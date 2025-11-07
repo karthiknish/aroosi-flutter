@@ -1,0 +1,442 @@
+// coverage:ignore-file
+import 'package:flutter/material.dart';
+import 'package:aroosi_flutter/core/error_handler.dart';
+
+/// Centralized input validation and sanitization service
+/// 
+/// Provides comprehensive validation for all user inputs including:
+/// - Email validation with domain checking
+/// - Password strength validation
+/// - Text sanitization and length validation
+/// - Profile data validation
+/// - Input sanitization to prevent XSS and injection attacks
+class ValidationService {
+  static final ValidationService _instance = ValidationService._internal();
+  factory ValidationService() => _instance;
+  ValidationService._internal();
+
+  final ErrorHandler _errorHandler = ErrorHandler();
+
+  /// Email validation with comprehensive checks
+  ValidationResult validateEmail(String email) {
+    if (email.isEmpty) {
+      return ValidationResult.failure(
+        'Email is required',
+        ValidationCode.required,
+      );
+    }
+
+    // Basic email format validation
+    final emailRegex = RegExp(
+      r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$',
+    );
+    if (!emailRegex.hasMatch(email)) {
+      return ValidationResult.failure(
+        'Please enter a valid email address',
+        ValidationCode.invalidFormat,
+      );
+    }
+
+    // Length validation
+    if (email.length > 254) {
+      return ValidationResult.failure(
+        'Email address is too long',
+        ValidationCode.tooLong,
+      );
+    }
+
+    // Local part validation
+    final localPart = email.split('@')[0];
+    if (localPart.length > 64) {
+      return ValidationResult.failure(
+        'Email local part is too long',
+        ValidationCode.tooLong,
+      );
+    }
+
+    // Domain validation for common disposable email domains
+    final disposableDomains = [
+      '10minutemail.com',
+      'tempmail.org',
+      'guerrillamail.com',
+      'mailinator.com',
+      'yopmail.com',
+    ];
+    final domain = email.split('@')[1].toLowerCase();
+    if (disposableDomains.contains(domain)) {
+      return ValidationResult.failure(
+        'Please use a permanent email address',
+        ValidationCode.disallowedDomain,
+      );
+    }
+
+    return ValidationResult.success();
+  }
+
+  /// Password strength validation
+  ValidationResult validatePassword(String password) {
+    if (password.isEmpty) {
+      return ValidationResult.failure(
+        'Password is required',
+        ValidationCode.required,
+      );
+    }
+
+    // Length validation
+    if (password.length < 8) {
+      return ValidationResult.failure(
+        'Password must be at least 8 characters long',
+        ValidationCode.tooShort,
+      );
+    }
+
+    if (password.length > 128) {
+      return ValidationResult.failure(
+        'Password is too long',
+        ValidationCode.tooLong,
+      );
+    }
+
+    // Character variety validation
+    final hasUppercase = password.contains(RegExp(r'[A-Z]'));
+    final hasLowercase = password.contains(RegExp(r'[a-z]'));
+    final hasNumbers = password.contains(RegExp(r'[0-9]'));
+    final hasSpecialCharacters = password.contains(RegExp(r'[!@#$%^&*(),.?":{}|<>]'));
+
+    if (!hasUppercase) {
+      return ValidationResult.failure(
+        'Password must contain at least one uppercase letter',
+        ValidationCode.missingUppercase,
+      );
+    }
+
+    if (!hasLowercase) {
+      return ValidationResult.failure(
+        'Password must contain at least one lowercase letter',
+        ValidationCode.missingLowercase,
+      );
+    }
+
+    if (!hasNumbers) {
+      return ValidationResult.failure(
+        'Password must contain at least one number',
+        ValidationCode.missingNumbers,
+      );
+    }
+
+    if (!hasSpecialCharacters) {
+      return ValidationResult.failure(
+        'Password must contain at least one special character',
+        ValidationCode.missingSpecialChars,
+      );
+    }
+
+    // Common password patterns to avoid
+    final commonPatterns = [
+      'password',
+      '123456',
+      'qwerty',
+      'admin',
+      'letmein',
+    ];
+    final lowerPassword = password.toLowerCase();
+    for (final pattern in commonPatterns) {
+      if (lowerPassword.contains(pattern)) {
+        return ValidationResult.failure(
+          'Password cannot contain common patterns like "password" or "123456"',
+          ValidationCode.commonPattern,
+        );
+      }
+    }
+
+    return ValidationResult.success();
+  }
+
+  /// Name validation with sanitization
+  ValidationResult validateName(String name, {String fieldName = 'Name'}) {
+    if (name.isEmpty) {
+      return ValidationResult.failure(
+        '$fieldName is required',
+        ValidationCode.required,
+      );
+    }
+
+    // Length validation
+    if (name.length < 2) {
+      return ValidationResult.failure(
+        '$fieldName must be at least 2 characters long',
+        ValidationCode.tooShort,
+      );
+    }
+
+    if (name.length > 50) {
+      return ValidationResult.failure(
+        '$fieldName is too long',
+        ValidationCode.tooLong,
+      );
+    }
+
+    // Character validation - only letters, spaces, hyphens, and apostrophes
+    final nameRegex = RegExp(r'^[a-zA-Z\s\-\'\.]+$');
+    if (!nameRegex.hasMatch(name)) {
+      return ValidationResult.failure(
+        '$fieldName can only contain letters, spaces, hyphens, and apostrophes',
+        ValidationCode.invalidCharacters,
+      );
+    }
+
+    // Check for suspicious patterns
+    final suspiciousPatterns = [
+      RegExp(r'<script[^>]*>.*?</script>', caseSensitive: false),
+      RegExp(r'javascript:', caseSensitive: false),
+      RegExp(r'on\w+\s*=', caseSensitive: false),
+    ];
+
+    for (final pattern in suspiciousPatterns) {
+      if (pattern.hasMatch(name)) {
+        return ValidationResult.failure(
+          '$fieldName contains invalid characters',
+          ValidationCode.suspiciousContent,
+        );
+      }
+    }
+
+    return ValidationResult.success();
+  }
+
+  /// Bio/description validation with sanitization
+  ValidationResult validateBio(String bio) {
+    if (bio.isEmpty) {
+      return ValidationResult.success(); // Bio is optional
+    }
+
+    if (bio.length > 500) {
+      return ValidationResult.failure(
+        'Bio must be less than 500 characters',
+        ValidationCode.tooLong,
+      );
+    }
+
+    // Sanitize bio to prevent XSS
+    final sanitizedBio = sanitizeText(bio);
+    if (sanitizedBio.length != bio.length) {
+      return ValidationResult.failure(
+        'Bio contains invalid characters',
+        ValidationCode.invalidCharacters,
+      );
+    }
+
+    return ValidationResult.success();
+  }
+
+  /// Age validation
+  ValidationResult validateAge(int? age) {
+    if (age == null) {
+      return ValidationResult.failure(
+        'Age is required',
+        ValidationCode.required,
+      );
+    }
+
+    if (age < 18) {
+      return ValidationResult.failure(
+        'You must be at least 18 years old',
+        ValidationCode.underage,
+      );
+    }
+
+    if (age > 120) {
+      return ValidationResult.failure(
+        'Please enter a valid age',
+        ValidationCode.invalidFormat,
+      );
+    }
+
+    return ValidationResult.success();
+  }
+
+  /// Phone number validation
+  ValidationResult validatePhoneNumber(String phone) {
+    if (phone.isEmpty) {
+      return ValidationResult.success(); // Phone is optional
+    }
+
+    // Remove common formatting characters
+    final cleanPhone = phone.replaceAll(RegExp(r'[^\d+]'), '');
+    
+    if (cleanPhone.length < 10 || cleanPhone.length > 15) {
+      return ValidationResult.failure(
+        'Please enter a valid phone number',
+        ValidationCode.invalidFormat,
+      );
+    }
+
+    final phoneRegex = RegExp(r'^\+?[\d\s\-\(\)]+$');
+    if (!phoneRegex.hasMatch(phone)) {
+      return ValidationResult.failure(
+        'Phone number can only contain digits, spaces, and basic formatting characters',
+        ValidationCode.invalidCharacters,
+      );
+    }
+
+    return ValidationResult.success();
+  }
+
+  /// Text sanitization to prevent XSS and injection attacks
+  String sanitizeText(String text) {
+    if (text.isEmpty) return text;
+
+    // Remove HTML tags
+    String sanitized = text.replaceAll(RegExp(r'<[^>]*>'), '');
+    
+    // Remove JavaScript protocol
+    sanitized = sanitized.replaceAll(RegExp(r'javascript:', caseSensitive: false), '');
+    
+    // Remove event handlers
+    sanitized = sanitized.replaceAll(RegExp(r'on\w+\s*=', caseSensitive: false), '');
+    
+    // Remove potentially dangerous characters
+    sanitized = sanitized.replaceAll(RegExp(r'[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]'), '');
+    
+    return sanitized.trim();
+  }
+
+  /// Validate profile data comprehensively
+  Map<String, ValidationResult> validateProfileData({
+    required String firstName,
+    required String lastName,
+    required String email,
+    required int? age,
+    String? bio,
+    String? phone,
+  }) {
+    final results = <String, ValidationResult>{};
+
+    results['firstName'] = validateName(firstName, fieldName: 'First name');
+    results['lastName'] = validateName(lastName, fieldName: 'Last name');
+    results['email'] = validateEmail(email);
+    results['age'] = validateAge(age);
+    
+    if (bio != null && bio.isNotEmpty) {
+      results['bio'] = validateBio(bio);
+    }
+    
+    if (phone != null && phone.isNotEmpty) {
+      results['phone'] = validatePhoneNumber(phone);
+    }
+
+    return results;
+  }
+
+  /// Get password strength feedback
+  PasswordStrength getPasswordStrength(String password) {
+    if (password.length < 8) return PasswordStrength.weak;
+    
+    int score = 0;
+    if (password.length >= 12) score++;
+    if (password.contains(RegExp(r'[A-Z]'))) score++;
+    if (password.contains(RegExp(r'[a-z]'))) score++;
+    if (password.contains(RegExp(r'[0-9]'))) score++;
+    if (password.contains(RegExp(r'[!@#$%^&*(),.?":{}|<>]'))) score++;
+    if (password.length >= 16) score++;
+
+    if (score <= 2) return PasswordStrength.weak;
+    if (score <= 4) return PasswordStrength.medium;
+    return PasswordStrength.strong;
+  }
+}
+
+/// Validation result with detailed error information
+class ValidationResult {
+  final bool isValid;
+  final String? errorMessage;
+  final ValidationCode? code;
+
+  const ValidationResult._({
+    required this.isValid,
+    this.errorMessage,
+    this.code,
+  });
+
+  factory ValidationResult.success() {
+    return const ValidationResult._(isValid: true);
+  }
+
+  factory ValidationResult.failure(String message, ValidationCode code) {
+    return ValidationResult._(
+      isValid: false,
+      errorMessage: message,
+      code: code,
+    );
+  }
+
+  /// Get user-friendly error message
+  String get displayMessage => errorMessage ?? 'Validation failed';
+
+  /// Check if validation failed with specific code
+  bool hasCode(ValidationCode targetCode) {
+    return code == targetCode;
+  }
+}
+
+/// Validation error codes for better error handling
+enum ValidationCode {
+  required,
+  tooShort,
+  tooLong,
+  invalidFormat,
+  invalidCharacters,
+  missingUppercase,
+  missingLowercase,
+  missingNumbers,
+  missingSpecialChars,
+  commonPattern,
+  disallowedDomain,
+  suspiciousContent,
+  underage,
+}
+
+/// Password strength levels
+enum PasswordStrength {
+  weak,
+  medium,
+  strong,
+}
+
+/// Extension for easier validation in forms
+extension ValidationExtensions on String {
+  bool get isValidEmail => ValidationService().validateEmail(this).isValid;
+  bool get isValidPassword => ValidationService().validatePassword(this).isValid;
+  bool get isValidName => ValidationService().validateName(this).isValid;
+  String get sanitized => ValidationService().sanitizeText(this);
+}
+
+/// Widget for displaying validation errors
+class ValidationErrorWidget extends StatelessWidget {
+  final ValidationResult validationResult;
+  final TextStyle? textStyle;
+
+  const ValidationErrorWidget({
+    super.key,
+    required this.validationResult,
+    this.textStyle,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    if (validationResult.isValid) {
+      return const SizedBox.shrink();
+    }
+
+    return Padding(
+      padding: const EdgeInsets.only(top: 4.0),
+      child: Text(
+        validationResult.displayMessage,
+        style: textStyle ?? const TextStyle(
+          color: Colors.red,
+          fontSize: 12,
+        ),
+      ),
+    );
+  }
+}

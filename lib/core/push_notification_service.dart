@@ -5,6 +5,8 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -28,6 +30,7 @@ class PushNotificationService {
   bool _isInitialized = false;
   bool _hasUserConsent = false;
   String? _deviceToken;
+  final FirebaseAuth _auth = FirebaseAuth.instance;
 
   /// Initialize the push notification service
   Future<void> initialize() async {
@@ -485,6 +488,77 @@ class PushNotificationService {
 
   /// Get device token
   String? get deviceToken => _deviceToken;
+
+  /// Get current authenticated user
+  User? get currentUser => _auth.currentUser;
+
+  /// Check if a specific notification type should be shown
+  Future<bool> shouldShowNotification(String notificationType) async {
+    try {
+      // Check if notifications are globally enabled
+      if (!await isNotificationEnabled()) {
+        return false;
+      }
+
+      // Check granular preference for this notification type
+      final prefs = await SharedPreferences.getInstance();
+      final typeEnabled = prefs.getBool('notification_$notificationType') ?? true;
+      if (!typeEnabled) {
+        return false;
+      }
+
+      // Check quiet hours
+      if (await _isQuietHoursActive()) {
+        return false;
+      }
+
+      return true;
+    } catch (e) {
+      logDebug('Error checking notification preferences', error: e);
+      return true; // Default to showing notification if check fails
+    }
+  }
+
+  /// Check if quiet hours are currently active
+  Future<bool> _isQuietHoursActive() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final quietHoursEnabled = prefs.getBool('quiet_hours_enabled') ?? false;
+      if (!quietHoursEnabled) {
+        return false;
+      }
+
+      final startHour = prefs.getInt('quiet_hours_start_hour') ?? 22;
+      final startMinute = prefs.getInt('quiet_hours_start_minute') ?? 0;
+      final endHour = prefs.getInt('quiet_hours_end_hour') ?? 8;
+      final endMinute = prefs.getInt('quiet_hours_end_minute') ?? 0;
+
+      final now = TimeOfDay.fromDateTime(DateTime.now());
+      
+      return _isTimeInQuietHours(now, 
+        TimeOfDay(hour: startHour, minute: startMinute),
+        TimeOfDay(hour: endHour, minute: endMinute)
+      );
+    } catch (e) {
+      logDebug('Error checking quiet hours', error: e);
+      return false;
+    }
+  }
+
+  /// Check if current time is within quiet hours range
+  bool _isTimeInQuietHours(TimeOfDay current, TimeOfDay start, TimeOfDay end) {
+    final currentMinutes = current.hour * 60 + current.minute;
+    final startMinutes = start.hour * 60 + start.minute;
+    final endMinutes = end.hour * 60 + end.minute;
+
+    if (startMinutes <= endMinutes) {
+      // Normal range (e.g., 22:00 to 08:00 next day is handled below)
+      return currentMinutes >= startMinutes && currentMinutes <= endMinutes;
+    } else {
+      // Overnight range (e.g., 22:00 to 08:00)
+      return currentMinutes >= startMinutes || currentMinutes <= endMinutes;
+    }
+  }
 }
 
 /// Provider for push notification service

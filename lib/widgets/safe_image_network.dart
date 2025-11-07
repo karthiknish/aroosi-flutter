@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:aroosi_flutter/utils/debug_logger.dart';
 import 'package:aroosi_flutter/theme/colors.dart';
 
 class SafeImageNetwork extends StatelessWidget {
@@ -10,6 +11,9 @@ class SafeImageNetwork extends StatelessWidget {
   final Widget? errorWidget;
   final BorderRadius? borderRadius;
   final bool showRetry;
+  final Duration cacheDuration;
+  final int? maxWidth;
+  final int? maxHeight;
 
   const SafeImageNetwork({
     super.key,
@@ -21,6 +25,9 @@ class SafeImageNetwork extends StatelessWidget {
     this.errorWidget,
     this.borderRadius,
     this.showRetry = true,
+    this.cacheDuration = const Duration(days: 7),
+    this.maxWidth,
+    this.maxHeight,
   });
 
   @override
@@ -36,14 +43,26 @@ class SafeImageNetwork extends StatelessWidget {
         width: width,
         height: height,
         fit: fit,
+        // Performance optimizations
+        cacheWidth: maxWidth,
+        cacheHeight: maxHeight,
+        // Enable caching with custom headers
+        headers: {
+          'Cache-Control': 'max-age=${cacheDuration.inSeconds}',
+        },
         loadingBuilder: (context, child, loadingProgress) {
           if (loadingProgress == null) return child;
           return _buildLoadingWidget(loadingProgress);
         },
         errorBuilder: (context, error, stackTrace) {
-          debugPrint('Image loading error: $error');
+          logDebug('Image loading error: $error');
           return _buildErrorWidget();
         },
+        // Optimize for memory usage
+        filterQuality: FilterQuality.medium,
+        isAntiAlias: true,
+        // Enable semantic labels for accessibility
+        semanticLabel: 'Network image',
       ),
     );
   }
@@ -119,7 +138,7 @@ class SafeImageNetwork extends StatelessWidget {
             GestureDetector(
               onTap: () {
                 // Image reload would need parent callback
-                debugPrint('Retry image load for: $imageUrl');
+                logDebug('Retry image load for: $imageUrl');
               },
               child: Text(
                 'Tap to retry',

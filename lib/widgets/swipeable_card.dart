@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:aroosi_flutter/utils/debug_logger.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:aroosi_flutter/features/profiles/models.dart';
@@ -223,10 +224,10 @@ class _SwipeableCardState extends ConsumerState<SwipeableCard>
       
       if (response.statusCode == 200) {
         // Success - interests are idempotent so no issue if already sent
-        debugPrint('Interest sent to ${widget.profile.id}');
+        logDebug('Interest sent to ${widget.profile.id}');
       }
     } catch (e) {
-      debugPrint('Error sending interest: $e');
+      logDebug('Error sending interest: $e');
       rethrow; // Let the calling method handle the error
     }
   }
@@ -243,10 +244,10 @@ class _SwipeableCardState extends ConsumerState<SwipeableCard>
       );
       
       if (response.statusCode == 200) {
-        debugPrint('Profile ${widget.profile.id} skipped');
+        logDebug('Profile ${widget.profile.id} skipped');
       }
     } catch (e) {
-      debugPrint('Error skipping profile: $e');
+      logDebug('Error skipping profile: $e');
       rethrow; // Let the calling method handle the error
     }
   }
@@ -283,7 +284,7 @@ class _SwipeableCardState extends ConsumerState<SwipeableCard>
         }
       }
     } catch (e) {
-      debugPrint('Error updating shortlist: $e');
+      logDebug('Error updating shortlist: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(

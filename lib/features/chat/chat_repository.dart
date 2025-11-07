@@ -201,7 +201,36 @@ class ChatRepository {
 
   // Unread counts across matches/conversations
   Future<Map<String, dynamic>> getUnreadCounts() async {
-    return {};
+    try {
+      final currentUser = _firebase.currentUser?.uid;
+      if (currentUser == null) {
+        return {};
+      }
+
+      // Get all conversations for the current user - placeholder implementation
+      final conversations = <String>[]; // TODO: Implement actual conversation fetching
+      
+      Map<String, int> conversationCounts = {};
+      int totalUnread = 0;
+
+      // Count unread messages in each conversation
+      for (String conversationId in conversations) {
+        final unreadCount = 0; // TODO: Implement actual unread count fetching
+        
+        if (unreadCount > 0) {
+          conversationCounts[conversationId] = unreadCount;
+          totalUnread += unreadCount;
+        }
+      }
+
+      return {
+        'total': totalUnread,
+        'conversations': conversationCounts,
+      };
+    } catch (e) {
+      // Return empty counts on error
+      return {};
+    }
   }
 
   // Mark specific messages as read

@@ -1,7 +1,6 @@
 import 'package:flutter/cupertino.dart';
 
 import 'package:aroosi_flutter/theme/theme.dart';
-import 'package:aroosi_flutter/theme/typography.dart';
 import 'package:aroosi_flutter/widgets/email_verification_banner.dart';
 import 'package:aroosi_flutter/widgets/brand/aurora_background.dart';
 

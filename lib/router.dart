@@ -29,7 +29,8 @@ import 'package:aroosi_flutter/screens/main/cultural_assessment_screen.dart';
 import 'package:aroosi_flutter/screens/main/family_approval_screen.dart';
 import 'package:aroosi_flutter/screens/main/cultural_matching_dashboard.dart';
 import 'package:aroosi_flutter/screens/main/afghan_cultural_features_screen.dart';
-import 'package:aroosi_flutter/screens/main/matches_screen.dart';
+import 'package:aroosi_flutter/features/matches/matches_screen.dart';
+import 'package:aroosi_flutter/features/matches/match_detail_screen.dart';
 
 import 'package:aroosi_flutter/screens/cultural/cultural_compatibility_screen.dart'
     as cultural;
@@ -287,6 +288,16 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             name: 'mainMatches',
             pageBuilder: (context, state) =>
                 _adaptivePage(state, const MatchesScreen()),
+            routes: [
+              GoRoute(
+                path: ':matchID',
+                name: 'matchDetail',
+                pageBuilder: (context, state) {
+                  final matchID = state.pathParameters['matchID']!;
+                  return _adaptivePage(state, MatchDetailScreen(matchID: matchID));
+                },
+              ),
+            ],
           ),
           GoRoute(
             path: 'language',

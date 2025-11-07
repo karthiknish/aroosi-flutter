@@ -1,7 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'dart:io';
 import 'package:path_provider/path_provider.dart';
-import 'package:path/path.dart' as path;
 
 /// Global verbose logging toggle.
 /// Can be overridden at build time using:
@@ -61,7 +60,7 @@ Future<void> logGlobalKeyError(
   try {
     final directory = await getApplicationDocumentsDirectory();
     final logFile = File(
-      path.join(directory.path, 'aroosi_globalkey_errors.log'),
+      '${directory.path}/aroosi_globalkey_errors.log',
     );
     await logFile.writeAsString(fullMessage, mode: FileMode.append);
   } catch (e) {

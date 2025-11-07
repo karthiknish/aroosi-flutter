@@ -1,5 +1,4 @@
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/services.dart';
 
 import 'package:aroosi_flutter/theme/colors.dart';
 import 'package:aroosi_flutter/theme/typography.dart';

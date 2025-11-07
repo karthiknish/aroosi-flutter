@@ -20,6 +20,9 @@ import 'package:aroosi_flutter/widgets/retryable_network_image.dart';
 import 'package:aroosi_flutter/features/auth/auth_controller.dart';
 import 'package:aroosi_flutter/utils/debug_logger.dart';
 import 'package:aroosi_flutter/theme/colors.dart';
+import 'package:aroosi_flutter/features/search/advanced_search_filters_screen.dart';
+import 'package:aroosi_flutter/features/search/matrimony_search_integration.dart';
+import 'package:aroosi_flutter/features/onboarding/matrimony/matrimony_onboarding_provider.dart';
 
 class SearchScreen extends ConsumerStatefulWidget {
   const SearchScreen({super.key});
@@ -44,6 +47,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _loadAllProfiles();
       _loadInterests();
+      _initializeMatrimonyFilters();
     });
     addLoadMoreListener(
       _scrollController,
@@ -54,6 +58,21 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
       },
       onLoadMore: () => ref.read(searchControllerProvider.notifier).loadMore(),
     );
+  }
+
+  void _initializeMatrimonyFilters() async {
+    // Load matrimony onboarding data and integrate with search
+    final matrimonyData = ref.read(matrimonyOnboardingProvider).data;
+    if (matrimonyData != null) {
+      final matrimonyFilters = MatrimonySearchIntegration.fromMatrimonyOnboarding(matrimonyData);
+      final enhancedFilters = MatrimonySearchIntegration.enhanceForMatrimony(matrimonyFilters);
+      
+      // Apply matrimony filters as default if no existing filters
+      final currentFilters = ref.read(searchControllerProvider).filters;
+      if (currentFilters == null || !currentFilters.hasCriteria) {
+        ref.read(searchControllerProvider.notifier).search(enhancedFilters);
+      }
+    }
   }
 
   @override
@@ -138,7 +157,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
       SliverFillRemaining(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          child: _buildCardDeck(context, state),
+          child: _buildEmptyState(context, forCards: true),
         ),
       ),
     ];
@@ -212,9 +231,14 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
   }
 
   Widget _buildSearchControls(BuildContext context) {
+    final state = ref.watch(searchControllerProvider);
+    final hasFilters = state.filters?.hasCriteria ?? false;
+    final isMatrimonySearch = state.filters != null ? 
+        MatrimonySearchIntegration.isMatrimonySearch(state.filters!) : false;
+    
     return Column(
       children: [
-        // Search Text Field
+        // Search Text Field with suggestions
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           child: TextField(
@@ -222,15 +246,34 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
             decoration: InputDecoration(
               hintText: 'Search by name, city, or interests...',
               prefixIcon: const Icon(Icons.search),
-              suffixIcon: _controller.text.isNotEmpty
-                  ? IconButton(
+              suffixIcon: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (_controller.text.isNotEmpty)
+                    IconButton(
                       icon: const Icon(Icons.clear),
                       onPressed: () {
                         _controller.clear();
                         _loadAllProfiles();
                       },
-                    )
-                  : null,
+                    ),
+                  if (isMatrimonySearch)
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).colorScheme.primaryContainer,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Text(
+                        'Matrimony',
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: Theme.of(context).colorScheme.onPrimaryContainer,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                ],
+              ),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
               ),
@@ -245,104 +288,191 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
             },
           ),
         ),
-        // Filter Button
+        
+        // Filter buttons row
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          child: SizedBox(
-            width: double.infinity,
-            child: OutlinedButton.icon(
-              onPressed: () => _showFiltersSheet(context),
-              icon: const Icon(Icons.filter_list),
-              label: const Text('Filters'),
-              style: OutlinedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(vertical: 12),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
+          child: Row(
+            children: [
+              // Advanced Filters Button
+              Expanded(
+                child: OutlinedButton.icon(
+                  onPressed: () => _showAdvancedFilters(context),
+                  icon: Icon(
+                    Icons.filter_list,
+                    color: hasFilters ? Theme.of(context).colorScheme.primary : null,
+                  ),
+                  label: Text(
+                    hasFilters ? 'Filters Applied' : 'Advanced Filters',
+                    style: TextStyle(
+                      color: hasFilters ? Theme.of(context).colorScheme.primary : null,
+                      fontWeight: hasFilters ? FontWeight.bold : null,
+                    ),
+                  ),
+                  style: OutlinedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      side: hasFilters 
+                          ? BorderSide(color: Theme.of(context).colorScheme.primary)
+                          : BorderSide.none,
+                    ),
+                    backgroundColor: hasFilters 
+                        ? Theme.of(context).colorScheme.primaryContainer.withAlpha(30)
+                        : null,
+                  ),
                 ),
               ),
-            ),
+              
+              const SizedBox(width: 8),
+              
+              // Matrimony Presets Button
+              OutlinedButton.icon(
+                onPressed: () => _showMatrimonyPresets(context),
+                icon: const Icon(Icons.favorite_border),
+                label: const Text('Presets'),
+                style: OutlinedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 12),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
+        
+        // Active filters display
+        if (hasFilters)
+          _buildActiveFilters(context, state.filters!),
       ],
     );
   }
 
-  Widget _buildCardDeck(BuildContext context, ProfilesListState state) {
-    final items = state.items;
-    if (items.isEmpty && !state.loading) {
-      return _buildEmptyState(context, forCards: true);
+  Widget _buildActiveFilters(BuildContext context, SearchFilters filters) {
+    final theme = Theme.of(context);
+    final activeFilters = <String>[];
+    
+    // Collect active filter descriptions
+    if (filters.minAge != null || filters.maxAge != null) {
+      activeFilters.add('Age: ${filters.minAge ?? 'any'}-${filters.maxAge ?? 'any'}');
     }
-
-    // Filter out profiles that already have interest sent
-    final filteredItems = items.where((profile) {
-      final interestStatus = ref.read(interestsControllerProvider);
-      final hasSentInterest = interestStatus.items.any(
-        (interest) =>
-            interest.toUserId == profile.id &&
-            (interest.status == 'pending' || interest.status == 'accepted'),
-      );
-      return !hasSentInterest;
-    }).toList();
-
-    logDebug(
-      'Building profile list',
-      data: {
-        'itemCount': filteredItems.length,
-        'widgetType': 'ListView',
-        'timestamp': DateTime.now().toIso8601String(),
-      },
-    );
-
-    return Column(
-      children: [
-        Expanded(
-          child: ListView.builder(
-            controller: _scrollController,
-            itemCount: filteredItems.length,
-            itemBuilder: (context, index) {
-              final profile = filteredItems[index];
-              return Padding(
-                padding: const EdgeInsets.symmetric(vertical: 8.0),
-                child: _ProfileListItem(
-                  profile: profile,
-                  onLike: () async {
-                    final ok = await ref
-                        .read(matchesControllerProvider.notifier)
-                        .sendInterest(profile.id);
-                    if (ok['success'] == true) {
-                      _toast.success('Liked ${profile.displayName}');
-                    } else {
-                      _toast.error('Failed to like');
-                    }
-                  },
-                  onViewProfile: () {
-                    ref
-                        .read(lastSelectedProfileIdProvider.notifier)
-                        .set(profile.id);
-                    context.push('/details/${profile.id}');
-                  },
-                ),
-              );
-            },
-          ),
-        ),
-        if (state.hasMore && !state.loading)
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Center(
-              child: ElevatedButton(
-                onPressed: () =>
-                    ref.read(searchControllerProvider.notifier).loadMore(),
-                child: const Text('Load More'),
+    if (filters.education != null) {
+      activeFilters.add('Education: ${filters.education}');
+    }
+    if (filters.religion != null) {
+      activeFilters.add('Religion: ${filters.religion}');
+    }
+    if (filters.marriageIntention != null) {
+      activeFilters.add(MatrimonySearchIntegration.getMarriageIntentionDisplay(filters.marriageIntention));
+    }
+    if (filters.requiresFamilyApproval == true) {
+      activeFilters.add('Family Approval');
+    }
+    
+    if (activeFilters.isEmpty) return const SizedBox.shrink();
+    
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      child: Wrap(
+        spacing: 8,
+        runSpacing: 8,
+        children: activeFilters.map((filter) {
+          return Chip(
+            label: Text(
+              filter,
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: theme.colorScheme.onPrimary,
               ),
             ),
-          ),
-        if (state.loading)
-          const Padding(
-            padding: EdgeInsets.all(16.0),
-            child: Center(child: CircularProgressIndicator()),
-          ),
-      ],
+            backgroundColor: theme.colorScheme.primary,
+            deleteIcon: Icon(
+              Icons.close,
+              size: 16,
+              color: theme.colorScheme.onPrimary,
+            ),
+            onDeleted: () {
+              // Clear all filters by searching with empty filters
+              ref.read(searchControllerProvider.notifier).search(const SearchFilters());
+            },
+          );
+        }).toList(),
+      ),
+    );
+  }
+
+  void _showAdvancedFilters(BuildContext context) {
+    final currentFilters = ref.read(searchControllerProvider).filters;
+    
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      builder: (context) => DraggableScrollableSheet(
+        initialChildSize: 0.9,
+        maxChildSize: 0.95,
+        minChildSize: 0.5,
+        builder: (context, scrollController) => AdvancedSearchFiltersScreen(
+          initialFilters: currentFilters,
+        ),
+      ),
+    );
+  }
+
+  void _showMatrimonyPresets(BuildContext context) {
+    final presets = MatrimonySearchIntegration.getMatrimonyPresets();
+    
+    showModalBottomSheet(
+      context: context,
+      builder: (context) => Container(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Matrimony Search Presets',
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 16),
+            ...presets.asMap().entries.map((entry) {
+              final index = entry.key;
+              final preset = entry.value;
+              
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 12),
+                child: ListTile(
+                  title: Text(MatrimonySearchIntegration.getPresetDisplayName(preset, index)),
+                  subtitle: Text(MatrimonySearchIntegration.getPresetDescription(preset, index)),
+                  leading: Icon(
+                    Icons.favorite,
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
+                  onTap: () {
+                    ref.read(searchControllerProvider.notifier).search(preset);
+                    Navigator.pop(context);
+                  },
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    side: BorderSide(
+                      color: Theme.of(context).colorScheme.outline.withAlpha(50),
+                    ),
+                  ),
+                ),
+              );
+            }).toList(),
+            const SizedBox(height: 16),
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Cancel'),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 

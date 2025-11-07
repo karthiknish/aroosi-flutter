@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:firebase_auth/firebase_auth.dart' as fb;
 import 'package:aroosi_flutter/utils/debug_logger.dart';
+import 'package:aroosi_flutter/core/error_handler.dart';
 
 import 'auth_repository.dart';
 import 'auth_state.dart';
@@ -13,6 +14,7 @@ final authRepositoryProvider = Provider<AuthRepository>(
 class AuthController extends Notifier<AuthState> {
   late final Stream<fb.User?> _authStateChanges;
   late final AuthRepository _repo;
+  final ErrorHandler _errorHandler = ErrorHandler();
   static const String _missingProfileError =
       'Please complete your profile before signing in.';
 
@@ -99,8 +101,13 @@ class AuthController extends Notifier<AuthState> {
         state = const AuthState(isAuthenticated: false, loading: false);
         logAuth('_bootstrap(): state -> unauthenticated');
       }
-    } catch (e) {
-      logAuth('_bootstrap(): error -> $e');
+    } catch (e, stackTrace) {
+      final error = _errorHandler.handleException(
+        e,
+        context: '_bootstrap',
+        stackTrace: stackTrace,
+      );
+      logAuth('_bootstrap(): error -> ${error.message}');
       state = const AuthState(isAuthenticated: false, loading: false);
     }
   }
@@ -141,8 +148,13 @@ class AuthController extends Notifier<AuthState> {
             profile: UserProfile.fromJson(json),
           );
           logAuth('login(): state -> authenticated with profile');
-        } catch (profileError) {
-          logAuth('login(): profile fetch error: ${profileError.toString()}');
+        } catch (profileError, stackTrace) {
+          final error = _errorHandler.handleException(
+            profileError,
+            context: 'login: profile fetch',
+            stackTrace: stackTrace,
+          );
+          logAuth('login(): profile fetch error: ${error.message}');
           // Keep authenticated but show error for profile completion
           await _handleMissingProfile(showMessage: true);
         }
@@ -150,9 +162,14 @@ class AuthController extends Notifier<AuthState> {
         state = const AuthState(isAuthenticated: false, loading: false);
         logAuth('login(): state -> unauthenticated (me() false)');
       }
-    } catch (e) {
-      state = state.copyWith(loading: false, error: e.toString());
-      logAuth('login(): error ${e.toString()}');
+    } catch (e, stackTrace) {
+      final error = _errorHandler.handleException(
+        e,
+        context: 'login',
+        stackTrace: stackTrace,
+      );
+      state = state.copyWith(loading: false, error: error.message);
+      logAuth('login(): error ${error.message}');
     }
   }
 

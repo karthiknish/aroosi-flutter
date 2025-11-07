@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 import 'package:aroosi_flutter/core/env.dart';
+import 'package:aroosi_flutter/utils/debug_logger.dart';
 
 /// Realtime service using raw WebSocket to match aroosi (Next.js) implementation.
 /// Aligns with Next.js WebSocket message types: join_conversation, message, typing, delivery_receipt, read_receipt.
@@ -11,7 +12,7 @@ class RealTimeService {
   static final RealTimeService instance = RealTimeService._();
 
   WebSocketChannel? _channel;
-  final _connectedCtrl = StreamController<bool>.broadcast();
+  StreamController<bool>? _connectedCtrl;
   final Map<void Function(String, bool), void Function(String)>
   _typingHandlers = {};
   final Map<void Function(String, Map<String, dynamic>), void Function(String)>
@@ -25,8 +26,16 @@ class RealTimeService {
   final Map<void Function(String, bool, int?), void Function(String)>
   _presenceHandlers = {};
 
-  Stream<bool> get connectedStream => _connectedCtrl.stream;
-  bool get isConnected => _channel != null;
+  bool _isDisposed = false;
+
+  Stream<bool> get connectedStream {
+    if (_isDisposed || _connectedCtrl == null) {
+      return Stream.empty();
+    }
+    return _connectedCtrl!.stream;
+  }
+  
+  bool get isConnected => _channel != null && !_isDisposed;
 
   String get _wsUrl {
     // Convert API base URL to WebSocket URL
@@ -44,32 +53,85 @@ class RealTimeService {
   }
 
   void connect() {
-    if (_channel != null) return;
+    if (_channel != null || _isDisposed) return;
 
     try {
+      // Initialize stream controller if not already done
+      _connectedCtrl ??= StreamController<bool>.broadcast();
+      
       _channel = WebSocketChannel.connect(Uri.parse(_wsUrl));
-      _connectedCtrl.add(true);
+      _connectedCtrl!.add(true);
 
       _channel?.stream.listen(
         (message) {
-          _handleMessage(message);
+          if (!_isDisposed) {
+            _handleMessage(message);
+          }
         },
         onError: (error) {
-            _connectedCtrl.add(false);
+          if (!_isDisposed && _connectedCtrl != null) {
+            _connectedCtrl!.add(false);
+          }
+          logDebug('WebSocket error', error: error);
         },
         onDone: () {
-              _connectedCtrl.add(false);
+          if (!_isDisposed && _connectedCtrl != null) {
+            _connectedCtrl!.add(false);
+          }
+          logDebug('WebSocket connection closed');
         },
+        cancelOnError: true,
       );
     } catch (e) {
-        _connectedCtrl.add(false);
+      if (!_isDisposed && _connectedCtrl != null) {
+        _connectedCtrl!.add(false);
+      }
+      logDebug('WebSocket connection failed', error: e);
     }
   }
 
   void disconnect() {
-    _channel?.sink.close();
-    _channel = null;
-    _connectedCtrl.add(false);
+    if (_isDisposed) return;
+    
+    try {
+      _channel?.sink.close();
+      _channel = null;
+      
+      if (_connectedCtrl != null) {
+        _connectedCtrl!.add(false);
+      }
+    } catch (e) {
+      logDebug('Error disconnecting WebSocket', error: e);
+    }
+  }
+
+  /// Dispose all resources and clean up memory
+  void dispose() {
+    if (_isDisposed) return;
+    
+    _isDisposed = true;
+    
+    try {
+      // Close WebSocket connection
+      _channel?.sink.close();
+      _channel = null;
+      
+      // Close stream controller
+      _connectedCtrl?.close();
+      _connectedCtrl = null;
+      
+      // Clear all handler maps to prevent memory leaks
+      _typingHandlers.clear();
+      _messageHandlers.clear();
+      _deliveryReceiptHandlers.clear();
+      _readReceiptHandlers.clear();
+      _unreadHandlers.clear();
+      _presenceHandlers.clear();
+      
+      logDebug('RealTimeService disposed successfully');
+    } catch (e) {
+      logDebug('Error disposing RealTimeService', error: e);
+    }
   }
 
   void _handleMessage(String message) {
@@ -228,7 +290,7 @@ class RealTimeService {
       try {
         handler(conversationId, isTyping);
       } catch (e) {
-        debugPrint('Error in typing handler: $e');
+        logDebug('Error in typing handler', error: e);
       }
     }
   }
@@ -241,7 +303,7 @@ class RealTimeService {
       try {
         handler(conversationId, message);
       } catch (e) {
-        debugPrint('Error in message handler: $e');
+        logDebug('Error in message handler', error: e);
       }
     }
   }
@@ -255,7 +317,7 @@ class RealTimeService {
       try {
         handler(conversationId, messageId, userId);
       } catch (e) {
-        debugPrint('Error in delivery receipt handler: $e');
+        logDebug('Error in delivery receipt handler', error: e);
       }
     }
   }
@@ -269,7 +331,7 @@ class RealTimeService {
       try {
         handler(conversationId, messageId, userId);
       } catch (e) {
-        debugPrint('Error in read receipt handler: $e');
+        logDebug('Error in read receipt handler', error: e);
       }
     }
   }

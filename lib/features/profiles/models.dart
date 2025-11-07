@@ -777,6 +777,32 @@ class SearchFilters {
     this.maxReligionImportance,
     this.minCultureImportance,
     this.maxCultureImportance,
+    // Education and profession filters
+    this.education,
+    this.occupation,
+    this.annualIncome,
+    this.minIncome,
+    this.maxIncome,
+    // Physical attributes filters
+    this.height,
+    this.minHeight,
+    this.maxHeight,
+    this.physicalStatus,
+    this.maritalStatus,
+    // Lifestyle preferences
+    this.diet,
+    this.smoking,
+    this.drinking,
+    // Matrimony-specific filters
+    this.marriageIntention,
+    this.requiresFamilyApproval,
+    this.mustBeReligious,
+    this.mustWantChildren,
+    this.mustBeNeverMarried,
+    // Location-based search
+    this.locationRadius,
+    this.latitude,
+    this.longitude,
   });
 
   static const Object _unset = Object();
@@ -802,6 +828,32 @@ class SearchFilters {
   final int? maxReligionImportance;
   final int? minCultureImportance;
   final int? maxCultureImportance;
+  // Education and profession filters
+  final String? education;
+  final String? occupation;
+  final int? annualIncome;
+  final int? minIncome;
+  final int? maxIncome;
+  // Physical attributes filters
+  final String? height;
+  final String? minHeight;
+  final String? maxHeight;
+  final String? physicalStatus;
+  final String? maritalStatus;
+  // Lifestyle preferences
+  final String? diet;
+  final String? smoking;
+  final String? drinking;
+  // Matrimony-specific filters
+  final String? marriageIntention;
+  final bool? requiresFamilyApproval;
+  final bool? mustBeReligious;
+  final bool? mustWantChildren;
+  final bool? mustBeNeverMarried;
+  // Location-based search
+  final int? locationRadius;
+  final double? latitude;
+  final double? longitude;
 
   SearchFilters copyWith({
     Object? query = _unset,
@@ -825,6 +877,32 @@ class SearchFilters {
     Object? maxReligionImportance = _unset,
     Object? minCultureImportance = _unset,
     Object? maxCultureImportance = _unset,
+    // Education and profession filters
+    Object? education = _unset,
+    Object? occupation = _unset,
+    Object? annualIncome = _unset,
+    Object? minIncome = _unset,
+    Object? maxIncome = _unset,
+    // Physical attributes filters
+    Object? height = _unset,
+    Object? minHeight = _unset,
+    Object? maxHeight = _unset,
+    Object? physicalStatus = _unset,
+    Object? maritalStatus = _unset,
+    // Lifestyle preferences
+    Object? diet = _unset,
+    Object? smoking = _unset,
+    Object? drinking = _unset,
+    // Matrimony-specific filters
+    Object? marriageIntention = _unset,
+    Object? requiresFamilyApproval = _unset,
+    Object? mustBeReligious = _unset,
+    Object? mustWantChildren = _unset,
+    Object? mustBeNeverMarried = _unset,
+    // Location-based search
+    Object? locationRadius = _unset,
+    Object? latitude = _unset,
+    Object? longitude = _unset,
   }) => SearchFilters(
     query: query == _unset ? this.query : query as String?,
     minAge: minAge == _unset ? this.minAge : minAge as int?,
@@ -849,6 +927,32 @@ class SearchFilters {
     maxReligionImportance: maxReligionImportance == _unset ? this.maxReligionImportance : maxReligionImportance as int?,
     minCultureImportance: minCultureImportance == _unset ? this.minCultureImportance : minCultureImportance as int?,
     maxCultureImportance: maxCultureImportance == _unset ? this.maxCultureImportance : maxCultureImportance as int?,
+    // Education and profession filters
+    education: education == _unset ? this.education : education as String?,
+    occupation: occupation == _unset ? this.occupation : occupation as String?,
+    annualIncome: annualIncome == _unset ? this.annualIncome : annualIncome as int?,
+    minIncome: minIncome == _unset ? this.minIncome : minIncome as int?,
+    maxIncome: maxIncome == _unset ? this.maxIncome : maxIncome as int?,
+    // Physical attributes filters
+    height: height == _unset ? this.height : height as String?,
+    minHeight: minHeight == _unset ? this.minHeight : minHeight as String?,
+    maxHeight: maxHeight == _unset ? this.maxHeight : maxHeight as String?,
+    physicalStatus: physicalStatus == _unset ? this.physicalStatus : physicalStatus as String?,
+    maritalStatus: maritalStatus == _unset ? this.maritalStatus : maritalStatus as String?,
+    // Lifestyle preferences
+    diet: diet == _unset ? this.diet : diet as String?,
+    smoking: smoking == _unset ? this.smoking : smoking as String?,
+    drinking: drinking == _unset ? this.drinking : drinking as String?,
+    // Matrimony-specific filters
+    marriageIntention: marriageIntention == _unset ? this.marriageIntention : marriageIntention as String?,
+    requiresFamilyApproval: requiresFamilyApproval == _unset ? this.requiresFamilyApproval : requiresFamilyApproval as bool?,
+    mustBeReligious: mustBeReligious == _unset ? this.mustBeReligious : mustBeReligious as bool?,
+    mustWantChildren: mustWantChildren == _unset ? this.mustWantChildren : mustWantChildren as bool?,
+    mustBeNeverMarried: mustBeNeverMarried == _unset ? this.mustBeNeverMarried : mustBeNeverMarried as bool?,
+    // Location-based search
+    locationRadius: locationRadius == _unset ? this.locationRadius : locationRadius as int?,
+    latitude: latitude == _unset ? this.latitude : latitude as double?,
+    longitude: longitude == _unset ? this.longitude : longitude as double?,
   );
 
   bool get hasQuery => query?.trim().isNotEmpty ?? false;
@@ -871,7 +975,33 @@ class SearchFilters {
       minReligionImportance != null ||
       maxReligionImportance != null ||
       minCultureImportance != null ||
-      maxCultureImportance != null;
+      maxCultureImportance != null ||
+      // Education and profession filters
+      (education?.trim().isNotEmpty ?? false) ||
+      (occupation?.trim().isNotEmpty ?? false) ||
+      annualIncome != null ||
+      minIncome != null ||
+      maxIncome != null ||
+      // Physical attributes filters
+      (height?.trim().isNotEmpty ?? false) ||
+      (minHeight?.trim().isNotEmpty ?? false) ||
+      (maxHeight?.trim().isNotEmpty ?? false) ||
+      (physicalStatus?.trim().isNotEmpty ?? false) ||
+      (maritalStatus?.trim().isNotEmpty ?? false) ||
+      // Lifestyle preferences
+      (diet?.trim().isNotEmpty ?? false) ||
+      (smoking?.trim().isNotEmpty ?? false) ||
+      (drinking?.trim().isNotEmpty ?? false) ||
+      // Matrimony-specific filters
+      (marriageIntention?.trim().isNotEmpty ?? false) ||
+      requiresFamilyApproval != null ||
+      mustBeReligious != null ||
+      mustWantChildren != null ||
+      mustBeNeverMarried != null ||
+      // Location-based search
+      locationRadius != null ||
+      latitude != null ||
+      longitude != null;
 
   bool get hasCriteria => hasQuery || hasFieldFilters;
 
@@ -917,6 +1047,48 @@ class SearchFilters {
     if (minCultureImportance != null) m['minCultureImportance'] = minCultureImportance;
     if (maxCultureImportance != null) m['maxCultureImportance'] = maxCultureImportance;
 
+    // Education and profession filters
+    final edu = education?.trim();
+    final occ = occupation?.trim();
+    if (edu != null && edu.isNotEmpty) m['education'] = edu;
+    if (occ != null && occ.isNotEmpty) m['occupation'] = occ;
+    if (annualIncome != null) m['annualIncome'] = annualIncome;
+    if (minIncome != null) m['minIncome'] = minIncome;
+    if (maxIncome != null) m['maxIncome'] = maxIncome;
+
+    // Physical attributes filters
+    final h = height?.trim();
+    final minh = minHeight?.trim();
+    final maxh = maxHeight?.trim();
+    final ps = physicalStatus?.trim();
+    final ms = maritalStatus?.trim();
+    if (h != null && h.isNotEmpty) m['height'] = h;
+    if (minh != null && minh.isNotEmpty) m['minHeight'] = minh;
+    if (maxh != null && maxh.isNotEmpty) m['maxHeight'] = maxh;
+    if (ps != null && ps.isNotEmpty) m['physicalStatus'] = ps;
+    if (ms != null && ms.isNotEmpty) m['maritalStatus'] = ms;
+
+    // Lifestyle preferences
+    final d = diet?.trim();
+    final sm = smoking?.trim();
+    final dr = drinking?.trim();
+    if (d != null && d.isNotEmpty) m['diet'] = d;
+    if (sm != null && sm.isNotEmpty) m['smoking'] = sm;
+    if (dr != null && dr.isNotEmpty) m['drinking'] = dr;
+
+    // Matrimony-specific filters
+    final mi = marriageIntention?.trim();
+    if (mi != null && mi.isNotEmpty) m['marriageIntention'] = mi;
+    if (requiresFamilyApproval != null) m['requiresFamilyApproval'] = requiresFamilyApproval;
+    if (mustBeReligious != null) m['mustBeReligious'] = mustBeReligious;
+    if (mustWantChildren != null) m['mustWantChildren'] = mustWantChildren;
+    if (mustBeNeverMarried != null) m['mustBeNeverMarried'] = mustBeNeverMarried;
+
+    // Location-based search
+    if (locationRadius != null) m['locationRadius'] = locationRadius;
+    if (latitude != null) m['latitude'] = latitude;
+    if (longitude != null) m['longitude'] = longitude;
+
     return m;
   }
 
@@ -941,5 +1113,31 @@ class SearchFilters {
     if (maxReligionImportance != null) 'maxReligionImportance': maxReligionImportance,
     if (minCultureImportance != null) 'minCultureImportance': minCultureImportance,
     if (maxCultureImportance != null) 'maxCultureImportance': maxCultureImportance,
+    // Education and profession filters
+    if (education != null) 'education': education,
+    if (occupation != null) 'occupation': occupation,
+    if (annualIncome != null) 'annualIncome': annualIncome,
+    if (minIncome != null) 'minIncome': minIncome,
+    if (maxIncome != null) 'maxIncome': maxIncome,
+    // Physical attributes filters
+    if (height != null) 'height': height,
+    if (minHeight != null) 'minHeight': minHeight,
+    if (maxHeight != null) 'maxHeight': maxHeight,
+    if (physicalStatus != null) 'physicalStatus': physicalStatus,
+    if (maritalStatus != null) 'maritalStatus': maritalStatus,
+    // Lifestyle preferences
+    if (diet != null) 'diet': diet,
+    if (smoking != null) 'smoking': smoking,
+    if (drinking != null) 'drinking': drinking,
+    // Matrimony-specific filters
+    if (marriageIntention != null) 'marriageIntention': marriageIntention,
+    if (requiresFamilyApproval != null) 'requiresFamilyApproval': requiresFamilyApproval,
+    if (mustBeReligious != null) 'mustBeReligious': mustBeReligious,
+    if (mustWantChildren != null) 'mustWantChildren': mustWantChildren,
+    if (mustBeNeverMarried != null) 'mustBeNeverMarried': mustBeNeverMarried,
+    // Location-based search
+    if (locationRadius != null) 'locationRadius': locationRadius,
+    if (latitude != null) 'latitude': latitude,
+    if (longitude != null) 'longitude': longitude,
   };
 }

@@ -1,0 +1,598 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
+import 'package:aroosi_flutter/features/matches/matches_provider.dart';
+import 'package:aroosi_flutter/features/matches/models.dart';
+import 'package:aroosi_flutter/features/profiles/models.dart';
+import 'package:aroosi_flutter/features/chat/chat_provider.dart';
+import 'package:aroosi_flutter/features/auth/auth_controller.dart';
+import 'package:aroosi_flutter/core/safety_service.dart';
+import 'package:aroosi_flutter/theme/motion.dart';
+import 'package:aroosi_flutter/widgets/animations/motion.dart';
+import 'package:aroosi_flutter/l10n/app_localizations.dart';
+
+class MatchDetailScreen extends ConsumerStatefulWidget {
+  final String matchID;
+
+  const MatchDetailScreen({
+    super.key,
+    required this.matchID,
+  });
+
+  @override
+  ConsumerState<MatchDetailScreen> createState() => _MatchDetailScreenState();
+}
+
+class _MatchDetailScreenState extends ConsumerState<MatchDetailScreen> {
+  ReportReason? _selectedReportReason;
+  final TextEditingController _reportDescriptionController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      // Reset unread count when viewing match details
+      ref.read(matchesProvider.notifier).updateUnreadCount(widget.matchID, 0);
+    });
+  }
+
+  @override
+  void dispose() {
+    _reportDescriptionController.dispose();
+    super.dispose();
+  }
+
+  String _getReportReasonText(ReportReason reason) {
+    switch (reason) {
+      case ReportReason.inappropriateContent:
+        return 'Inappropriate Content';
+      case ReportReason.harassment:
+        return 'Harassment';
+      case ReportReason.spam:
+        return 'Spam or Scam';
+      case ReportReason.fakeProfile:
+        return 'Fake Profile';
+      case ReportReason.underageUser:
+        return 'Underage User';
+      case ReportReason.other:
+        return 'Other';
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final matchesState = ref.watch(matchesProvider);
+    final user = ref.watch(authControllerProvider);
+
+    if (user == null) {
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
+
+    final matchItem = matchesState.items.firstWhere(
+      (item) => item.id == widget.matchID,
+      orElse: () => MatchListItem(
+        id: widget.matchID,
+        match: Match(
+          id: widget.matchID,
+          participantIDs: [user.profile?.id ?? '', ''],
+          createdAt: DateTime.now(),
+          lastUpdatedAt: DateTime.now(),
+        ),
+      ),
+    );
+
+    return Scaffold(
+      body: CustomScrollView(
+        slivers: [
+          SliverAppBar.large(
+            title: Text(matchItem.counterpartProfile?.displayName ?? 'Match'),
+            actions: [
+              IconButton(
+                icon: const Icon(Icons.chat),
+                onPressed: () {
+                  context.push('/matches/${widget.matchID}/chat');
+                },
+              ),
+              PopupMenuButton<String>(
+                onSelected: (value) {
+                  switch (value) {
+                    case 'report':
+                      _showReportDialog(matchItem);
+                      break;
+                    case 'block':
+                      _showBlockDialog(matchItem);
+                      break;
+                  }
+                },
+                itemBuilder: (context) => [
+                  PopupMenuItem(
+                    value: 'report',
+                    child: Row(
+                      children: [
+                        const Icon(Icons.flag),
+                        const SizedBox(width: 8),
+                        Text('Report User'),
+                      ],
+                    ),
+                  ),
+                  PopupMenuItem(
+                    value: 'block',
+                    child: Row(
+                      children: [
+                        const Icon(Icons.block),
+                        const SizedBox(width: 8),
+                        Text('Block User'),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+          if (matchItem.counterpartProfile != null)
+            SliverToBoxAdapter(
+              child: _ProfileSection(profile: matchItem.counterpartProfile!),
+            ),
+          SliverToBoxAdapter(
+            child: _MatchInfoSection(matchItem: matchItem, user: user),
+          ),
+          SliverToBoxAdapter(
+            child: _ActionButtons(
+              matchItem: matchItem,
+              onChatPressed: () {
+                context.push('/matches/${widget.matchID}/chat');
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showReportDialog(MatchListItem matchItem) {
+    final l10n = AppLocalizations.of(context)!;
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Report User'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('Are you sure you want to report this user?'),
+            const SizedBox(height: 16),
+            Text(
+              'Please select a reason for reporting:',
+              style: TextStyle(
+                fontWeight: FontWeight.w600,
+                fontSize: 14,
+              ),
+            ),
+            const SizedBox(height: 8),
+            ...ReportReason.values.map((reason) => RadioListTile<ReportReason>(
+              title: Text(_getReportReasonText(reason)),
+              value: reason,
+              groupValue: _selectedReportReason,
+              onChanged: (value) {
+                setState(() {
+                  _selectedReportReason = value;
+                });
+              },
+            )),
+            const SizedBox(height: 8),
+            TextField(
+              controller: _reportDescriptionController,
+              decoration: InputDecoration(
+                labelText: 'Additional details (optional)',
+                border: OutlineInputBorder(),
+              ),
+              maxLines: 3,
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+              setState(() {
+                _selectedReportReason = null;
+                _reportDescriptionController.clear();
+              });
+            },
+            child: Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () async {
+              Navigator.of(context).pop();
+              
+              if (_selectedReportReason == null) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Please select a reason for reporting'),
+                    backgroundColor: Colors.orange,
+                  ),
+                );
+                return;
+              }
+
+              final safetyService = ref.read(safetyServiceProvider);
+              final success = await safetyService.reportUser(
+                reportedUserId: matchItem.id,
+                reason: _selectedReportReason!,
+                description: _reportDescriptionController.text.trim(),
+                relatedContentId: widget.matchID,
+              );
+
+              if (success) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('Report submitted successfully'),
+                    backgroundColor: Colors.green,
+                  ),
+                );
+                // Navigate back after successful report
+                if (mounted) {
+                  context.pop();
+                }
+              } else {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Failed to submit report. Please try again.'),
+                    backgroundColor: Colors.red,
+                  ),
+                );
+              }
+
+              setState(() {
+                _selectedReportReason = null;
+                _reportDescriptionController.clear();
+              });
+            },
+            child: Text('Report'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showBlockDialog(MatchListItem matchItem) {
+    final l10n = AppLocalizations.of(context)!;
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Block User'),
+        content: Text('Are you sure you want to block this user?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () async {
+              Navigator.of(context).pop();
+              
+              final safetyService = ref.read(safetyServiceProvider);
+              final success = await safetyService.blockUser(matchItem.id);
+
+              if (success) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('User blocked successfully'),
+                    backgroundColor: Colors.green,
+                  ),
+                );
+                // Navigate back after successful block
+                if (mounted) {
+                  context.pop();
+                }
+              } else {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Failed to block user. Please try again.'),
+                    backgroundColor: Colors.red,
+                  ),
+                );
+              }
+            },
+            child: Text('Block'),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ProfileSection extends StatelessWidget {
+  final ProfileSummary profile;
+
+  const _ProfileSection({required this.profile});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(24),
+      child: Column(
+        children: [
+          // Profile photo
+          CircleAvatar(
+            radius: 60,
+            backgroundImage: profile.avatarUrl != null
+                ? NetworkImage(profile.avatarUrl!)
+                : null,
+            child: profile.avatarUrl == null
+                ? Text(
+                    profile.displayName.isNotEmpty
+                        ? profile.displayName[0].toUpperCase()
+                        : '?',
+                    style: theme.textTheme.headlineLarge?.copyWith(
+                      color: theme.colorScheme.onPrimary,
+                    ),
+                  )
+                : null,
+          ),
+          const SizedBox(height: 16),
+          
+          // Name and verification
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                profile.displayName,
+                style: theme.textTheme.headlineSmall?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              // if (profile.isVerified) ...[
+              //   const SizedBox(width: 8),
+              //   Icon(
+              //     Icons.verified,
+              //     size: 20,
+              //     color: theme.colorScheme.primary,
+              //   ),
+              // ],
+            ],
+          ),
+          const SizedBox(height: 8),
+          
+          // Basic info
+          Text(
+            _formatBasicInfo(profile),
+            style: theme.textTheme.bodyLarge?.copyWith(
+              color: theme.colorScheme.onSurfaceVariant,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 8),
+          
+          // Occupation and education
+          // if (profile.occupation.isNotEmpty || profile.education.isNotEmpty) ...[
+          //   Text(
+          //     profile.occupation.isNotEmpty ? profile.occupation : profile.education,
+          //     style: theme.textTheme.bodyMedium?.copyWith(
+          //       color: theme.colorScheme.onSurfaceVariant,
+          //     ),
+          //     textAlign: TextAlign.center,
+          //   ),
+          // ],
+          const SizedBox(height: 8),
+          
+          // Cultural and religious info
+          // if (profile.religiousPreference?.isNotEmpty == true ||
+          //     profile.culturalBackground?.isNotEmpty == true) ...[
+          //   Wrap(
+          //     spacing: 8,
+          //     runSpacing: 4,
+          //     alignment: WrapAlignment.center,
+          //     children: [
+          //       if (profile.religiousPreference?.isNotEmpty == true)
+          //         Chip(
+          //           label: Text(profile.religiousPreference!),
+          //           backgroundColor: theme.colorScheme.surfaceVariant,
+          //         ),
+          //       if (profile.culturalBackground?.isNotEmpty == true)
+          //         Chip(
+          //           label: Text(profile.culturalBackground!),
+          //           backgroundColor: theme.colorScheme.surfaceVariant,
+          //         ),
+          //     ],
+          //   ),
+          // ],
+        ],
+      ),
+    );
+  }
+
+  String _formatBasicInfo(ProfileSummary profile) {
+    final parts = <String>[];
+    if (profile.age != null && profile.age! > 0) parts.add('${profile.age}');
+    if (profile.city?.isNotEmpty == true) parts.add(profile.city!);
+    return parts.join(' • ');
+  }
+}
+
+class _MatchInfoSection extends StatelessWidget {
+  final MatchListItem matchItem;
+  final user;
+
+  const _MatchInfoSection({
+    required this.matchItem,
+    required this.user,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(24),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Match Details',
+            style: theme.textTheme.titleLarge?.copyWith(
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 16),
+          
+          _InfoRow(
+            icon: Icons.calendar_today,
+            label: 'Matched On',
+            value: DateFormat('MMM d, yyyy').format(matchItem.match.createdAt),
+          ),
+          const SizedBox(height: 12),
+          
+          _InfoRow(
+            icon: Icons.message,
+            label: 'Total Messages',
+            value: matchItem.match.totalMessages.toString(),
+          ),
+          const SizedBox(height: 12),
+          
+          _InfoRow(
+            icon: Icons.update,
+            label: 'Last Active',
+            value: _formatLastActive(matchItem.match.lastUpdatedAt),
+          ),
+          
+          if (matchItem.lastMessagePreview?.isNotEmpty == true) ...[
+            const SizedBox(height: 12),
+            _InfoRow(
+              icon: Icons.chat_bubble_outline,
+              label: 'Last Message',
+              value: matchItem.lastMessagePreview!,
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  String _formatLastActive(DateTime dateTime) {
+    final now = DateTime.now();
+    final difference = now.difference(dateTime);
+
+    if (difference.inMinutes < 1) {
+      return 'Just now';
+    } else if (difference.inMinutes < 60) {
+      return '${difference.inMinutes}m ago';
+    } else if (difference.inHours < 24) {
+      return '${difference.inHours}h ago';
+    } else if (difference.inDays < 7) {
+      return '${difference.inDays}d ago';
+    } else {
+      return DateFormat('MMM d').format(dateTime);
+    }
+  }
+}
+
+class _InfoRow extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final String value;
+
+  const _InfoRow({
+    required this.icon,
+    required this.label,
+    required this.value,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    
+    return Row(
+      children: [
+        Icon(
+          icon,
+          size: 20,
+          color: theme.colorScheme.onSurfaceVariant,
+        ),
+        const SizedBox(width: 12),
+        Text(
+          label,
+          style: theme.textTheme.bodyMedium?.copyWith(
+            color: theme.colorScheme.onSurfaceVariant,
+          ),
+        ),
+        const Spacer(),
+        Text(
+          value,
+          style: theme.textTheme.bodyMedium?.copyWith(
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _ActionButtons extends StatelessWidget {
+  final MatchListItem matchItem;
+  final VoidCallback onChatPressed;
+
+  const _ActionButtons({
+    required this.matchItem,
+    required this.onChatPressed,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(24),
+      child: Column(
+        children: [
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton.icon(
+              onPressed: onChatPressed,
+              icon: const Icon(Icons.chat),
+              label: Text('Send Message'),
+              style: ElevatedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(vertical: 16),
+              ),
+            ),
+          ),
+          const SizedBox(height: 12),
+          SizedBox(
+            width: double.infinity,
+            child: OutlinedButton.icon(
+              onPressed: () {
+                // Video call functionality placeholder
+                // TODO: Implement video call integration using WebRTC or similar service
+                // This would require:
+                // - Video calling SDK integration (Agora, Twilio, etc.)
+                // - UI components for video interface
+                // - Call state management
+                // - Audio/video permission handling
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Video calls coming soon!')),
+                );
+              },
+              icon: const Icon(Icons.video_call),
+              label: Text('Video Call'),
+              style: OutlinedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(vertical: 16),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
