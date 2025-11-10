@@ -115,7 +115,7 @@ class _AfghanTraditionsScreenState extends ConsumerState<AfghanTraditionsScreen>
                     padding: const EdgeInsets.only(right: 8),
                     child: _buildCategoryChip(category, _getCategoryLabel(category)),
                   );
-                }).toList(),
+                }),
               ],
             ),
           ),
@@ -216,7 +216,6 @@ class _TraditionCard extends StatelessWidget {
   final AfghanCulturalTradition tradition;
 
   const _TraditionCard({
-    super.key,
     required this.tradition,
   });
 
@@ -322,7 +321,7 @@ class _TraditionCard extends StatelessWidget {
                       ],
                     ),
                   );
-                }).toList(),
+                }),
                 if (tradition.practices.length > 3)
                   Text(
                     '... and ${tradition.practices.length - 3} more',

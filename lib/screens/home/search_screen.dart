@@ -1,10 +1,8 @@
 import 'dart:async';
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import 'package:aroosi_flutter/features/profiles/list_controller.dart';
 import 'package:aroosi_flutter/features/profiles/models.dart';
@@ -13,13 +11,12 @@ import 'package:aroosi_flutter/widgets/app_scaffold.dart';
 import 'package:aroosi_flutter/widgets/empty_states.dart';
 import 'package:aroosi_flutter/widgets/error_states.dart';
 import 'package:aroosi_flutter/utils/pagination.dart';
-import 'package:aroosi_flutter/features/profiles/selection.dart';
 import 'package:aroosi_flutter/widgets/adaptive_refresh.dart';
-import 'package:aroosi_flutter/widgets/retryable_network_image.dart';
+import 'package:aroosi_flutter/widgets/profile_list_item.dart';
 
 import 'package:aroosi_flutter/features/auth/auth_controller.dart';
 import 'package:aroosi_flutter/utils/debug_logger.dart';
-import 'package:aroosi_flutter/theme/colors.dart';
+import 'package:aroosi_flutter/theme/theme_helpers.dart';
 import 'package:aroosi_flutter/features/search/advanced_search_filters_screen.dart';
 import 'package:aroosi_flutter/features/search/matrimony_search_integration.dart';
 import 'package:aroosi_flutter/features/onboarding/matrimony/matrimony_onboarding_provider.dart';
@@ -123,7 +120,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
             ),
             SliverFillRemaining(
               child: Container(
-                color: Theme.of(context).colorScheme.surface,
+                color: ThemeHelpers.getMaterialTheme(context).colorScheme.surface,
                 child: Center(
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -132,8 +129,8 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                       const SizedBox(height: 16),
                       Text(
                         'Loading profiles...',
-                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                          color: Theme.of(context).colorScheme.onSurface,
+                        style: ThemeHelpers.getMaterialTheme(context).textTheme.bodyLarge?.copyWith(
+                          color: ThemeHelpers.getMaterialTheme(context).colorScheme.onSurface,
                         ),
                       ),
                     ],
@@ -146,20 +143,92 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
       );
     }
 
+    final items = state.items;
+    final hasResults = items.isNotEmpty;
+    final showLoadingMore = state.loading && hasResults;
+
+    final materialTheme = ThemeHelpers.getMaterialTheme(context);
+
     final slivers = <Widget>[
+      SliverToBoxAdapter(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
+          child: _buildSearchControls(context),
+        ),
+      ),
       if (state.error != null)
         SliverToBoxAdapter(
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
             child: _buildErrorBanner(context, state.error!),
           ),
         ),
-      SliverFillRemaining(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          child: _buildEmptyState(context, forCards: true),
+      if (hasResults)
+        SliverToBoxAdapter(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+            child: Text(
+              'Search Results',
+              style: materialTheme.textTheme.titleMedium,
+            ),
+          ),
         ),
-      ),
+      if (hasResults)
+        SliverPadding(
+          padding: const EdgeInsets.only(bottom: 16),
+          sliver: SliverList(
+            delegate: SliverChildBuilderDelegate(
+              (context, index) {
+                final profile = items[index];
+                final score = profile.compatibilityScore;
+                return Column(
+                  children: [
+                    ProfileListItem(
+                      profile: profile,
+                      compatibilityScore: score > 0 ? score : null,
+                      onTap: () => _openProfileDetails(profile),
+                    ),
+                    if (index < items.length - 1)
+                      const Divider(height: 1, indent: 16, endIndent: 16),
+                  ],
+                );
+              },
+              childCount: items.length,
+            ),
+          ),
+        ),
+      if (!hasResults)
+        SliverFillRemaining(
+          hasScrollBody: false,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            child: _buildEmptyState(context, forCards: false),
+          ),
+        ),
+      if (showLoadingMore)
+        SliverPadding(
+          padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+          sliver: SliverList(
+            delegate: SliverChildBuilderDelegate(
+              (_, __) => const ProfileListSkeleton(),
+              childCount: 2,
+            ),
+          ),
+        )
+      else if (hasResults && state.hasMore)
+        SliverToBoxAdapter(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+            child: Center(
+              child: Text(
+                'Scroll to load more profiles',
+                style: materialTheme.textTheme.bodyMedium?.copyWith(
+                  color: materialTheme.colorScheme.onSurfaceVariant,
+                ),
+              ),
+            ),
+          ),
+        ),
     ];
 
     return AppScaffold(
@@ -193,7 +262,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
           vertical: forCards ? 24 : 32,
         ),
         child: Container(
-          color: Theme.of(context).colorScheme.surface,
+          color: ThemeHelpers.getMaterialTheme(context).colorScheme.surface,
           child: Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -202,8 +271,8 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                 const SizedBox(height: 16),
                 Text(
                   'Loading profiles...',
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurface,
+                  style: ThemeHelpers.getMaterialTheme(context).textTheme.titleMedium?.copyWith(
+                    color: ThemeHelpers.getMaterialTheme(context).colorScheme.onSurface,
                   ),
                 ),
               ],
@@ -261,13 +330,13 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                       decoration: BoxDecoration(
-                        color: Theme.of(context).colorScheme.primaryContainer,
+                        color: ThemeHelpers.getMaterialTheme(context).colorScheme.primaryContainer,
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Text(
                         'Matrimony',
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: Theme.of(context).colorScheme.onPrimaryContainer,
+                        style: ThemeHelpers.getMaterialTheme(context).textTheme.bodySmall?.copyWith(
+                          color: ThemeHelpers.getMaterialTheme(context).colorScheme.onPrimaryContainer,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -278,7 +347,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                 borderRadius: BorderRadius.circular(12),
               ),
               filled: true,
-              fillColor: Theme.of(context).colorScheme.surface,
+              fillColor: ThemeHelpers.getMaterialTheme(context).colorScheme.surface,
             ),
             onChanged: (value) {
               _debounce?.cancel();
@@ -300,12 +369,12 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                   onPressed: () => _showAdvancedFilters(context),
                   icon: Icon(
                     Icons.filter_list,
-                    color: hasFilters ? Theme.of(context).colorScheme.primary : null,
+                    color: hasFilters ? ThemeHelpers.getMaterialTheme(context).colorScheme.primary : null,
                   ),
                   label: Text(
                     hasFilters ? 'Filters Applied' : 'Advanced Filters',
                     style: TextStyle(
-                      color: hasFilters ? Theme.of(context).colorScheme.primary : null,
+                      color: hasFilters ? ThemeHelpers.getMaterialTheme(context).colorScheme.primary : null,
                       fontWeight: hasFilters ? FontWeight.bold : null,
                     ),
                   ),
@@ -314,11 +383,11 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                       side: hasFilters 
-                          ? BorderSide(color: Theme.of(context).colorScheme.primary)
+                          ? BorderSide(color: ThemeHelpers.getMaterialTheme(context).colorScheme.primary)
                           : BorderSide.none,
                     ),
                     backgroundColor: hasFilters 
-                        ? Theme.of(context).colorScheme.primaryContainer.withAlpha(30)
+                        ? ThemeHelpers.getMaterialTheme(context).colorScheme.primaryContainer.withAlpha(30)
                         : null,
                   ),
                 ),
@@ -350,7 +419,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
   }
 
   Widget _buildActiveFilters(BuildContext context, SearchFilters filters) {
-    final theme = Theme.of(context);
+    final theme = ThemeHelpers.getMaterialTheme(context);
     final activeFilters = <String>[];
     
     // Collect active filter descriptions
@@ -431,7 +500,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
           children: [
             Text(
               'Matrimony Search Presets',
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+              style: ThemeHelpers.getMaterialTheme(context).textTheme.titleLarge?.copyWith(
                 fontWeight: FontWeight.bold,
               ),
             ),
@@ -447,7 +516,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                   subtitle: Text(MatrimonySearchIntegration.getPresetDescription(preset, index)),
                   leading: Icon(
                     Icons.favorite,
-                    color: Theme.of(context).colorScheme.primary,
+                    color: ThemeHelpers.getMaterialTheme(context).colorScheme.primary,
                   ),
                   onTap: () {
                     ref.read(searchControllerProvider.notifier).search(preset);
@@ -456,12 +525,12 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                     side: BorderSide(
-                      color: Theme.of(context).colorScheme.outline.withAlpha(50),
+                      color: ThemeHelpers.getMaterialTheme(context).colorScheme.outline.withAlpha(50),
                     ),
                   ),
                 ),
               );
-            }).toList(),
+            }),
             const SizedBox(height: 16),
             SizedBox(
               width: double.infinity,
@@ -564,605 +633,12 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                 filters.preferredGender != null));
   }
 
-  Future<void> _showFiltersSheet(BuildContext context) async {
-    final state = ref.read(searchControllerProvider);
-    final initialFilters =
-        state.filters ?? SearchFilters(pageSize: _defaultPageSize);
-
-    final result = await showModalBottomSheet<_FilterSelection>(
-      context: context,
-      isScrollControlled: true,
-      builder: (context) => _SearchFiltersSheet(initial: initialFilters),
-    );
-
-    if (result != null) {
-      // Apply the selected filters
-      final auth = ref.read(authControllerProvider);
-      final userProfile = auth.profile;
-
-      final filters = SearchFilters(
-        pageSize: _defaultPageSize,
-        query: _controller.text.trim().isNotEmpty
-            ? _controller.text.trim()
-            : null,
-        city: result.city,
-        minAge: result.minAge,
-        maxAge: result.maxAge,
-        sort: result.sort,
-        cursor: null,
-        preferredGender:
-            result.preferredGender ??
-            (userProfile?.preferredGender?.isNotEmpty == true
-                ? userProfile!.preferredGender
-                : null),
-      );
-
-      await ref.read(searchControllerProvider.notifier).search(filters);
-    }
-  }
-}
-
-class _ProfileListItem extends StatelessWidget {
-  const _ProfileListItem({
-    required this.profile,
-    required this.onLike,
-    required this.onViewProfile,
-  });
-
-  final ProfileSummary profile;
-  final VoidCallback onLike;
-  final VoidCallback onViewProfile;
-
-  static const String _placeholderAsset = 'assets/images/placeholder.png';
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final p = profile;
-
-    final ageCity = <String>[];
-    if (p.age != null) ageCity.add(p.age!.toString());
-    if (p.city?.trim().isNotEmpty == true) {
-      ageCity.add(p.city!.trim());
-    }
-    final subtitle = ageCity.join(' • ');
-
-    return Card(
-      elevation: 2,
-      margin: EdgeInsets.zero,
-      child: InkWell(
-        onTap: onViewProfile,
-        borderRadius: BorderRadius.circular(12),
-        child: Padding(
-          padding: const EdgeInsets.all(12.0),
-          child: Row(
-            children: [
-              // Profile Image
-              ClipRRect(
-                borderRadius: BorderRadius.circular(8),
-                child: SizedBox(
-                  width: 80,
-                  height: 80,
-                  child: p.avatarUrl != null && p.avatarUrl!.trim().isNotEmpty
-                      ? RetryableNetworkImage(
-                          url: p.avatarUrl!,
-                          fit: BoxFit.cover,
-                          errorWidget: Image.asset(
-                            _placeholderAsset,
-                            fit: BoxFit.cover,
-                          ),
-                        )
-                      : Image.asset(_placeholderAsset, fit: BoxFit.cover),
-                ),
-              ),
-              const SizedBox(width: 16),
-              // Profile Info
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      p.displayName,
-                      style: theme.textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w600,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    if (subtitle.isNotEmpty) ...[
-                      const SizedBox(height: 4),
-                      Text(
-                        subtitle,
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          color: theme.textTheme.bodyMedium?.color?.withValues(
-                            alpha: 0.7,
-                          ),
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ],
-                    // Compatibility Score (mock data for now)
-                    if (true) ...[
-                      // This would be based on actual compatibility data
-                      const SizedBox(height: 8),
-                      _CompatibilityScoreIndicator(score: 0.75), // Mock score
-                    ],
-
-                    if (p.isFavorite || p.isShortlisted) ...[
-                      const SizedBox(height: 8),
-                      Row(
-                        children: [
-                          if (p.isFavorite)
-                            Icon(
-                              Icons.favorite,
-                              color: theme.colorScheme.error,
-                              size: 16,
-                            ),
-                          if (p.isShortlisted)
-                            Padding(
-                              padding: const EdgeInsets.only(left: 8),
-                              child: Icon(
-                                Icons.bookmark,
-                                color: theme.colorScheme.primary,
-                                size: 16,
-                              ),
-                            ),
-                        ],
-                      ),
-                    ],
-                  ],
-                ),
-              ),
-              // Action Buttons
-              Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  IconButton.outlined(
-                    onPressed: onViewProfile,
-                    icon: const Icon(Icons.person_outline),
-                    tooltip: 'View Profile',
-                  ),
-                  const SizedBox(height: 8),
-                  IconButton.filled(
-                    onPressed: onLike,
-                    icon: const Icon(Icons.favorite),
-                    style: IconButton.styleFrom(
-                      backgroundColor: Colors.pink.withValues(alpha: 0.1),
-                      foregroundColor: Colors.pink,
-                    ),
-                    tooltip: 'Like',
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _CompatibilityScoreIndicator extends StatelessWidget {
-  final double score; // 0.0 to 1.0
-
-  const _CompatibilityScoreIndicator({required this.score});
-
-  @override
-  Widget build(BuildContext context) {
-    final percentage = (score * 100).round();
-    final color = _getScoreColor(score);
-
-    return Row(
-      children: [
-        Icon(Icons.favorite_border, size: 16, color: color),
-        const SizedBox(width: 6),
-        Text(
-          '$percentage% Match',
-          style: GoogleFonts.nunitoSans(
-            fontSize: 12,
-            fontWeight: FontWeight.w600,
-            color: color,
-          ),
-        ),
-        const SizedBox(width: 8),
-        Expanded(
-          child: LinearProgressIndicator(
-            value: score,
-            backgroundColor: Colors.grey[300],
-            valueColor: AlwaysStoppedAnimation<Color>(color),
-            minHeight: 4,
-          ),
-        ),
-      ],
+  void _openProfileDetails(ProfileSummary profile) {
+    if (profile.id.isEmpty) return;
+    GoRouter.of(context).pushNamed(
+      'details',
+      pathParameters: {'id': profile.id},
     );
   }
 
-  Color _getScoreColor(double score) {
-    if (score >= 0.8) return Colors.green;
-    if (score >= 0.6) return Colors.orange;
-    return Colors.red;
-  }
-}
-
-class _FilterSelection {
-  const _FilterSelection({
-    this.city,
-    this.minAge,
-    this.maxAge,
-    this.sort,
-    this.preferredGender,
-  });
-
-  final String? city;
-  final int? minAge;
-  final int? maxAge;
-  final String? sort;
-  final String? preferredGender;
-}
-
-class _FilterOption {
-  const _FilterOption(this.value, this.label);
-  final String value;
-  final String label;
-}
-
-const List<_FilterOption> _sortOptions = [
-  _FilterOption('', 'Recommended'),
-  _FilterOption('recent', 'Recently active'),
-  _FilterOption('newest', 'Newest profiles'),
-  _FilterOption('distance', 'Closest to you'),
-];
-
-const List<_FilterOption> _genderOptions = [
-  _FilterOption('', 'Any gender'),
-  _FilterOption('male', 'Male'),
-  _FilterOption('female', 'Female'),
-  _FilterOption('non-binary', 'Non-binary'),
-];
-
-BoxDecoration cupertinoDecoration(BuildContext context) {
-  return BoxDecoration(
-    border: Border.all(color: AppColors.primary, width: 1.5),
-    borderRadius: BorderRadius.circular(8),
-  );
-}
-
-class _SearchFiltersSheet extends StatefulWidget {
-  const _SearchFiltersSheet({required this.initial});
-
-  final SearchFilters initial;
-
-  @override
-  State<_SearchFiltersSheet> createState() => _SearchFiltersSheetState();
-}
-
-class _SearchFiltersSheetState extends State<_SearchFiltersSheet> {
-  late final TextEditingController _cityController;
-  late bool _useAgeFilter;
-  late RangeValues _ageRange;
-  late String _sort;
-  late String? _gender;
-
-  static const double _minAge = 18;
-  static const double _maxAge = 80;
-  static const double _defaultMinAge = 24;
-  static const double _defaultMaxAge = 36;
-
-  @override
-  void initState() {
-    super.initState();
-    _cityController = TextEditingController(text: widget.initial.city ?? '');
-    _useAgeFilter =
-        widget.initial.minAge != null || widget.initial.maxAge != null;
-    final minAge = (widget.initial.minAge ?? _defaultMinAge).toDouble();
-    final maxAge = (widget.initial.maxAge ?? _defaultMaxAge).toDouble();
-    _ageRange = RangeValues(
-      minAge.clamp(_minAge, _maxAge),
-      maxAge.clamp(_minAge, _maxAge),
-    );
-    _sort = widget.initial.sort ?? '';
-    _gender = widget.initial.preferredGender;
-  }
-
-  @override
-  void dispose() {
-    _cityController.dispose();
-    super.dispose();
-  }
-
-  void _showSortPicker() {
-    final initialIndex = _sortOptions.indexWhere(
-      (option) => option.value == _sort,
-    );
-    showCupertinoModalPopup(
-      context: context,
-      builder: (BuildContext context) => Container(
-        height: 250,
-        padding: const EdgeInsets.only(top: 6.0),
-        margin: EdgeInsets.only(
-          bottom: MediaQuery.of(context).viewInsets.bottom,
-        ),
-        color: CupertinoColors.systemBackground.resolveFrom(context),
-        child: SafeArea(
-          top: false,
-          child: CupertinoPicker(
-            magnification: 1.22,
-            squeeze: 1.2,
-            useMagnifier: true,
-            itemExtent: 32.0,
-            scrollController: FixedExtentScrollController(
-              initialItem: initialIndex >= 0 ? initialIndex : 0,
-            ),
-            onSelectedItemChanged: (int selectedItem) {
-              setState(() {
-                _sort = _sortOptions[selectedItem].value;
-              });
-            },
-            children: _sortOptions
-                .map((option) => Center(child: Text(option.label)))
-                .toList(),
-          ),
-        ),
-      ),
-    );
-  }
-
-  void _showGenderPicker() {
-    final initialIndex = _genderOptions.indexWhere(
-      (option) => option.value == (_gender ?? ''),
-    );
-    showCupertinoModalPopup(
-      context: context,
-      builder: (BuildContext context) => Container(
-        height: 250,
-        padding: const EdgeInsets.only(top: 6.0),
-        margin: EdgeInsets.only(
-          bottom: MediaQuery.of(context).viewInsets.bottom,
-        ),
-        color: CupertinoColors.systemBackground.resolveFrom(context),
-        child: SafeArea(
-          top: false,
-          child: CupertinoPicker(
-            magnification: 1.22,
-            squeeze: 1.2,
-            useMagnifier: true,
-            itemExtent: 32.0,
-            scrollController: FixedExtentScrollController(
-              initialItem: initialIndex >= 0 ? initialIndex : 0,
-            ),
-            onSelectedItemChanged: (int selectedItem) {
-              setState(() {
-                final value = _genderOptions[selectedItem].value;
-                _gender = value.isEmpty ? null : value;
-              });
-            },
-            children: _genderOptions
-                .map((option) => Center(child: Text(option.label)))
-                .toList(),
-          ),
-        ),
-      ),
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final bottomInset = MediaQuery.of(context).viewInsets.bottom;
-
-    return Padding(
-      padding: EdgeInsets.only(bottom: bottomInset),
-      child: SafeArea(
-        top: false,
-        child: ConstrainedBox(
-          constraints: BoxConstraints(
-            maxHeight: MediaQuery.of(context).size.height * 0.8,
-          ),
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
-            child: SizedBox(
-              width: double.infinity,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Center(
-                    child: Container(
-                      width: 40,
-                      height: 4,
-                      margin: const EdgeInsets.only(bottom: 12),
-                      decoration: BoxDecoration(
-                        color: theme.dividerColor.withValues(alpha: 0.4),
-                        borderRadius: BorderRadius.circular(2),
-                      ),
-                    ),
-                  ),
-                  Text('Refine search', style: theme.textTheme.titleMedium),
-                  const SizedBox(height: 16),
-                  TextField(
-                    controller: _cityController,
-                    textCapitalization: TextCapitalization.words,
-                    decoration: const InputDecoration(
-                      labelText: 'City',
-                      hintText: 'Enter city',
-                      prefixIcon: Icon(Icons.location_on_outlined),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  SwitchListTile(
-                    contentPadding: EdgeInsets.zero,
-                    value: _useAgeFilter,
-                    onChanged: (value) => setState(() => _useAgeFilter = value),
-                    title: const Text('Filter by age range'),
-                    subtitle: Text(
-                      '${_ageRange.start.round()} - ${_ageRange.end.round()}',
-                    ),
-                  ),
-                  AnimatedOpacity(
-                    opacity: _useAgeFilter ? 1.0 : 0.4,
-                    duration: const Duration(milliseconds: 200),
-                    child: IgnorePointer(
-                      ignoring: !_useAgeFilter,
-                      child: RangeSlider(
-                        values: _ageRange,
-                        min: _minAge,
-                        max: _maxAge,
-                        divisions: (_maxAge - _minAge).round(),
-                        labels: RangeLabels(
-                          '${_ageRange.start.round()}',
-                          '${_ageRange.end.round()}',
-                        ),
-                        onChanged: _useAgeFilter
-                            ? (value) => setState(() => _ageRange = value)
-                            : null,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Padding(
-                        padding: EdgeInsets.only(left: 4, bottom: 8),
-                        child: Text(
-                          'Sort by',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w400,
-                            color: CupertinoColors.label,
-                          ),
-                        ),
-                      ),
-                      Container(
-                        decoration: cupertinoDecoration(context),
-                        child: CupertinoButton(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 8,
-                          ),
-                          onPressed: _showSortPicker,
-                          child: Row(
-                            children: [
-                              const Icon(CupertinoIcons.sort_down, size: 20),
-                              const SizedBox(width: 8),
-                              Expanded(
-                                child: Text(
-                                  _sortOptions
-                                      .firstWhere(
-                                        (option) => option.value == _sort,
-                                        orElse: () => _sortOptions[0],
-                                      )
-                                      .label,
-                                  style: const TextStyle(
-                                    fontSize: 16,
-                                    color: CupertinoColors.label,
-                                  ),
-                                ),
-                              ),
-                              const Icon(CupertinoIcons.chevron_down, size: 16),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 16),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Padding(
-                        padding: EdgeInsets.only(left: 4, bottom: 8),
-                        child: Text(
-                          'Gender',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w400,
-                            color: CupertinoColors.label,
-                          ),
-                        ),
-                      ),
-                      Container(
-                        decoration: cupertinoDecoration(context),
-                        child: CupertinoButton(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 8,
-                          ),
-                          onPressed: _showGenderPicker,
-                          child: Row(
-                            children: [
-                              const Icon(CupertinoIcons.person, size: 20),
-                              const SizedBox(width: 8),
-                              Expanded(
-                                child: Text(
-                                  _genderOptions
-                                      .firstWhere(
-                                        (option) =>
-                                            option.value == (_gender ?? ''),
-                                        orElse: () => _genderOptions[0],
-                                      )
-                                      .label,
-                                  style: const TextStyle(
-                                    fontSize: 16,
-                                    color: CupertinoColors.label,
-                                  ),
-                                ),
-                              ),
-                              const Icon(CupertinoIcons.chevron_down, size: 16),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 24),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: TextButton(
-                          onPressed: _reset,
-                          child: const Text('Reset'),
-                        ),
-                      ),
-                      const SizedBox(width: 16),
-                      Expanded(
-                        child: FilledButton(
-                          onPressed: _apply,
-                          child: const Text('Apply filters'),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  void _reset() {
-    setState(() {
-      _cityController.clear();
-      _useAgeFilter = false;
-      _ageRange = const RangeValues(_defaultMinAge, _defaultMaxAge);
-      _sort = '';
-      _gender = null;
-    });
-  }
-
-  void _apply() {
-    final trimmedCity = _cityController.text.trim();
-    Navigator.of(context).pop(
-      _FilterSelection(
-        city: trimmedCity.isEmpty ? null : trimmedCity,
-        minAge: _useAgeFilter ? _ageRange.start.round() : null,
-        maxAge: _useAgeFilter ? _ageRange.end.round() : null,
-        sort: _sort.isEmpty ? null : _sort,
-        preferredGender: _gender?.isEmpty == true ? null : _gender,
-      ),
-    );
-  }
 }

@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:aroosi_flutter/theme/theme_helpers.dart';
 
 class PagedListFooter extends StatelessWidget {
   const PagedListFooter({
@@ -16,9 +17,10 @@ class PagedListFooter extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (!hasMore) return const SizedBox.shrink();
+    final platform = ThemeHelpers.getMaterialTheme(context).platform;
     final isCupertino =
-        Theme.of(context).platform == TargetPlatform.iOS ||
-        Theme.of(context).platform == TargetPlatform.macOS;
+        platform == TargetPlatform.iOS ||
+        platform == TargetPlatform.macOS;
 
     return Padding(
       padding: indicatorPadding,

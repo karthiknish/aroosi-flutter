@@ -5,12 +5,9 @@ import 'package:intl/intl.dart';
 import 'package:aroosi_flutter/features/matches/matches_provider.dart';
 import 'package:aroosi_flutter/features/matches/models.dart';
 import 'package:aroosi_flutter/features/profiles/models.dart';
-import 'package:aroosi_flutter/features/chat/chat_provider.dart';
 import 'package:aroosi_flutter/features/auth/auth_controller.dart';
 import 'package:aroosi_flutter/core/safety_service.dart';
-import 'package:aroosi_flutter/theme/motion.dart';
-import 'package:aroosi_flutter/widgets/animations/motion.dart';
-import 'package:aroosi_flutter/l10n/app_localizations.dart';
+import 'package:aroosi_flutter/theme/theme_helpers.dart';
 
 class MatchDetailScreen extends ConsumerStatefulWidget {
   final String matchID;
@@ -62,11 +59,10 @@ class _MatchDetailScreenState extends ConsumerState<MatchDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
     final matchesState = ref.watch(matchesProvider);
     final user = ref.watch(authControllerProvider);
 
-    if (user == null) {
+    if (user.profile == null) {
       return const Scaffold(
         body: Center(child: CircularProgressIndicator()),
       );
@@ -138,7 +134,7 @@ class _MatchDetailScreenState extends ConsumerState<MatchDetailScreen> {
               child: _ProfileSection(profile: matchItem.counterpartProfile!),
             ),
           SliverToBoxAdapter(
-            child: _MatchInfoSection(matchItem: matchItem, user: user),
+            child: _MatchInfoSection(matchItem: matchItem),
           ),
           SliverToBoxAdapter(
             child: _ActionButtons(
@@ -154,10 +150,12 @@ class _MatchDetailScreenState extends ConsumerState<MatchDetailScreen> {
   }
 
   void _showReportDialog(MatchListItem matchItem) {
-    final l10n = AppLocalizations.of(context)!;
+    final messenger = ScaffoldMessenger.of(context);
+    final router = GoRouter.of(context);
+
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
+      builder: (dialogContext) => AlertDialog(
         title: Text('Report User'),
         content: Column(
           mainAxisSize: MainAxisSize.min,
@@ -173,16 +171,22 @@ class _MatchDetailScreenState extends ConsumerState<MatchDetailScreen> {
               ),
             ),
             const SizedBox(height: 8),
-            ...ReportReason.values.map((reason) => RadioListTile<ReportReason>(
-              title: Text(_getReportReasonText(reason)),
-              value: reason,
-              groupValue: _selectedReportReason,
-              onChanged: (value) {
-                setState(() {
-                  _selectedReportReason = value;
-                });
-              },
-            )),
+            ...ReportReason.values.map((reason) {
+              final isSelected = _selectedReportReason == reason;
+              return ListTile(
+                leading: Icon(
+                  isSelected
+                      ? Icons.radio_button_checked
+                      : Icons.radio_button_off,
+                ),
+                title: Text(_getReportReasonText(reason)),
+                onTap: () {
+                  setState(() {
+                    _selectedReportReason = reason;
+                  });
+                },
+              );
+            }),
             const SizedBox(height: 8),
             TextField(
               controller: _reportDescriptionController,
@@ -197,7 +201,7 @@ class _MatchDetailScreenState extends ConsumerState<MatchDetailScreen> {
         actions: [
           TextButton(
             onPressed: () {
-              Navigator.of(context).pop();
+              Navigator.of(dialogContext).pop();
               setState(() {
                 _selectedReportReason = null;
                 _reportDescriptionController.clear();
@@ -207,10 +211,10 @@ class _MatchDetailScreenState extends ConsumerState<MatchDetailScreen> {
           ),
           TextButton(
             onPressed: () async {
-              Navigator.of(context).pop();
+              Navigator.of(dialogContext).pop();
               
               if (_selectedReportReason == null) {
-                ScaffoldMessenger.of(context).showSnackBar(
+                messenger.showSnackBar(
                   const SnackBar(
                     content: Text('Please select a reason for reporting'),
                     backgroundColor: Colors.orange,
@@ -227,19 +231,19 @@ class _MatchDetailScreenState extends ConsumerState<MatchDetailScreen> {
                 relatedContentId: widget.matchID,
               );
 
+              if (!mounted) return;
+
               if (success) {
-                ScaffoldMessenger.of(context).showSnackBar(
+                messenger.showSnackBar(
                   SnackBar(
                     content: Text('Report submitted successfully'),
                     backgroundColor: Colors.green,
                   ),
                 );
                 // Navigate back after successful report
-                if (mounted) {
-                  context.pop();
-                }
+                router.pop();
               } else {
-                ScaffoldMessenger.of(context).showSnackBar(
+                messenger.showSnackBar(
                   const SnackBar(
                     content: Text('Failed to submit report. Please try again.'),
                     backgroundColor: Colors.red,
@@ -247,6 +251,7 @@ class _MatchDetailScreenState extends ConsumerState<MatchDetailScreen> {
                 );
               }
 
+              if (!mounted) return;
               setState(() {
                 _selectedReportReason = null;
                 _reportDescriptionController.clear();
@@ -260,37 +265,39 @@ class _MatchDetailScreenState extends ConsumerState<MatchDetailScreen> {
   }
 
   void _showBlockDialog(MatchListItem matchItem) {
-    final l10n = AppLocalizations.of(context)!;
+    final messenger = ScaffoldMessenger.of(context);
+    final router = GoRouter.of(context);
+
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
+      builder: (dialogContext) => AlertDialog(
         title: Text('Block User'),
         content: Text('Are you sure you want to block this user?'),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context),
+            onPressed: () => Navigator.pop(dialogContext),
             child: Text('Cancel'),
           ),
           TextButton(
             onPressed: () async {
-              Navigator.of(context).pop();
+              Navigator.of(dialogContext).pop();
               
               final safetyService = ref.read(safetyServiceProvider);
               final success = await safetyService.blockUser(matchItem.id);
 
+              if (!mounted) return;
+
               if (success) {
-                ScaffoldMessenger.of(context).showSnackBar(
+                messenger.showSnackBar(
                   SnackBar(
                     content: Text('User blocked successfully'),
                     backgroundColor: Colors.green,
                   ),
                 );
                 // Navigate back after successful block
-                if (mounted) {
-                  context.pop();
-                }
+                router.pop();
               } else {
-                ScaffoldMessenger.of(context).showSnackBar(
+                messenger.showSnackBar(
                   const SnackBar(
                     content: Text('Failed to block user. Please try again.'),
                     backgroundColor: Colors.red,
@@ -313,8 +320,7 @@ class _ProfileSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final l10n = AppLocalizations.of(context)!;
+    final theme = ThemeHelpers.getMaterialTheme(context);
 
     return Container(
       width: double.infinity,
@@ -420,17 +426,14 @@ class _ProfileSection extends StatelessWidget {
 
 class _MatchInfoSection extends StatelessWidget {
   final MatchListItem matchItem;
-  final user;
 
   const _MatchInfoSection({
     required this.matchItem,
-    required this.user,
   });
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final l10n = AppLocalizations.of(context)!;
+    final theme = ThemeHelpers.getMaterialTheme(context);
 
     return Container(
       width: double.infinity,
@@ -510,7 +513,7 @@ class _InfoRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final theme = ThemeHelpers.getMaterialTheme(context);
     
     return Row(
       children: [
@@ -549,9 +552,6 @@ class _ActionButtons extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final l10n = AppLocalizations.of(context)!;
-
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(24),
@@ -564,29 +564,6 @@ class _ActionButtons extends StatelessWidget {
               icon: const Icon(Icons.chat),
               label: Text('Send Message'),
               style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(vertical: 16),
-              ),
-            ),
-          ),
-          const SizedBox(height: 12),
-          SizedBox(
-            width: double.infinity,
-            child: OutlinedButton.icon(
-              onPressed: () {
-                // Video call functionality placeholder
-                // TODO: Implement video call integration using WebRTC or similar service
-                // This would require:
-                // - Video calling SDK integration (Agora, Twilio, etc.)
-                // - UI components for video interface
-                // - Call state management
-                // - Audio/video permission handling
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Video calls coming soon!')),
-                );
-              },
-              icon: const Icon(Icons.video_call),
-              label: Text('Video Call'),
-              style: OutlinedButton.styleFrom(
                 padding: const EdgeInsets.symmetric(vertical: 16),
               ),
             ),

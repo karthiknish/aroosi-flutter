@@ -1,30 +1,35 @@
 import 'package:flutter/material.dart';
 import 'package:aroosi_flutter/core/responsive.dart';
+import 'package:aroosi_flutter/theme/theme_helpers.dart';
 
 class PrivacyPolicyScreen extends StatelessWidget {
   const PrivacyPolicyScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final theme = ThemeHelpers.getMaterialTheme(context);
+    final colorScheme = theme.colorScheme;
+    final textColor = ThemeHelpers.getTextColor(context);
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
+        title: Text(
           'Privacy Policy',
-          style: TextStyle(
+          style: theme.textTheme.titleLarge?.copyWith(
             fontSize: 20,
             fontWeight: FontWeight.bold,
-            color: Colors.black87,
+            color: textColor,
           ),
         ),
-        backgroundColor: Colors.pink.withValues(alpha: 0.05),
+        backgroundColor: ThemeHelpers.getSurfaceColor(context),
         flexibleSpace: Container(
           decoration: BoxDecoration(
             gradient: LinearGradient(
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
               colors: [
-                Colors.pink.withValues(alpha: 0.1),
-                Colors.pink.withValues(alpha: 0.05),
+                colorScheme.primary.withValues(alpha: 0.12),
+                colorScheme.primary.withValues(alpha: 0.05),
               ],
             ),
           ),
@@ -56,6 +61,7 @@ class PrivacyPolicyScreen extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _buildSection(
+          context: context,
           title: 'Data Collection & Usage',
           content: '''
 Aroosi is committed to protecting your privacy and maintaining the security of your personal information.
@@ -138,6 +144,7 @@ Aroosi is committed to protecting your privacy and maintaining the security of y
 ''',
         ),
         _buildSection(
+          context: context,
           title: 'Data Sharing & Third Parties',
           content: '''
 **We Do Not Sell Your Personal Information.**
@@ -167,6 +174,7 @@ All third-party services provide the same level of protection as required by App
 ''',
         ),
         _buildSection(
+          context: context,
           title: 'User Consent & Data Collection',
           content: '''
 **Explicit Consent Required:**
@@ -200,6 +208,7 @@ Our consent management system ensures Apple App Store Guideline 5.1.1 compliance
 ''',
         ),
         _buildSection(
+          context: context,
           title: 'Data Retention & Deletion',
           content: '''
 **Data Retention Period:**
@@ -231,6 +240,7 @@ Our consent management system ensures Apple App Store Guideline 5.1.1 compliance
 ''',
         ),
         _buildSection(
+          context: context,
           title: 'Age Requirement & Adult Data Collection',
           content: '''
 **18+ Age Requirement:**
@@ -268,6 +278,7 @@ This approach ensures GDPR, COPPA compliance and follows Apple's App Store guide
 ''',
         ),
         _buildSection(
+          context: context,
           title: 'Changes to This Policy',
           content:
               '''
@@ -280,6 +291,7 @@ Last updated: ${DateTime.now().toLocal().toString().split(' ')[0]}
 ''',
         ),
         _buildSection(
+          context: context,
           title: 'Contact Information',
           content: '''
 If you have questions about this Privacy Policy or want to exercise your data rights, contact us:
@@ -297,16 +309,24 @@ For Afghan residents, your data protection rights are protected under applicable
     );
   }
 
-  Widget _buildSection({required String title, required String content}) {
+  Widget _buildSection({
+    required BuildContext context,
+    required String title,
+    required String content,
+  }) {
+    final theme = ThemeHelpers.getMaterialTheme(context);
+    final colorScheme = theme.colorScheme;
+    final textTheme = theme.textTheme;
+
     return Container(
       margin: const EdgeInsets.only(bottom: 24),
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: colorScheme.surface,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
+            color: colorScheme.shadow.withValues(alpha: 0.08),
             blurRadius: 10,
             offset: const Offset(0, 2),
           ),
@@ -317,19 +337,17 @@ For Afghan residents, your data protection rights are protected under applicable
         children: [
           Text(
             title,
-            style: const TextStyle(
-              fontSize: 18,
+            style: textTheme.titleMedium?.copyWith(
               fontWeight: FontWeight.bold,
-              color: Colors.pink,
+              color: colorScheme.primary,
             ),
           ),
           const SizedBox(height: 12),
           Text(
             content,
-            style: TextStyle(
-              fontSize: 14,
+            style: textTheme.bodyMedium?.copyWith(
               height: 1.5,
-              color: Colors.grey.shade700,
+              color: colorScheme.onSurfaceVariant,
             ),
           ),
         ],
@@ -338,6 +356,7 @@ For Afghan residents, your data protection rights are protected under applicable
   }
 
   Widget _buildActionButtons(BuildContext context) {
+    final colorScheme = ThemeHelpers.getMaterialTheme(context).colorScheme;
     return Column(
       children: [
         SizedBox(
@@ -349,8 +368,8 @@ For Afghan residents, your data protection rights are protected under applicable
             icon: const Icon(Icons.download),
             label: const Text('Request My Data'),
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.pink,
-              foregroundColor: Colors.white,
+              backgroundColor: colorScheme.primary,
+              foregroundColor: colorScheme.onPrimary,
               padding: const EdgeInsets.symmetric(vertical: 16),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
@@ -368,8 +387,8 @@ For Afghan residents, your data protection rights are protected under applicable
             icon: const Icon(Icons.delete_outline),
             label: const Text('Delete My Account'),
             style: OutlinedButton.styleFrom(
-              foregroundColor: Colors.red,
-              side: const BorderSide(color: Colors.red),
+              foregroundColor: colorScheme.error,
+              side: BorderSide(color: colorScheme.error),
               padding: const EdgeInsets.symmetric(vertical: 16),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),

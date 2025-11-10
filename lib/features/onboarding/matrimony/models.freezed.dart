@@ -1058,7 +1058,7 @@ mixin _$MatrimonyOnboardingData {
   String? get religiousPreferenceId => throw _privateConstructorUsedError;
   PartnerPreferences? get partnerPreferences =>
       throw _privateConstructorUsedError;
-  bool get requiresFamilyApproval => throw _privateConstructorUsedError;
+  bool? get requiresFamilyApproval => throw _privateConstructorUsedError;
   String? get familyApprovalDetails => throw _privateConstructorUsedError;
 
   /// Serializes this MatrimonyOnboardingData to a JSON map.
@@ -1083,7 +1083,7 @@ abstract class $MatrimonyOnboardingDataCopyWith<$Res> {
     List<String> familyValueIds,
     String? religiousPreferenceId,
     PartnerPreferences? partnerPreferences,
-    bool requiresFamilyApproval,
+    bool? requiresFamilyApproval,
     String? familyApprovalDetails,
   });
 
@@ -1112,7 +1112,7 @@ class _$MatrimonyOnboardingDataCopyWithImpl<
     Object? familyValueIds = null,
     Object? religiousPreferenceId = freezed,
     Object? partnerPreferences = freezed,
-    Object? requiresFamilyApproval = null,
+    Object? requiresFamilyApproval = freezed,
     Object? familyApprovalDetails = freezed,
   }) {
     return _then(
@@ -1133,10 +1133,10 @@ class _$MatrimonyOnboardingDataCopyWithImpl<
                 ? _value.partnerPreferences
                 : partnerPreferences // ignore: cast_nullable_to_non_nullable
                       as PartnerPreferences?,
-            requiresFamilyApproval: null == requiresFamilyApproval
+            requiresFamilyApproval: freezed == requiresFamilyApproval
                 ? _value.requiresFamilyApproval
                 : requiresFamilyApproval // ignore: cast_nullable_to_non_nullable
-                      as bool,
+                      as bool?,
             familyApprovalDetails: freezed == familyApprovalDetails
                 ? _value.familyApprovalDetails
                 : familyApprovalDetails // ignore: cast_nullable_to_non_nullable
@@ -1177,7 +1177,7 @@ abstract class _$$MatrimonyOnboardingDataImplCopyWith<$Res>
     List<String> familyValueIds,
     String? religiousPreferenceId,
     PartnerPreferences? partnerPreferences,
-    bool requiresFamilyApproval,
+    bool? requiresFamilyApproval,
     String? familyApprovalDetails,
   });
 
@@ -1207,7 +1207,7 @@ class __$$MatrimonyOnboardingDataImplCopyWithImpl<$Res>
     Object? familyValueIds = null,
     Object? religiousPreferenceId = freezed,
     Object? partnerPreferences = freezed,
-    Object? requiresFamilyApproval = null,
+    Object? requiresFamilyApproval = freezed,
     Object? familyApprovalDetails = freezed,
   }) {
     return _then(
@@ -1228,10 +1228,10 @@ class __$$MatrimonyOnboardingDataImplCopyWithImpl<$Res>
             ? _value.partnerPreferences
             : partnerPreferences // ignore: cast_nullable_to_non_nullable
                   as PartnerPreferences?,
-        requiresFamilyApproval: null == requiresFamilyApproval
+        requiresFamilyApproval: freezed == requiresFamilyApproval
             ? _value.requiresFamilyApproval
             : requiresFamilyApproval // ignore: cast_nullable_to_non_nullable
-                  as bool,
+                  as bool?,
         familyApprovalDetails: freezed == familyApprovalDetails
             ? _value.familyApprovalDetails
             : familyApprovalDetails // ignore: cast_nullable_to_non_nullable
@@ -1249,7 +1249,7 @@ class _$MatrimonyOnboardingDataImpl implements _MatrimonyOnboardingData {
     final List<String> familyValueIds = const [],
     this.religiousPreferenceId,
     this.partnerPreferences,
-    this.requiresFamilyApproval = false,
+    this.requiresFamilyApproval,
     this.familyApprovalDetails,
   }) : _familyValueIds = familyValueIds;
 
@@ -1272,8 +1272,7 @@ class _$MatrimonyOnboardingDataImpl implements _MatrimonyOnboardingData {
   @override
   final PartnerPreferences? partnerPreferences;
   @override
-  @JsonKey()
-  final bool requiresFamilyApproval;
+  final bool? requiresFamilyApproval;
   @override
   final String? familyApprovalDetails;
 
@@ -1338,7 +1337,7 @@ abstract class _MatrimonyOnboardingData implements MatrimonyOnboardingData {
     final List<String> familyValueIds,
     final String? religiousPreferenceId,
     final PartnerPreferences? partnerPreferences,
-    final bool requiresFamilyApproval,
+    final bool? requiresFamilyApproval,
     final String? familyApprovalDetails,
   }) = _$MatrimonyOnboardingDataImpl;
 
@@ -1354,7 +1353,7 @@ abstract class _MatrimonyOnboardingData implements MatrimonyOnboardingData {
   @override
   PartnerPreferences? get partnerPreferences;
   @override
-  bool get requiresFamilyApproval;
+  bool? get requiresFamilyApproval;
   @override
   String? get familyApprovalDetails;
 

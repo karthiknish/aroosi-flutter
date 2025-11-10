@@ -115,7 +115,7 @@ _$MatrimonyOnboardingDataImpl _$$MatrimonyOnboardingDataImplFromJson(
       : PartnerPreferences.fromJson(
           json['partnerPreferences'] as Map<String, dynamic>,
         ),
-  requiresFamilyApproval: json['requiresFamilyApproval'] as bool? ?? false,
+  requiresFamilyApproval: json['requiresFamilyApproval'] as bool?,
   familyApprovalDetails: json['familyApprovalDetails'] as String?,
 );
 

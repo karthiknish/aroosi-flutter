@@ -18,6 +18,8 @@ import 'package:aroosi_flutter/utils/pagination.dart';
 import 'package:aroosi_flutter/features/profiles/selection.dart';
 import 'package:aroosi_flutter/widgets/adaptive_refresh.dart';
 import 'package:aroosi_flutter/theme/colors.dart';
+import 'package:aroosi_flutter/theme/color_helpers.dart';
+import 'package:aroosi_flutter/theme/theme_helpers.dart';
 import 'package:aroosi_flutter/theme/motion.dart';
 import 'package:aroosi_flutter/widgets/animations/motion.dart';
 
@@ -61,6 +63,7 @@ class _MatchesScreenState extends ConsumerState<MatchesScreen> {
 
     // Handle matches controller errors
     ref.listen(matchesControllerProvider, (prev, next) {
+      if (!mounted) return;
       if (next.error != null && prev?.error != next.error) {
         final error = next.error.toString();
         final isOfflineError =
@@ -68,11 +71,13 @@ class _MatchesScreenState extends ConsumerState<MatchesScreen> {
             error.toLowerCase().contains('connection') ||
             error.toLowerCase().contains('timeout');
 
+        final messenger = ScaffoldMessenger.maybeOf(context);
+
         if (isOfflineError) {
           ToastService.instance.error('Connection error while loading matches');
-          ScaffoldMessenger.of(context).showSnackBar(
+          messenger?.showSnackBar(
             SnackBar(
-              content: Text('Connection error while loading matches'),
+              content: const Text('Connection error while loading matches'),
               action: SnackBarAction(
                 label: 'Retry',
                 onPressed: () =>
@@ -128,7 +133,9 @@ class _MatchesScreenState extends ConsumerState<MatchesScreen> {
             delegate: SliverChildBuilderDelegate(
               (context, index) {
                 if (state.items.isEmpty && state.loading) {
-                  return _MatchSkeleton();
+                  return _MatchSkeleton(
+                    showMessagePreview: index.isEven,
+                  );
                 }
                 if (index >= state.items.length) {
                   return PagedListFooter(
@@ -194,6 +201,8 @@ class _MatchesScreenState extends ConsumerState<MatchesScreen> {
                         ],
                       );
 
+                      if (!ctx.mounted) return;
+
                       if (action == null) return;
 
                       if (action == 0 && !match.isMutual) {
@@ -217,7 +226,7 @@ class _MatchesScreenState extends ConsumerState<MatchesScreen> {
                         ref
                             .read(lastSelectedProfileIdProvider.notifier)
                             .set(targetUserId);
-                        context.push('/details/$targetUserId');
+                        ctx.push('/details/$targetUserId');
                       } else if ((action == 1 && match.isMutual) ||
                           (action == 2)) {
                         // Open chat
@@ -225,7 +234,7 @@ class _MatchesScreenState extends ConsumerState<MatchesScreen> {
                           ref
                               .read(matchesControllerProvider.notifier)
                               .markConversationAsRead(match.conversationId);
-                          context.push('/chat/${match.conversationId}');
+                          ctx.push('/chat/${match.conversationId}');
                         }
                       }
                     },
@@ -272,21 +281,21 @@ class _MatchesScreenState extends ConsumerState<MatchesScreen> {
   }
 
   Widget _buildMatchesHero(BuildContext context, MatchesState state) {
-    final theme = Theme.of(context);
-
+    final theme = ThemeHelpers.getMaterialTheme(context);
+    
     return DecoratedBox(
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
             AppColors.primary.withAlpha(56),
             AppColors.secondary.withAlpha(46),
-            Theme.of(context).colorScheme.surface,
+            ThemeHelpers.getSurfaceColor(context),
           ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: theme.colorScheme.outline.withAlpha(20)),
+        border: Border.all(color: theme.colorScheme.outline.withValues(alpha: 0.08)),
         boxShadow: [
           BoxShadow(
             color: AppColors.primary.withAlpha(36),
@@ -311,7 +320,7 @@ class _MatchesScreenState extends ConsumerState<MatchesScreen> {
             Text(
               'Discover meaningful connections and build lasting relationships with people who share your values.',
               style: theme.textTheme.bodyMedium?.copyWith(
-                color: theme.colorScheme.onSurface.withAlpha(184),
+                color: theme.colorScheme.onSurface.withValues(alpha: 0.72),
                 height: 1.4,
               ),
             ),
@@ -381,7 +390,7 @@ class _MatchCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final theme = ThemeHelpers.getMaterialTheme(context);
     final displayName = (match.otherUserName ?? 'Match').trim();
     final name = displayName.isEmpty ? 'Match' : displayName;
     final accent = _accentColor;
@@ -424,8 +433,8 @@ class _MatchCard extends StatelessWidget {
               decoration: BoxDecoration(
                 gradient: LinearGradient(
                   colors: [
-                    Colors.black.withAlpha(166),
-                    Colors.black.withAlpha(26),
+                    AppColors.text.withValues(alpha: 0.65),
+                    AppColors.text.withValues(alpha: 0.1),
                   ],
                   begin: Alignment.bottomCenter,
                   end: Alignment.topCenter,
@@ -444,7 +453,7 @@ class _MatchCard extends StatelessWidget {
             Positioned(
               top: 16,
               left: 16,
-              child: _buildBadge('Blocked', Colors.grey.shade600),
+              child: _buildBadge('Blocked', AppColors.muted),
             ),
           Positioned(
             bottom: 0,
@@ -454,10 +463,7 @@ class _MatchCard extends StatelessWidget {
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
                 gradient: LinearGradient(
-                  colors: [
-                    Colors.black.withAlpha(179),
-                    Colors.black.withAlpha(51),
-                  ],
+                  colors: ColorHelpers.bottomOverlayGradient(),
                   begin: Alignment.bottomCenter,
                   end: Alignment.topCenter,
                 ),
@@ -471,7 +477,7 @@ class _MatchCard extends StatelessWidget {
                         child: Text(
                           name,
                           style: theme.textTheme.titleLarge?.copyWith(
-                            color: Colors.white,
+                            color: ColorHelpers.white,
                             fontWeight: FontWeight.w700,
                             letterSpacing: -0.2,
                           ),
@@ -487,15 +493,15 @@ class _MatchCard extends StatelessWidget {
                             vertical: 2,
                           ),
                           decoration: BoxDecoration(
-                            color: Colors.redAccent,
+                            color: AppColors.error,
                             borderRadius: BorderRadius.circular(10),
                           ),
                           child: Text(
                             match.unreadCount > 99
                                 ? '99+'
                                 : '${match.unreadCount}',
-                            style: const TextStyle(
-                              color: Colors.white,
+                            style: TextStyle(
+                              color: ColorHelpers.white,
                               fontSize: 12,
                             ),
                           ),
@@ -510,15 +516,15 @@ class _MatchCard extends StatelessWidget {
                         match.isMutual ? Icons.favorite : Icons.person,
                         size: 14,
                         color: match.isMutual
-                            ? Colors.pinkAccent
-                            : Colors.white.withAlpha(191),
+                            ? AppColors.primary
+                            : ColorHelpers.whiteWithAlpha(0.75),
                       ),
                       const SizedBox(width: 6),
                       Expanded(
                         child: Text(
                           match.isMutual ? 'Mutual Match' : 'Potential Match',
                           style: theme.textTheme.bodySmall?.copyWith(
-                            color: Colors.white.withAlpha(191),
+                            color: ColorHelpers.whiteWithAlpha(0.75),
                             fontWeight: FontWeight.w500,
                           ),
                           maxLines: 1,
@@ -529,13 +535,13 @@ class _MatchCard extends StatelessWidget {
                       Icon(
                         Icons.access_time,
                         size: 12,
-                        color: Colors.white.withAlpha(153),
+                        color: ColorHelpers.whiteWithAlpha(0.6),
                       ),
                       const SizedBox(width: 4),
                       Text(
                         _formatRelativeTime(lastInteraction),
                         style: theme.textTheme.bodySmall?.copyWith(
-                          color: Colors.white.withAlpha(153),
+                          color: ColorHelpers.whiteWithAlpha(0.6),
                         ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
@@ -549,7 +555,7 @@ class _MatchCard extends StatelessWidget {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: theme.textTheme.bodySmall?.copyWith(
-                        color: Colors.white.withAlpha(224),
+                        color: ColorHelpers.whiteWithAlpha(0.88),
                         fontStyle: FontStyle.italic,
                       ),
                     ),
@@ -567,9 +573,9 @@ class _MatchCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
-        color: Colors.black.withAlpha(115),
+        color: ColorHelpers.blackWithAlpha(0.45),
         borderRadius: BorderRadius.circular(999),
-        border: Border.all(color: Colors.white.withAlpha(31)),
+        border: Border.all(color: ColorHelpers.whiteWithAlpha(0.12)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -582,7 +588,7 @@ class _MatchCard extends StatelessWidget {
           const SizedBox(width: 6),
           Text(
             label,
-            style: TextStyle(fontWeight: FontWeight.w600, color: Colors.white),
+            style: TextStyle(fontWeight: FontWeight.w600, color: ColorHelpers.white),
           ),
         ],
       ),
@@ -640,27 +646,35 @@ class _MatchCard extends StatelessWidget {
   }
 
   Color get _accentColor {
-    if (match.isMutual) return Colors.pinkAccent;
-    if (match.status == 'pending') return Colors.teal;
-    if (match.isBlocked) return Colors.grey;
-    return AppColors.primary;
+    return ColorHelpers.getMatchStatusColor(
+      isMutual: match.isMutual,
+      status: match.status,
+      isBlocked: match.isBlocked,
+    );
   }
 }
 
 class _MatchSkeleton extends StatelessWidget {
+  const _MatchSkeleton({
+    this.showMessagePreview = false,
+  });
+
+  final bool showMessagePreview;
+
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final base = isDark ? Colors.grey.shade800 : Colors.grey.shade300;
-    final hilite = isDark ? Colors.grey.shade700 : Colors.grey.shade200;
+    final cupertinoTheme = CupertinoThemeHelpers.getMaterialTheme(context);
+    final isDark = cupertinoTheme.brightness == Brightness.dark;
+    final base = isDark ? AppColors.muted.withValues(alpha: 0.5) : AppColors.borderPrimary;
+    final hilite = isDark ? AppColors.muted.withValues(alpha: 0.3) : AppColors.surfaceSecondary;
 
     return ClipRRect(
       borderRadius: BorderRadius.circular(24),
       child: Stack(
         children: [
-          // Background image placeholder
+          // Skeleton backdrop mimicking the profile photo area
           Positioned.fill(child: Container(color: base.withAlpha(102))),
-          // Status chip placeholder
+          // Skeleton chip representing the mutual-match/status badge
           Positioned(
             top: 16,
             left: 16,
@@ -682,10 +696,7 @@ class _MatchSkeleton extends StatelessWidget {
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
                 gradient: LinearGradient(
-                  colors: [
-                    Colors.black.withAlpha(179),
-                    Colors.black.withAlpha(51),
-                  ],
+                  colors: ColorHelpers.bottomOverlayGradient(),
                   begin: Alignment.bottomCenter,
                   end: Alignment.topCenter,
                 ),
@@ -693,7 +704,7 @@ class _MatchSkeleton extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Name placeholder
+                  // Skeleton block for the member name line
                   Container(
                     width: 120,
                     height: 20,
@@ -734,8 +745,8 @@ class _MatchSkeleton extends StatelessWidget {
                       ),
                     ],
                   ),
-                  // Message preview placeholder (sometimes shown)
-                  if (DateTime.now().millisecond % 3 == 0) ...[
+                  // Optional second line to hint at a recent message preview
+                  if (showMessagePreview) ...[
                     const SizedBox(height: 8),
                     Container(
                       width: 180,

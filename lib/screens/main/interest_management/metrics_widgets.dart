@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'package:aroosi_flutter/features/profiles/list_controller.dart';
 import 'package:aroosi_flutter/theme/colors.dart';
+import 'package:aroosi_flutter/theme/theme_helpers.dart';
 
 /// Journey metrics widget showing statistics about interests
 class JourneyMetrics extends StatelessWidget {
@@ -11,7 +12,7 @@ class JourneyMetrics extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final theme = ThemeHelpers.getMaterialTheme(context);
     final total = state.items.length;
     final awaitingCount = state.items
         .where((interest) => interest.status == 'pending')
@@ -105,7 +106,7 @@ class JourneyMetrics extends StatelessWidget {
     required IconData icon,
     required Color color,
   }) {
-    final theme = Theme.of(context);
+    final theme = ThemeHelpers.getMaterialTheme(context);
     return Container(
       width: 160,
       padding: const EdgeInsets.all(16),
@@ -171,7 +172,7 @@ class InsightControls extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final theme = ThemeHelpers.getMaterialTheme(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -226,7 +227,7 @@ class InsightControls extends StatelessWidget {
     required Color accent,
     required Function(bool) onChanged,
   }) {
-    final theme = Theme.of(context);
+    final theme = ThemeHelpers.getMaterialTheme(context);
     return GestureDetector(
       onTap: () => onChanged(!selected),
       child: Container(

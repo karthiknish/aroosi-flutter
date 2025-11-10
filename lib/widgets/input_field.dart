@@ -126,15 +126,6 @@ class _ValidatedTextFieldState extends State<ValidatedTextField> {
     widget.onChanged?.call(widget.controller.text);
   }
 
-  void _onFocusLost() {
-    if (!_hasBeenEdited && widget.controller.text.isNotEmpty) {
-      setState(() {
-        _hasBeenEdited = true;
-        _errorText = widget.validator?.call(widget.controller.text);
-      });
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return Column(

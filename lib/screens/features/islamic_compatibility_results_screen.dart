@@ -167,7 +167,7 @@ class IslamicCompatibilityResultsScreen extends ConsumerWidget {
             score: categoryScore,
             weight: _getCategoryWeight(categoryId),
           );
-        }).toList(),
+        }),
       ],
     );
   }
@@ -263,7 +263,7 @@ class IslamicCompatibilityResultsScreen extends ConsumerWidget {
                     ],
                   ),
                 );
-              }).toList(),
+              }),
             ],
           ),
         ),
@@ -298,38 +298,6 @@ class IslamicCompatibilityResultsScreen extends ConsumerWidget {
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
                     color: Colors.white,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-        const SizedBox(height: 12),
-        
-        SizedBox(
-          width: double.infinity,
-          child: OutlinedButton(
-            onPressed: () {
-              _downloadReport(context);
-            },
-            style: OutlinedButton.styleFrom(
-              padding: const EdgeInsets.symmetric(vertical: 16),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-              side: const BorderSide(color: AppColors.primary),
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Icon(Icons.download, color: AppColors.primary),
-                const SizedBox(width: 8),
-                Text(
-                  'Download Report',
-                  style: GoogleFonts.nunitoSans(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.primary,
                   ),
                 ),
               ],
@@ -460,18 +428,6 @@ class IslamicCompatibilityResultsScreen extends ConsumerWidget {
             ),
           ),
         ],
-      ),
-    );
-  }
-
-  void _downloadReport(BuildContext context) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          'Report download feature coming soon!',
-          style: GoogleFonts.nunitoSans(),
-        ),
-        backgroundColor: AppColors.primary,
       ),
     );
   }

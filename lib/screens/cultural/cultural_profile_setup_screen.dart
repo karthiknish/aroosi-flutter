@@ -7,6 +7,7 @@ import 'package:aroosi_flutter/features/cultural/cultural_controller.dart';
 import 'package:aroosi_flutter/features/cultural/cultural_constants.dart';
 import 'package:aroosi_flutter/features/profiles/models.dart';
 import 'package:aroosi_flutter/theme/colors.dart';
+import 'package:aroosi_flutter/theme/theme_helpers.dart';
 
 import 'package:aroosi_flutter/widgets/app_scaffold.dart';
 import 'package:aroosi_flutter/widgets/input_field.dart';
@@ -187,9 +188,9 @@ class _CulturalProfileSetupScreenState
       children: [
         Text(
           label,
-          style: Theme.of(context).textTheme.titleSmall?.copyWith(
+          style: ThemeHelpers.getMaterialTheme(context).textTheme.titleSmall?.copyWith(
             fontWeight: FontWeight.w600,
-            color: Theme.of(context).colorScheme.onSurface,
+            color: ThemeHelpers.getMaterialTheme(context).colorScheme.onSurface,
           ),
         ),
         const SizedBox(height: 8),
@@ -246,9 +247,9 @@ class _CulturalProfileSetupScreenState
       children: [
         Text(
           label,
-          style: Theme.of(context).textTheme.titleSmall?.copyWith(
+          style: ThemeHelpers.getMaterialTheme(context).textTheme.titleSmall?.copyWith(
             fontWeight: FontWeight.w600,
-            color: Theme.of(context).colorScheme.onSurface,
+            color: ThemeHelpers.getMaterialTheme(context).colorScheme.onSurface,
           ),
         ),
         const SizedBox(height: 8),
@@ -312,14 +313,14 @@ class _CulturalProfileSetupScreenState
           children: [
             Text(
               label,
-              style: Theme.of(context).textTheme.titleSmall?.copyWith(
+              style: ThemeHelpers.getMaterialTheme(context).textTheme.titleSmall?.copyWith(
                 fontWeight: FontWeight.w600,
-                color: Theme.of(context).colorScheme.onSurface,
+                color: ThemeHelpers.getMaterialTheme(context).colorScheme.onSurface,
               ),
             ),
             Text(
               displayValue(value),
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              style: ThemeHelpers.getMaterialTheme(context).textTheme.bodyMedium?.copyWith(
                 fontWeight: FontWeight.w600,
                 color: AppColors.primary,
               ),
@@ -406,16 +407,16 @@ class _CulturalProfileSetupScreenState
             children: [
               Text(
                 'Tell us about your cultural background',
-                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                style: ThemeHelpers.getMaterialTheme(context).textTheme.headlineSmall?.copyWith(
                   fontWeight: FontWeight.bold,
-                  color: Theme.of(context).colorScheme.primary,
+                  color: ThemeHelpers.getMaterialTheme(context).colorScheme.primary,
                 ),
               ),
               const SizedBox(height: 8),
               Text(
                 'This helps us find culturally compatible matches for meaningful relationships.',
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                style: ThemeHelpers.getMaterialTheme(context).textTheme.bodyMedium?.copyWith(
+                  color: ThemeHelpers.getMaterialTheme(context).colorScheme.onSurfaceVariant,
                 ),
               ),
               const SizedBox(height: 32),
@@ -423,9 +424,9 @@ class _CulturalProfileSetupScreenState
               // Religion Section
               Text(
                 'Religious Background',
-                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                style: ThemeHelpers.getMaterialTheme(context).textTheme.titleLarge?.copyWith(
                   fontWeight: FontWeight.w600,
-                  color: Theme.of(context).colorScheme.primary,
+                  color: ThemeHelpers.getMaterialTheme(context).colorScheme.primary,
                 ),
               ),
               const SizedBox(height: 16),
@@ -462,9 +463,9 @@ class _CulturalProfileSetupScreenState
               // Language Section
               Text(
                 'Language & Communication',
-                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                style: ThemeHelpers.getMaterialTheme(context).textTheme.titleLarge?.copyWith(
                   fontWeight: FontWeight.w600,
-                  color: Theme.of(context).colorScheme.primary,
+                  color: ThemeHelpers.getMaterialTheme(context).colorScheme.primary,
                 ),
               ),
               const SizedBox(height: 16),
@@ -497,9 +498,9 @@ class _CulturalProfileSetupScreenState
               // Cultural Values Section
               Text(
                 'Cultural Values & Family',
-                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                style: ThemeHelpers.getMaterialTheme(context).textTheme.titleLarge?.copyWith(
                   fontWeight: FontWeight.w600,
-                  color: Theme.of(context).colorScheme.primary,
+                  color: ThemeHelpers.getMaterialTheme(context).colorScheme.primary,
                 ),
               ),
               const SizedBox(height: 16),
@@ -572,13 +573,13 @@ class _CulturalProfileSetupScreenState
                   padding: const EdgeInsets.all(12),
                   margin: const EdgeInsets.only(bottom: 16),
                   decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.errorContainer,
+                    color: ThemeHelpers.getMaterialTheme(context).colorScheme.errorContainer,
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Text(
                     _error!,
                     style: TextStyle(
-                      color: Theme.of(context).colorScheme.onErrorContainer,
+                      color: ThemeHelpers.getMaterialTheme(context).colorScheme.onErrorContainer,
                     ),
                   ),
                 ),

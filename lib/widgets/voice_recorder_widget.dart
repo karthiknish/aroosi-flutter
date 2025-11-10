@@ -5,6 +5,7 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:record/record.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:aroosi_flutter/theme/theme_helpers.dart';
 
 /// Simple voice recorder widget (long press to record) producing bytes + duration.
 /// This is a minimal MVP to enable voice message sending; can be enhanced with waveform.
@@ -131,7 +132,7 @@ class _VoiceRecorderWidgetState extends State<VoiceRecorderWidget> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final theme = ThemeHelpers.getMaterialTheme(context);
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [

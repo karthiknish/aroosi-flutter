@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:aroosi_flutter/theme/theme.dart';
+import 'package:aroosi_flutter/theme/theme_helpers.dart';
 
 class TermsOfServiceScreen extends StatelessWidget {
   const TermsOfServiceScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final theme = ThemeHelpers.getMaterialTheme(context);
     final textTheme = theme.textTheme;
 
     return Scaffold(

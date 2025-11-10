@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:convert';
-import 'package:flutter/foundation.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 import 'package:aroosi_flutter/core/env.dart';
 import 'package:aroosi_flutter/utils/debug_logger.dart';

@@ -24,7 +24,10 @@ class MatchListItem with _$MatchListItem {
   const factory MatchListItem({
     required String id,
     required Match match,
-    @JsonKey(ignore: true) ProfileSummary? counterpartProfile,
+    // Freezed applies this annotation to the generated field; suppress analyzer complaint.
+    // ignore: invalid_annotation_target
+    @JsonKey(includeFromJson: false, includeToJson: false)
+    ProfileSummary? counterpartProfile,
     @Default(0) int unreadCount,
   }) = _MatchListItem;
 

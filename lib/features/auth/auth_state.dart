@@ -73,11 +73,9 @@ class UserProfile {
 
   factory UserProfile.fromJson(Map<String, dynamic> json) {
     // Handle NextJS API response format: { success: boolean, data: userProfile }
-    dynamic userData = json;
-    if (json is Map<String, dynamic>) {
-      if (json['success'] == true) {
-        userData = json['data'];
-      }
+    var userData = Map<String, dynamic>.from(json);
+    if (json['success'] == true && json['data'] is Map<String, dynamic>) {
+      userData = Map<String, dynamic>.from(json['data'] as Map<String, dynamic>);
     }
 
     // Tolerant parsing for email verification flags across backends

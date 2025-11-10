@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:aroosi_flutter/providers/language_provider.dart';
 import 'package:aroosi_flutter/widgets/app_scaffold.dart';
 import 'package:aroosi_flutter/l10n/app_localizations.dart';
+import 'package:aroosi_flutter/theme/theme_helpers.dart';
 
 class LanguageSettingsScreen extends ConsumerWidget {
   const LanguageSettingsScreen({super.key});
@@ -27,7 +28,7 @@ class LanguageSettingsScreen extends ConsumerWidget {
               // Header
               Text(
                 'Choose your preferred language',
-                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                style: ThemeHelpers.getMaterialTheme(context).textTheme.headlineSmall?.copyWith(
                   fontWeight: FontWeight.w600,
                 ),
               ),
@@ -36,8 +37,8 @@ class LanguageSettingsScreen extends ConsumerWidget {
 
               Text(
                 'Aroosi supports multiple languages to serve our diverse community.',
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                style: ThemeHelpers.getMaterialTheme(context).textTheme.bodyMedium?.copyWith(
+                  color: ThemeHelpers.getMaterialTheme(context).colorScheme.onSurfaceVariant,
                 ),
               ),
 
@@ -75,16 +76,16 @@ class LanguageSettingsScreen extends ConsumerWidget {
                       children: [
                         Icon(
                           Icons.info_outline_rounded,
-                          color: Theme.of(context).colorScheme.primary,
+                          color: ThemeHelpers.getMaterialTheme(context).colorScheme.primary,
                           size: 20,
                         ),
                         const SizedBox(width: 8),
                         Text(
                           'Language Information',
-                          style: Theme.of(context).textTheme.titleSmall
+                          style: ThemeHelpers.getMaterialTheme(context).textTheme.titleSmall
                               ?.copyWith(
                                 fontWeight: FontWeight.w600,
-                                color: Theme.of(context).colorScheme.primary,
+                                color: ThemeHelpers.getMaterialTheme(context).colorScheme.primary,
                               ),
                         ),
                       ],
@@ -94,8 +95,8 @@ class LanguageSettingsScreen extends ConsumerWidget {
 
                     Text(
                       'Changing the language will restart the app to apply the new language settings. All text and interface elements will be displayed in your selected language.',
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      style: ThemeHelpers.getMaterialTheme(context).textTheme.bodySmall?.copyWith(
+                        color: ThemeHelpers.getMaterialTheme(context).colorScheme.onSurfaceVariant,
                         height: 1.5,
                       ),
                     ),
@@ -137,7 +138,7 @@ class LanguageSettingsScreen extends ConsumerWidget {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Language changed to ${language.displayName}'),
-            backgroundColor: Theme.of(context).colorScheme.primary,
+            backgroundColor: ThemeHelpers.getMaterialTheme(context).colorScheme.primary,
             behavior: SnackBarBehavior.floating,
           ),
         );
@@ -158,7 +159,7 @@ class LanguageSettingsScreen extends ConsumerWidget {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Failed to change language. Please try again.'),
-            backgroundColor: Theme.of(context).colorScheme.error,
+            backgroundColor: ThemeHelpers.getMaterialTheme(context).colorScheme.error,
             behavior: SnackBarBehavior.floating,
           ),
         );
@@ -180,7 +181,7 @@ class _LanguageOptionTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final theme = ThemeHelpers.getMaterialTheme(context);
 
     return Container(
       margin: const EdgeInsets.only(bottom: 12),

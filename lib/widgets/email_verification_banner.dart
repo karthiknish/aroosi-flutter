@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:aroosi_flutter/core/toast_service.dart';
 import 'package:aroosi_flutter/features/auth/auth_controller.dart';
+import 'package:aroosi_flutter/theme/theme_helpers.dart';
 // auth_state imported via controller state, no direct usage here
 
 class EmailVerificationBanner extends ConsumerStatefulWidget {
@@ -89,7 +90,7 @@ class _EmailVerificationBannerState
     if (!needs) return const SizedBox.shrink();
 
     final email = profile?.email ?? '';
-    final scheme = Theme.of(context).colorScheme;
+    final scheme = ThemeHelpers.getMaterialTheme(context).colorScheme;
 
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
@@ -114,7 +115,7 @@ class _EmailVerificationBannerState
               children: [
                 Text(
                   'Verify your email',
-                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                  style: ThemeHelpers.getMaterialTheme(context).textTheme.titleSmall?.copyWith(
                     color: scheme.onTertiaryContainer,
                   ),
                 ),
@@ -123,7 +124,7 @@ class _EmailVerificationBannerState
                   email.isNotEmpty
                       ? 'We\'ve sent a verification link to $email. Please verify to unlock all features.'
                       : 'We\'ve sent a verification link. Please verify to unlock all features.',
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  style: ThemeHelpers.getMaterialTheme(context).textTheme.bodySmall?.copyWith(
                     color: scheme.onTertiaryContainer,
                   ),
                 ),

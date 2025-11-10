@@ -368,21 +368,27 @@ class _CulturalAssessmentScreenState extends ConsumerState<CulturalAssessmentScr
     switch (question.type) {
       case 'single_choice':
         return Column(
-          children: question.options!.map(
-            (option) => RadioListTile<String>(
+          children: question.options!.map((option) {
+            final selected = _answers[question.id] == option;
+            return ListTile(
+              contentPadding: EdgeInsets.zero,
+              leading: Icon(
+                selected
+                    ? Icons.radio_button_checked
+                    : Icons.radio_button_off,
+                color: selected ? AppColors.primary : Colors.grey,
+              ),
               title: Text(
                 option,
                 style: GoogleFonts.nunitoSans(fontSize: 14),
               ),
-              value: option,
-              groupValue: _answers[question.id],
-              onChanged: (value) {
+              onTap: () {
                 setState(() {
-                  _answers[question.id] = value;
+                  _answers[question.id] = option;
                 });
               },
-            ),
-          ).toList(),
+            );
+          }).toList(),
         );
       case 'multiple_choice':
         return Column(

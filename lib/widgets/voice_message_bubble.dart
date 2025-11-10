@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:aroosi_flutter/features/chat/chat_models.dart';
 import 'package:aroosi_flutter/core/api_client.dart';
+import 'package:aroosi_flutter/theme/theme_helpers.dart';
 
 /// Lightweight voice message playback bubble.
 /// Fetches secure URL on first play via /voice-messages/{storageId}/url with fallback direct path.
@@ -90,7 +91,7 @@ class _VoiceMessageBubbleState extends State<VoiceMessageBubble> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final theme = ThemeHelpers.getMaterialTheme(context);
     final durationSecs = widget.message.duration ?? 0;
     final total = Duration(seconds: durationSecs);
     final progress = total.inMilliseconds > 0

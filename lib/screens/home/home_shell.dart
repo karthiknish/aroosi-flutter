@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:aroosi_flutter/core/responsive.dart';
 import 'package:aroosi_flutter/platform/platform_utils.dart';
 import 'package:aroosi_flutter/widgets/brand/aroosi_navigation_bar.dart';
+import 'package:aroosi_flutter/theme/theme_helpers.dart';
 
 /// Custom Cupertino-style tab scaffold that avoids GlobalKey conflicts
 class _CupertinoTabScaffoldWrapper extends StatelessWidget {
@@ -160,7 +161,7 @@ class _SearchCircleIcon extends StatelessWidget {
   Widget build(BuildContext context) {
     final iconTheme = IconTheme.of(context);
     final size = iconTheme.size ?? 24.0;
-    final scheme = Theme.of(context).colorScheme;
+    final scheme = ThemeHelpers.getMaterialTheme(context).colorScheme;
     final fg = selected ? scheme.onPrimary : scheme.primary;
     final bg = selected ? scheme.primary : Colors.transparent;
 

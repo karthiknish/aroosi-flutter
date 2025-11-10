@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:aroosi_flutter/features/onboarding/matrimony/constants.dart';
-import 'package:aroosi_flutter/l10n/app_localizations.dart';
+import 'package:aroosi_flutter/features/onboarding/matrimony/models.dart';
+import 'package:aroosi_flutter/theme/theme_helpers.dart';
 
 class ReligiousPreferencesStep extends StatelessWidget {
   final String? selectedPreferenceId;
@@ -16,8 +17,7 @@ class ReligiousPreferencesStep extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final l10n = AppLocalizations.of(context)!;
+    final theme = ThemeHelpers.getMaterialTheme(context);
 
     return Padding(
       padding: const EdgeInsets.all(24),
@@ -96,7 +96,7 @@ class ReligiousPreferencesStep extends StatelessWidget {
     bool isSelected,
     VoidCallback onTap,
   ) {
-    final theme = Theme.of(context);
+    final theme = ThemeHelpers.getMaterialTheme(context);
     
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
@@ -198,9 +198,9 @@ class ReligiousPreferencesStep extends StatelessWidget {
       case 'very_religious':
         return Icons.mosque;
       case 'moderately_religious':
-        return Icons.balance;
+        return Icons.self_improvement;
       case 'culturally_religious':
-        return Icons.culture;
+        return Icons.language;
       case 'spiritual_not_religious':
         return Icons.spa;
       case 'not_religious':

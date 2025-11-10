@@ -4,19 +4,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:aroosi_flutter/features/matches/models.dart';
 import 'package:aroosi_flutter/features/matches/matches_repository.dart';
 import 'package:aroosi_flutter/features/profiles/models.dart';
-import 'package:aroosi_flutter/features/chat/chat_repository.dart';
-import 'package:aroosi_flutter/features/chat/chat_models.dart';
 import 'package:aroosi_flutter/features/chat/unread_counts_controller.dart';
-import 'package:aroosi_flutter/features/auth/auth_controller.dart';
 import 'package:aroosi_flutter/core/performance_service.dart';
 
 // Repository providers
 final matchesRepositoryProvider = Provider<MatchesRepository>((ref) {
   return FirestoreMatchesRepository();
-});
-
-final chatRepositoryProvider = Provider<ChatRepository>((ref) {
-  return ChatRepository();
 });
 
 // State notifier for matches
@@ -26,8 +19,6 @@ class MatchesNotifier extends Notifier<MatchesState> {
   ProviderSubscription<UnreadCountsState>? _unreadCountsSubscription;
   
   MatchesRepository get _matchesRepository => ref.read(matchesRepositoryProvider);
-  ChatRepository? get _chatRepository => ref.read(chatRepositoryProvider);
-  
   String? _currentUserID;
   final Map<String, ProfileSummary> _profileCache = {};
   final Map<String, int> _unreadCounts = {};
@@ -42,8 +33,9 @@ class MatchesNotifier extends Notifier<MatchesState> {
   void _dispose() {
     _performance.startTimer('matches_dispose');
     
-    // ProviderSubscription is managed automatically by Riverpod 3.x
+    unawaited(_matchesSubscription?.cancel());
     _matchesSubscription = null;
+    _unreadCountsSubscription?.close();
     _unreadCountsSubscription = null;
     
     // Clear caches
@@ -122,8 +114,9 @@ class MatchesNotifier extends Notifier<MatchesState> {
   void stopObserving() {
     _performance.startTimer('stop_observing');
     
-    // ProviderSubscription is managed automatically by Riverpod 3.x
+    unawaited(_matchesSubscription?.cancel());
     _matchesSubscription = null;
+    _unreadCountsSubscription?.close();
     _unreadCountsSubscription = null;
     
     _performance.endTimer('stop_observing');

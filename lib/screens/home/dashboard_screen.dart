@@ -8,6 +8,7 @@ import 'package:aroosi_flutter/features/chat/unread_counts_controller.dart';
 import 'package:aroosi_flutter/features/engagement/quick_picks_repository.dart';
 import 'package:aroosi_flutter/features/icebreakers/icebreaker_controller.dart';
 import 'package:aroosi_flutter/features/profiles/models.dart';
+import 'package:aroosi_flutter/theme/colors.dart';
 import 'widgets/actions_row.dart';
 import 'widgets/explore_grid.dart';
 import 'widgets/header_row.dart';
@@ -70,7 +71,7 @@ class DashboardScreen extends ConsumerWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(Icons.error_outline, size: 64, color: Colors.red.shade300),
+              Icon(Icons.error_outline, size: 64, color: AppColors.error),
               const SizedBox(height: 16),
               Text('Authentication Error', style: TextStyle(fontSize: 18)),
               const SizedBox(height: 8),
@@ -96,8 +97,8 @@ class DashboardScreen extends ConsumerWidget {
         title: const Text('Dashboard'),
         centerTitle: true,
         elevation: 0,
-        backgroundColor: Colors.white,
-        foregroundColor: Colors.black87,
+        backgroundColor: AppColors.background,
+        foregroundColor: AppColors.text,
         surfaceTintColor: Colors.transparent,
         actions: [
           if (unreadTotal > 0)
@@ -115,7 +116,7 @@ class DashboardScreen extends ConsumerWidget {
                   child: Container(
                     padding: const EdgeInsets.all(2),
                     decoration: BoxDecoration(
-                      color: Colors.red,
+                      color: AppColors.error,
                       borderRadius: BorderRadius.circular(10),
                     ),
                     constraints: const BoxConstraints(
@@ -124,8 +125,8 @@ class DashboardScreen extends ConsumerWidget {
                     ),
                     child: Text(
                       unreadTotal > 99 ? '99+' : unreadTotal.toString(),
-                      style: const TextStyle(
-                        color: Colors.white,
+                      style: TextStyle(
+                        color: AppColors.onPrimary,
                         fontSize: 10,
                         fontWeight: FontWeight.bold,
                       ),
@@ -137,7 +138,7 @@ class DashboardScreen extends ConsumerWidget {
             ),
         ],
       ),
-      backgroundColor: Colors.grey.shade50,
+      backgroundColor: AppColors.surfaceSecondary,
       body: RefreshIndicator(
         onRefresh: () async {
           // Refresh data
@@ -165,21 +166,21 @@ class DashboardScreen extends ConsumerWidget {
                 margin: const EdgeInsets.only(bottom: 16),
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: Colors.orange.withValues(alpha: 0.05),
+                  color: AppColors.warning.withValues(alpha: 0.05),
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(
-                    color: Colors.orange.withValues(alpha: 0.2),
+                    color: AppColors.warning.withValues(alpha: 0.2),
                     width: 1,
                   ),
                 ),
                 child: Row(
                   children: [
-                    Icon(Icons.warning_amber, color: Colors.orange, size: 20),
+                    Icon(Icons.warning_amber, color: AppColors.warning, size: 20),
                     const SizedBox(width: 12),
-                    const Expanded(
+                    Expanded(
                       child: Text(
                         'Unable to load quick picks. Pull to refresh later.',
-                        style: TextStyle(fontSize: 14, color: Colors.orange),
+                        style: TextStyle(fontSize: 14, color: AppColors.warning),
                       ),
                     ),
                   ],
@@ -247,13 +248,13 @@ class _IcebreakerProgressCard extends StatelessWidget {
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: hasUnanswered
-            ? Colors.blue.withValues(alpha: 0.05)
-            : Colors.green.withValues(alpha: 0.05),
+            ? AppColors.info.withValues(alpha: 0.05)
+            : AppColors.success.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
           color: hasUnanswered
-              ? Colors.blue.withValues(alpha: 0.2)
-              : Colors.green.withValues(alpha: 0.2),
+              ? AppColors.info.withValues(alpha: 0.2)
+              : AppColors.success.withValues(alpha: 0.2),
           width: 1,
         ),
       ),
@@ -273,7 +274,7 @@ class _IcebreakerProgressCard extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
-                      color: hasUnanswered ? Colors.blue : Colors.green,
+                      color: hasUnanswered ? AppColors.info : AppColors.success,
                     ),
                   ),
                   const SizedBox(height: 4),
@@ -282,8 +283,8 @@ class _IcebreakerProgressCard extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 14,
                       color: hasUnanswered
-                          ? Colors.blue.withValues(alpha: 0.8)
-                          : Colors.green.withValues(alpha: 0.8),
+                          ? AppColors.info.withValues(alpha: 0.8)
+                          : AppColors.success.withValues(alpha: 0.8),
                     ),
                   ),
                 ],
@@ -291,7 +292,7 @@ class _IcebreakerProgressCard extends StatelessWidget {
             ),
             Icon(
               hasUnanswered ? Icons.arrow_forward : Icons.check_circle,
-              color: hasUnanswered ? Colors.blue : Colors.green,
+              color: hasUnanswered ? AppColors.info : AppColors.success,
             ),
           ],
         ),

@@ -7,6 +7,7 @@ import 'package:aroosi_flutter/core/toast_service.dart';
 import 'package:aroosi_flutter/features/auth/auth_controller.dart';
 import 'package:aroosi_flutter/features/support/support_repository.dart';
 import 'package:aroosi_flutter/theme/colors.dart';
+import 'package:aroosi_flutter/theme/theme_helpers.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
 class ContactScreen extends ConsumerStatefulWidget {
@@ -24,6 +25,8 @@ class _ContactScreenState extends ConsumerState<ContactScreen> {
   String _category = 'General';
   bool _includeDiagnostics = true;
   bool _submitting = false;
+  bool _submitted = false;
+  String? _submitError;
 
   @override
   void initState() {
@@ -48,7 +51,7 @@ class _ContactScreenState extends ConsumerState<ContactScreen> {
     bool hasError = false,
   }) {
     return BoxDecoration(
-      color: CupertinoTheme.of(context).scaffoldBackgroundColor,
+      color: CupertinoThemeHelpers.getMaterialTheme(context).scaffoldBackgroundColor,
       border: Border.all(
         color: hasError ? CupertinoColors.destructiveRed : AppColors.primary,
         width: 1.5,
@@ -150,26 +153,52 @@ class _ContactScreenState extends ConsumerState<ContactScreen> {
       return;
     }
 
-    setState(() => _submitting = true);
-    final repo = SupportRepository();
-    final ok = await repo.submitContact(
-      email: email.isEmpty ? null : email,
-      subject: _subjectCtrl.text.trim().isEmpty
-          ? null
-          : _subjectCtrl.text.trim(),
-      category: _category,
-      message: message,
-      metadata: _includeDiagnostics ? _buildDiagnostics() : null,
-    );
-    setState(() => _submitting = false);
-    if (ok) {
-      ToastService.instance.success('Thanks! Our team will get back to you.');
-      if (mounted) context.pop();
-    } else {
-      ToastService.instance.error(
-        'Couldn\'t submit right now. Try email instead.',
+    setState(() {
+      _submitting = true;
+      _submitError = null;
+    });
+    
+    try {
+      final repo = SupportRepository();
+      final ok = await repo.submitContact(
+        email: email.isEmpty ? null : email,
+        subject: _subjectCtrl.text.trim().isEmpty
+            ? null
+            : _subjectCtrl.text.trim(),
+        category: _category,
+        message: message,
+        metadata: _includeDiagnostics ? _buildDiagnostics() : null,
       );
-      _mailtoFallback();
+      
+      if (mounted) {
+        setState(() {
+          _submitting = false;
+          if (ok) {
+            _submitted = true;
+            _submitError = null;
+          } else {
+            _submitError = 'Couldn\'t submit right now. Try email instead.';
+          }
+        });
+        
+        if (ok) {
+          ToastService.instance.success('Thanks! Our team will get back to you.');
+          Future.delayed(const Duration(seconds: 2), () {
+            if (mounted) context.pop();
+          });
+        } else {
+          ToastService.instance.error(_submitError!);
+          _mailtoFallback();
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _submitting = false;
+          _submitError = e.toString();
+        });
+        ToastService.instance.error('Failed to submit: ${e.toString()}');
+      }
     }
   }
 
@@ -200,7 +229,34 @@ class _ContactScreenState extends ConsumerState<ContactScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final theme = ThemeHelpers.getMaterialTheme(context);
+    
+    // Success state
+    if (_submitted) {
+      return Scaffold(
+        appBar: AppBar(title: const Text('Contact Support')),
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.check_circle, size: 80, color: Colors.green),
+              const SizedBox(height: 24),
+              Text(
+                'Message Sent!',
+                style: theme.textTheme.headlineSmall,
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Our team will get back to you soon.',
+                style: theme.textTheme.bodyMedium,
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+    
     return Scaffold(
       appBar: AppBar(title: const Text('Contact Support')),
       body: Form(
@@ -349,6 +405,29 @@ class _ContactScreenState extends ConsumerState<ContactScreen> {
                 ),
               ],
             ),
+            if (_submitError != null) ...[
+              const SizedBox(height: 12),
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.red.shade50,
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: Colors.red.shade200),
+                ),
+                child: Row(
+                  children: [
+                    Icon(Icons.error_outline, color: Colors.red.shade700, size: 20),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        _submitError!,
+                        style: TextStyle(color: Colors.red.shade900, fontSize: 12),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
             const SizedBox(height: 16),
             FilledButton(
               onPressed: _submitting ? null : _submit,

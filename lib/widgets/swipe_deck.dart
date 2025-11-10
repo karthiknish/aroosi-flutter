@@ -1,5 +1,7 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
+import 'package:aroosi_flutter/theme/theme_helpers.dart';
+import 'package:aroosi_flutter/theme/colors.dart';
 
 typedef SwipeDecisionBuilder =
     Widget Function(
@@ -173,11 +175,11 @@ class DefaultSwipeOverlay extends StatelessWidget {
           children: [
             Align(
               alignment: Alignment.topLeft,
-              child: _Label(text: 'NOPE', color: Colors.redAccent),
+              child: _Label(text: 'NOPE', color: AppColors.error),
             ),
             Align(
               alignment: Alignment.topRight,
-              child: _Label(text: 'LIKE', color: Colors.lightGreen),
+              child: _Label(text: 'LIKE', color: AppColors.success),
             ),
           ],
         );
@@ -222,8 +224,8 @@ class _LoadingState extends StatelessWidget {
           const SizedBox(height: 16),
           Text(
             'Loading profiles...',
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            style: ThemeHelpers.getMaterialTheme(context).textTheme.bodyMedium?.copyWith(
+              color: ThemeHelpers.getMaterialTheme(context).colorScheme.onSurfaceVariant,
             ),
           ),
         ],
@@ -246,20 +248,20 @@ class _EmptyState extends StatelessWidget {
           Icon(
             Icons.person_off,
             size: 64,
-            color: Theme.of(context).colorScheme.onSurfaceVariant,
+            color: ThemeHelpers.getMaterialTheme(context).colorScheme.onSurfaceVariant,
           ),
           const SizedBox(height: 16),
           Text(
             'No more profiles',
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            style: ThemeHelpers.getMaterialTheme(context).textTheme.titleMedium?.copyWith(
+              color: ThemeHelpers.getMaterialTheme(context).colorScheme.onSurfaceVariant,
             ),
           ),
           const SizedBox(height: 8),
           Text(
             'Check back later for new matches!',
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            style: ThemeHelpers.getMaterialTheme(context).textTheme.bodyMedium?.copyWith(
+              color: ThemeHelpers.getMaterialTheme(context).colorScheme.onSurfaceVariant,
             ),
           ),
         ],
@@ -287,14 +289,14 @@ class _ProgressIndicator extends StatelessWidget {
             children: [
               Text(
                 'Profile $current of $total',
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                style: ThemeHelpers.getMaterialTheme(context).textTheme.bodySmall?.copyWith(
+                  color: ThemeHelpers.getMaterialTheme(context).colorScheme.onSurfaceVariant,
                 ),
               ),
               Text(
                 '${(progress * 100).round()}%',
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                style: ThemeHelpers.getMaterialTheme(context).textTheme.bodySmall?.copyWith(
+                  color: ThemeHelpers.getMaterialTheme(context).colorScheme.onSurfaceVariant,
                 ),
               ),
             ],
@@ -306,7 +308,7 @@ class _ProgressIndicator extends StatelessWidget {
               context,
             ).colorScheme.surfaceContainerHighest,
             valueColor: AlwaysStoppedAnimation<Color>(
-              Theme.of(context).colorScheme.primary,
+              ThemeHelpers.getMaterialTheme(context).colorScheme.primary,
             ),
           ),
         ],

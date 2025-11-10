@@ -3,11 +3,15 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../theme/colors.dart';
+import '../../theme/color_helpers.dart';
 import '../../features/islamic_education/models.dart';
 import '../../features/islamic_education/services.dart';
 import 'islamic_education_content_screen.dart';
 import 'islamic_education_quiz_screen.dart';
 import 'afghan_traditions_screen.dart';
+import '../../widgets/error_states.dart';
+import '../../widgets/empty_states.dart';
+import '../../widgets/offline_states.dart';
 
 class IslamicEducationHubScreen extends ConsumerStatefulWidget {
   const IslamicEducationHubScreen({super.key});
@@ -20,6 +24,7 @@ class _IslamicEducationHubScreenState extends ConsumerState<IslamicEducationHubS
   EducationCategory? _selectedCategory;
   DifficultyLevel? _selectedDifficulty;
   bool _isLoading = false;
+  String? _error;
   List<IslamicEducationalContent> _featuredContent = [];
   List<IslamicEducationalContent> _allContent = [];
 
@@ -32,6 +37,7 @@ class _IslamicEducationHubScreenState extends ConsumerState<IslamicEducationHubS
   Future<void> _loadContent() async {
     setState(() {
       _isLoading = true;
+      _error = null;
     });
 
     try {
@@ -42,23 +48,13 @@ class _IslamicEducationHubScreenState extends ConsumerState<IslamicEducationHubS
         _featuredContent = featured;
         _allContent = all;
         _isLoading = false;
+        _error = null;
       });
     } catch (e) {
       setState(() {
         _isLoading = false;
+        _error = e.toString();
       });
-      // Show error message
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              'Failed to load content: $e',
-              style: GoogleFonts.nunitoSans(),
-            ),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
     }
   }
 
@@ -86,9 +82,41 @@ class _IslamicEducationHubScreenState extends ConsumerState<IslamicEducationHubS
           ),
         ],
       ),
-      body: _isLoading
+      body: _isLoading && _featuredContent.isEmpty && _allContent.isEmpty
           ? const Center(child: CircularProgressIndicator())
-          : SingleChildScrollView(
+          : _error != null && _featuredContent.isEmpty && _allContent.isEmpty
+              ? Builder(
+                  builder: (context) {
+                    final error = _error!;
+                    final isOfflineError =
+                        error.toLowerCase().contains('network') ||
+                        error.toLowerCase().contains('connection') ||
+                        error.toLowerCase().contains('timeout') ||
+                        error.toLowerCase().contains('offline');
+
+                    return isOfflineError
+                        ? OfflineState(
+                            title: 'Connection Lost',
+                            subtitle: 'Unable to load educational content',
+                            description: 'Check your internet connection and try again',
+                            onRetry: _loadContent,
+                          )
+                        : ErrorState(
+                            title: 'Failed to Load Content',
+                            subtitle: 'Something went wrong',
+                            errorMessage: error,
+                            onRetryPressed: _loadContent,
+                          );
+                  },
+                )
+              : _featuredContent.isEmpty && _allContent.isEmpty && !_isLoading && _error == null
+                  ? EmptyState(
+                      title: 'No content available',
+                      subtitle: 'Check back later for new educational content',
+                      description: 'New content is added regularly',
+                      icon: Icon(Icons.menu_book_outlined, size: 64, color: AppColors.muted),
+                    )
+                  : SingleChildScrollView(
               padding: const EdgeInsets.all(16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -131,7 +159,7 @@ class _IslamicEducationHubScreenState extends ConsumerState<IslamicEducationHubS
           Icon(
             Icons.menu_book,
             size: 48,
-            color: Colors.white,
+            color: ColorHelpers.white,
           ),
           const SizedBox(height: 16),
           Text(
@@ -139,7 +167,7 @@ class _IslamicEducationHubScreenState extends ConsumerState<IslamicEducationHubS
             style: GoogleFonts.nunitoSans(
               fontSize: 24,
               fontWeight: FontWeight.bold,
-              color: Colors.white,
+              color: ColorHelpers.white,
             ),
           ),
           const SizedBox(height: 8),
@@ -147,7 +175,7 @@ class _IslamicEducationHubScreenState extends ConsumerState<IslamicEducationHubS
             'Comprehensive guidance on Islamic marriage, Afghan traditions, and family values',
             style: GoogleFonts.nunitoSans(
               fontSize: 16,
-              color: Colors.white.withValues(alpha: 0.9),
+              color: ColorHelpers.whiteWithAlpha(0.9),
             ),
           ),
         ],
@@ -162,7 +190,7 @@ class _IslamicEducationHubScreenState extends ConsumerState<IslamicEducationHubS
         title: 'Marriage Principles',
         subtitle: 'Core Islamic marriage teachings',
         category: EducationCategory.marriagePrinciples,
-        color: Colors.pink,
+        color: AppColors.primary,
       ),
       _CategoryItem(
         icon: Icons.book,
@@ -176,7 +204,7 @@ class _IslamicEducationHubScreenState extends ConsumerState<IslamicEducationHubS
         title: 'Prophetic Teachings',
         subtitle: 'Sunnah of the Prophet',
         category: EducationCategory.propheticTeachings,
-        color: Colors.blue,
+        color: AppColors.info,
       ),
       _CategoryItem(
         icon: Icons.diversity_3,
@@ -197,7 +225,7 @@ class _IslamicEducationHubScreenState extends ConsumerState<IslamicEducationHubS
         title: 'Communication',
         subtitle: 'Healthy relationships',
         category: EducationCategory.communication,
-        color: Colors.teal,
+        color: AppColors.secondary,
       ),
     ];
 
@@ -273,7 +301,7 @@ class _IslamicEducationHubScreenState extends ConsumerState<IslamicEducationHubS
               style: GoogleFonts.nunitoSans(
                 fontSize: 14,
                 fontWeight: FontWeight.bold,
-                color: isSelected ? category.color : Colors.black87,
+                color: isSelected ? category.color : AppColors.text,
               ),
               textAlign: TextAlign.center,
               maxLines: 2,
@@ -284,7 +312,7 @@ class _IslamicEducationHubScreenState extends ConsumerState<IslamicEducationHubS
               category.subtitle,
               style: GoogleFonts.nunitoSans(
                 fontSize: 10,
-                color: Colors.grey[600],
+                color: AppColors.muted,
               ),
               textAlign: TextAlign.center,
               maxLines: 2,
@@ -321,7 +349,7 @@ class _IslamicEducationHubScreenState extends ConsumerState<IslamicEducationHubS
                 _getDifficultyLabel(level),
                 style: GoogleFonts.nunitoSans(
                   fontSize: 12,
-                  color: isSelected ? Colors.white : Colors.black87,
+                  color: isSelected ? ColorHelpers.white : AppColors.text,
                 ),
               ),
               selected: isSelected,
@@ -331,7 +359,7 @@ class _IslamicEducationHubScreenState extends ConsumerState<IslamicEducationHubS
                 });
                 _filterContent();
               },
-              backgroundColor: Colors.grey[200],
+              backgroundColor: AppColors.surfaceSecondary,
               selectedColor: AppColors.primary,
             );
           }).toList(),
@@ -430,7 +458,7 @@ class _IslamicEducationHubScreenState extends ConsumerState<IslamicEducationHubS
                   content.description,
                   style: GoogleFonts.nunitoSans(
                     fontSize: 12,
-                    color: Colors.grey[600],
+                    color: AppColors.muted,
                   ),
                   maxLines: 3,
                   overflow: TextOverflow.ellipsis,
@@ -441,14 +469,14 @@ class _IslamicEducationHubScreenState extends ConsumerState<IslamicEducationHubS
                     Icon(
                       Icons.access_time,
                       size: 14,
-                      color: Colors.grey[600],
+                      color: AppColors.muted,
                     ),
                     const SizedBox(width: 4),
                     Text(
                       '${content.estimatedReadTime} min',
                       style: GoogleFonts.nunitoSans(
                         fontSize: 10,
-                        color: Colors.grey[600],
+                        color: AppColors.muted,
                       ),
                     ),
                     const Spacer(),
@@ -534,7 +562,7 @@ class _IslamicEducationHubScreenState extends ConsumerState<IslamicEducationHubS
               'No content found',
               style: GoogleFonts.nunitoSans(
                 fontSize: 18,
-                color: Colors.grey[600],
+                color: AppColors.muted,
               ),
             ),
           ],
@@ -561,7 +589,7 @@ class _IslamicEducationHubScreenState extends ConsumerState<IslamicEducationHubS
               onTap: () => _navigateToContent(content),
             ),
           );
-        }).toList(),
+        }),
       ],
     );
   }
@@ -769,7 +797,7 @@ class _ContentListItem extends StatelessWidget {
                       content.description,
                       style: GoogleFonts.nunitoSans(
                         fontSize: 12,
-                        color: Colors.grey[600],
+                        color: AppColors.muted,
                       ),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
@@ -783,14 +811,14 @@ class _ContentListItem extends StatelessWidget {
                   Icon(
                     Icons.access_time,
                     size: 16,
-                    color: Colors.grey[600],
+                    color: AppColors.muted,
                   ),
                   const SizedBox(height: 4),
                   Text(
                     '${content.estimatedReadTime}m',
                     style: GoogleFonts.nunitoSans(
                       fontSize: 10,
-                      color: Colors.grey[600],
+                      color: AppColors.muted,
                     ),
                   ),
                   if (content.quiz != null) ...[

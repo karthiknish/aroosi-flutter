@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:aroosi_flutter/features/onboarding/matrimony/models.dart';
 import 'package:aroosi_flutter/features/onboarding/matrimony/constants.dart';
-import 'package:aroosi_flutter/l10n/app_localizations.dart';
+import 'package:aroosi_flutter/theme/theme_helpers.dart';
 
 class PartnerPreferencesStep extends StatefulWidget {
   final PartnerPreferences? partnerPreferences;
@@ -29,9 +29,6 @@ class _PartnerPreferencesStepState extends State<PartnerPreferencesStep> {
   late bool _mustBeReligious;
   late bool _mustWantChildren;
   late bool _mustBeNeverMarried;
-
-  final _educationController = TextEditingController();
-  final _locationController = TextEditingController();
 
   @override
   void initState() {
@@ -69,8 +66,7 @@ class _PartnerPreferencesStepState extends State<PartnerPreferencesStep> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final l10n = AppLocalizations.of(context)!;
+    final theme = ThemeHelpers.getMaterialTheme(context);
 
     return Padding(
       padding: const EdgeInsets.all(24),
@@ -170,7 +166,7 @@ class _PartnerPreferencesStepState extends State<PartnerPreferencesStep> {
           SizedBox(
             width: double.infinity,
             child: ElevatedButton(
-              onPressed: _isValid() ? onNext : null,
+              onPressed: _isValid() ? widget.onNext : null,
               style: ElevatedButton.styleFrom(
                 padding: const EdgeInsets.symmetric(vertical: 16),
                 shape: RoundedRectangleBorder(
@@ -192,7 +188,7 @@ class _PartnerPreferencesStepState extends State<PartnerPreferencesStep> {
   }
 
   Widget _buildSectionTitle(String title) {
-    final theme = Theme.of(context);
+    final theme = ThemeHelpers.getMaterialTheme(context);
     
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
@@ -207,7 +203,7 @@ class _PartnerPreferencesStepState extends State<PartnerPreferencesStep> {
   }
 
   Widget _buildAgeRangeSelector() {
-    final theme = Theme.of(context);
+    final theme = ThemeHelpers.getMaterialTheme(context);
     
     return Container(
       padding: const EdgeInsets.all(16),
@@ -267,7 +263,7 @@ class _PartnerPreferencesStepState extends State<PartnerPreferencesStep> {
     List<String> options,
     Function(List<String>) onChanged,
   ) {
-    final theme = Theme.of(context);
+    final theme = ThemeHelpers.getMaterialTheme(context);
     
     return Container(
       padding: const EdgeInsets.all(16),
@@ -313,7 +309,7 @@ class _PartnerPreferencesStepState extends State<PartnerPreferencesStep> {
   }
 
   Widget _buildImportantPreferences() {
-    final theme = Theme.of(context);
+    final theme = ThemeHelpers.getMaterialTheme(context);
     
     return Container(
       padding: const EdgeInsets.all(16),
@@ -370,7 +366,7 @@ class _PartnerPreferencesStepState extends State<PartnerPreferencesStep> {
     bool value,
     Function(bool?) onChanged,
   ) {
-    final theme = Theme.of(context);
+    final theme = ThemeHelpers.getMaterialTheme(context);
     
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4),

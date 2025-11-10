@@ -4,7 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:aroosi_flutter/features/admin/admin_service.dart';
 import 'package:aroosi_flutter/core/performance_service.dart';
 import 'package:aroosi_flutter/core/error_handler.dart';
-import 'package:aroosi_flutter/utils/debug_logger.dart';
+import 'package:aroosi_flutter/theme/theme_helpers.dart';
 
 /// Admin dashboard screen for monitoring app performance and data
 /// 
@@ -45,8 +45,8 @@ class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen>
   int _totalCount = 0;
   String _searchQuery = '';
   String _filterByStatus = 'all';
-  String _sortBy = 'createdAt';
-  bool _sortDescending = true;
+  final String _sortBy = 'createdAt';
+  final bool _sortDescending = true;
   final TextEditingController _searchController = TextEditingController();
 
   @override
@@ -238,7 +238,7 @@ class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen>
                   title: Text('Performance Optimization'),
                 ),
               ),
-              if (_userRole == AdminRole.super_admin)
+              if (_userRole == AdminRole.superAdmin)
                 const PopupMenuItem(
                   value: 'manage_admins',
                   child: ListTile(
@@ -350,7 +350,7 @@ class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen>
             const SizedBox(height: 24),
             Text(
               'System Status',
-              style: Theme.of(context).textTheme.headlineSmall,
+              style: ThemeHelpers.getMaterialTheme(context).textTheme.headlineSmall,
             ),
             const SizedBox(height: 12),
             _buildSystemStatusCard(),
@@ -366,7 +366,7 @@ class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen>
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
-            Icon(icon, size: 32, color: Theme.of(context).primaryColor),
+            Icon(icon, size: 32, color: ThemeHelpers.getMaterialTheme(context).primaryColor),
             const SizedBox(height: 8),
             Text(
               value,
@@ -378,7 +378,7 @@ class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen>
             const SizedBox(height: 4),
             Text(
               title,
-              style: Theme.of(context).textTheme.bodyMedium,
+              style: ThemeHelpers.getMaterialTheme(context).textTheme.bodyMedium,
               textAlign: TextAlign.center,
             ),
           ],
@@ -399,7 +399,7 @@ class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen>
             const SizedBox(height: 12),
             Text(
               'Last Backup: ${_formatDateTime(_systemHealth['last_backup'])}',
-              style: Theme.of(context).textTheme.bodySmall,
+              style: ThemeHelpers.getMaterialTheme(context).textTheme.bodySmall,
             ),
           ],
         ),
@@ -428,11 +428,19 @@ class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen>
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildPerformanceTab() {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(16),
+      child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             'Performance Metrics',
-            style: Theme.of(context).textTheme.headlineSmall,
+            style: ThemeHelpers.getMaterialTheme(context).textTheme.headlineSmall,
           ),
           const SizedBox(height: 16),
           Card(
@@ -469,7 +477,7 @@ class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen>
         children: [
           Text(
             'Safety Reports',
-            style: Theme.of(context).textTheme.headlineSmall,
+            style: ThemeHelpers.getMaterialTheme(context).textTheme.headlineSmall,
           ),
           const SizedBox(height: 16),
           Card(
@@ -537,12 +545,13 @@ class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen>
         _tabController.animateTo(4); // Navigate to optimization tab
         break;
       case 'manage_admins':
-        if (_userRole == AdminRole.super_admin) {
+        if (_userRole == AdminRole.superAdmin) {
           await _showManageAdminsDialog();
         }
         break;
       case 'logout':
         await FirebaseAuth.instance.signOut();
+        if (!mounted) return;
         Navigator.of(context).pushReplacementNamed('/login');
         break;
     }
@@ -562,6 +571,9 @@ class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen>
   Future<void> _showUserDetails(String userId) async {
     try {
       final userDetails = await _adminService.getUserDetails(userId);
+      if (!mounted) {
+        return;
+      }
       if (userDetails == null) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('User not found')),
@@ -606,6 +618,7 @@ class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen>
         ),
       );
     } catch (e) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Failed to load user details: ${e.toString()}')),
       );
@@ -670,13 +683,21 @@ class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen>
         permanent: isPermanent.value,
       );
 
+      if (!mounted) {
+        reasonController.dispose();
+        isPermanent.dispose();
+        return;
+      }
+
+      final messenger = ScaffoldMessenger.of(context);
+
       if (success) {
-        ScaffoldMessenger.of(context).showSnackBar(
+        messenger.showSnackBar(
           SnackBar(content: Text(isPermanent.value ? 'User banned successfully' : 'User suspended successfully')),
         );
         _loadUsersList(); // Refresh the list
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
+        messenger.showSnackBar(
           const SnackBar(content: Text('Failed to suspend user')),
         );
       }
@@ -737,11 +758,11 @@ class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen>
                 children: [
                   Text(
                     'Total: $_totalCount users',
-                    style: Theme.of(context).textTheme.bodySmall,
+                    style: ThemeHelpers.getMaterialTheme(context).textTheme.bodySmall,
                   ),
                   Text(
                     'Page $_currentPage of $_totalPages',
-                    style: Theme.of(context).textTheme.bodySmall,
+                    style: ThemeHelpers.getMaterialTheme(context).textTheme.bodySmall,
                   ),
                 ],
               ),
@@ -885,7 +906,7 @@ class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen>
         children: [
           Text(
             'Performance Optimization Recommendations',
-            style: Theme.of(context).textTheme.headlineSmall,
+            style: ThemeHelpers.getMaterialTheme(context).textTheme.headlineSmall,
           ),
           const SizedBox(height: 16),
           if (_performanceRecommendations.isEmpty)
@@ -954,16 +975,18 @@ class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen>
                       const SizedBox(height: 8),
                       Text('Effort: ${recommendation['effort']}'),
                       const SizedBox(height: 16),
-                      if (_userRole == AdminRole.super_admin)
+                      if (_userRole == AdminRole.superAdmin)
                         ElevatedButton(
                           onPressed: () async {
                             final success = await _adminService.applyOptimization('opt_$index');
+                            if (!mounted) return;
+                            final messenger = ScaffoldMessenger.of(context);
                             if (success) {
-                              ScaffoldMessenger.of(context).showSnackBar(
+                              messenger.showSnackBar(
                                 const SnackBar(content: Text('Optimization applied successfully')),
                               );
                             } else {
-                              ScaffoldMessenger.of(context).showSnackBar(
+                              messenger.showSnackBar(
                                 const SnackBar(content: Text('Failed to apply optimization')),
                               );
                             }
@@ -986,11 +1009,14 @@ class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen>
         action: 'export_data',
         details: 'Admin exported dashboard data',
       );
-      
+
+      if (!mounted) return;
+
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Data export initiated')),
       );
     } catch (e) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Export failed: ${e.toString()}')),
       );

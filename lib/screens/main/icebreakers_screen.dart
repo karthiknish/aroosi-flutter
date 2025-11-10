@@ -5,6 +5,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:aroosi_flutter/features/icebreakers/icebreaker_controller.dart';
 import 'package:aroosi_flutter/features/icebreakers/icebreaker_models.dart';
 import 'package:aroosi_flutter/core/toast_service.dart';
+import 'package:aroosi_flutter/widgets/error_states.dart';
+import 'package:aroosi_flutter/widgets/empty_states.dart';
+import 'package:aroosi_flutter/widgets/offline_states.dart';
+import 'package:aroosi_flutter/theme/theme_helpers.dart';
 
 class IcebreakersScreen extends ConsumerStatefulWidget {
   const IcebreakersScreen({super.key});
@@ -63,15 +67,15 @@ class _IcebreakersScreenState extends ConsumerState<IcebreakersScreen> {
                   context,
                 ).colorScheme.onPrimary.withValues(alpha: 0.3),
                 valueColor: AlwaysStoppedAnimation<Color>(
-                  Theme.of(context).colorScheme.primary,
+                  ThemeHelpers.getMaterialTheme(context).colorScheme.primary,
                 ),
               ),
             ),
             const SizedBox(width: 8),
             Text(
               '$answeredCount / ${icebreakers.length}',
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Theme.of(context).colorScheme.onPrimary,
+              style: ThemeHelpers.getMaterialTheme(context).textTheme.bodyMedium?.copyWith(
+                color: ThemeHelpers.getMaterialTheme(context).colorScheme.onPrimary,
               ),
             ),
           ],
@@ -97,20 +101,37 @@ class _IcebreakersScreenState extends ConsumerState<IcebreakersScreen> {
       body: icebreakersAsync.isLoading
           ? const Center(child: CircularProgressIndicator())
           : icebreakersAsync.error != null
-          ? Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text('Error: ${icebreakersAsync.error}'),
-                  ElevatedButton(
-                    onPressed: () => controller.fetchDailyIcebreakers(),
-                    child: const Text('Retry'),
-                  ),
-                ],
-              ),
+          ? Builder(
+              builder: (context) {
+                final error = icebreakersAsync.error!;
+                final isOfflineError =
+                    error.toLowerCase().contains('network') ||
+                    error.toLowerCase().contains('connection') ||
+                    error.toLowerCase().contains('timeout') ||
+                    error.toLowerCase().contains('offline');
+
+                return isOfflineError
+                    ? OfflineState(
+                        title: 'Connection Lost',
+                        subtitle: 'Unable to load icebreakers',
+                        description: 'Check your internet connection and try again',
+                        onRetry: () => controller.fetchDailyIcebreakers(),
+                      )
+                    : ErrorState(
+                        title: 'Failed to Load Icebreakers',
+                        subtitle: 'Something went wrong',
+                        errorMessage: error,
+                        onRetryPressed: () => controller.fetchDailyIcebreakers(),
+                      );
+              },
             )
           : icebreakersAsync.icebreakers.isEmpty
-          ? const Center(child: Text('No icebreakers available today.'))
+          ? EmptyState(
+              title: 'No icebreakers available',
+              subtitle: 'Check back later for new icebreakers',
+              description: 'New icebreakers are added daily',
+              icon: Icon(Icons.chat_bubble_outline, size: 64, color: Colors.grey[400]),
+            )
           : RefreshIndicator(
               onRefresh: () async {
                 await controller.refreshIcebreakers();
@@ -234,7 +255,7 @@ class IcebreakerCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final theme = Theme.of(context);
+    final theme = ThemeHelpers.getMaterialTheme(context);
     final icebreakerState = ref.watch(icebreakerControllerProvider);
     final minLength = 10;
     final text = controller.text;

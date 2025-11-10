@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:intl/intl.dart';
 import 'package:aroosi_flutter/features/matches/matches_provider.dart';
 import 'package:aroosi_flutter/features/matches/models.dart';
 import 'package:aroosi_flutter/features/auth/auth_controller.dart';
@@ -13,13 +12,11 @@ import 'package:aroosi_flutter/widgets/retryable_network_image.dart';
 import 'package:aroosi_flutter/widgets/error_states.dart';
 import 'package:aroosi_flutter/widgets/offline_states.dart';
 import 'package:aroosi_flutter/core/toast_service.dart';
-import 'package:aroosi_flutter/utils/pagination.dart';
 import 'package:aroosi_flutter/widgets/adaptive_refresh.dart';
 import 'package:aroosi_flutter/theme/colors.dart';
+import 'package:aroosi_flutter/theme/theme_helpers.dart';
 import 'package:aroosi_flutter/theme/motion.dart';
 import 'package:aroosi_flutter/widgets/animations/motion.dart';
-import 'package:aroosi_flutter/platform/adaptive_feedback.dart';
-import 'package:aroosi_flutter/l10n/app_localizations.dart';
 
 class MatchesScreen extends ConsumerStatefulWidget {
   const MatchesScreen({super.key});
@@ -51,11 +48,10 @@ class _MatchesScreenState extends ConsumerState<MatchesScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
     final matchesState = ref.watch(matchesProvider);
     final user = ref.watch(authControllerProvider);
 
-    if (user == null) {
+    if (user.profile == null) {
       return const Scaffold(
         body: Center(child: CircularProgressIndicator()),
       );
@@ -173,7 +169,7 @@ class _MatchesScreenState extends ConsumerState<MatchesScreen> {
         SliverToBoxAdapter(
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            child: _buildMatchesHero(context, matchesState, l10n),
+            child: _buildMatchesHero(context),
           ),
         ),
         if (matchesState.items.isEmpty && !matchesState.isLoading)
@@ -191,8 +187,8 @@ class _MatchesScreenState extends ConsumerState<MatchesScreen> {
     return AppScaffold(title: 'Matches', child: content);
   }
 
-  Widget _buildMatchesHero(BuildContext context, MatchesState state, AppLocalizations l10n) {
-    final theme = Theme.of(context);
+  Widget _buildMatchesHero(BuildContext context) {
+    final theme = ThemeHelpers.getMaterialTheme(context);
 
     return DecoratedBox(
       decoration: BoxDecoration(
@@ -200,7 +196,7 @@ class _MatchesScreenState extends ConsumerState<MatchesScreen> {
           colors: [
             AppColors.primary.withAlpha(56),
             AppColors.secondary.withAlpha(46),
-            Theme.of(context).colorScheme.surface,
+            ThemeHelpers.getMaterialTheme(context).colorScheme.surface,
           ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
@@ -235,14 +231,14 @@ class _MatchesScreenState extends ConsumerState<MatchesScreen> {
               ),
             ),
             const SizedBox(height: 20),
-            _buildSortDropdown(theme, l10n),
+            _buildSortDropdown(theme),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildSortDropdown(ThemeData theme, AppLocalizations l10n) {
+  Widget _buildSortDropdown(ThemeData theme) {
     final options = <Map<String, Object?>>[
       {'value': null, 'label': 'Default Order'},
       {'value': 'recent', 'label': 'Recently Active'},
@@ -295,7 +291,7 @@ class _MatchCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final theme = ThemeHelpers.getMaterialTheme(context);
     final displayName = (matchItem.counterpartProfile?.displayName ?? 'Match').trim();
     final name = displayName.isEmpty ? 'Match' : displayName;
     final accent = _accentColor;
@@ -513,7 +509,7 @@ class _MatchCard extends StatelessWidget {
 class _MatchSkeleton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final isDark = ThemeHelpers.getMaterialTheme(context).brightness == Brightness.dark;
     final base = isDark ? Colors.grey.shade800 : Colors.grey.shade300;
     final hilite = isDark ? Colors.grey.shade700 : Colors.grey.shade200;
 

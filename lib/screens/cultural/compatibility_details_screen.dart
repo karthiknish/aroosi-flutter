@@ -8,6 +8,7 @@ import 'package:aroosi_flutter/widgets/app_scaffold.dart';
 import 'package:aroosi_flutter/widgets/error_states.dart';
 
 import 'package:aroosi_flutter/l10n/app_localizations.dart';
+import 'package:aroosi_flutter/theme/theme_helpers.dart';
 
 class CompatibilityDetailsScreen extends ConsumerStatefulWidget {
   const CompatibilityDetailsScreen({
@@ -141,7 +142,7 @@ class _CompatibilityContent extends StatelessWidget {
   }
 
   Widget _buildOverallScore(BuildContext context, int overall) {
-    final theme = Theme.of(context);
+    final theme = ThemeHelpers.getMaterialTheme(context);
     final scoreColor = _getScoreColor(overall);
 
     return Container(
@@ -219,7 +220,7 @@ class _CompatibilityContent extends StatelessWidget {
     BuildContext context,
     Map<String, dynamic> factors,
   ) {
-    final theme = Theme.of(context);
+    final theme = ThemeHelpers.getMaterialTheme(context);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -322,7 +323,7 @@ class _CompatibilityContent extends StatelessWidget {
   }
 
   Widget _buildInsightsSection(BuildContext context, List<String> insights) {
-    final theme = Theme.of(context);
+    final theme = ThemeHelpers.getMaterialTheme(context);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -389,7 +390,7 @@ class _CompatibilityContent extends StatelessWidget {
     BuildContext context,
     List<String> recommendations,
   ) {
-    final theme = Theme.of(context);
+    final theme = ThemeHelpers.getMaterialTheme(context);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -453,7 +454,7 @@ class _CompatibilityContent extends StatelessWidget {
   }
 
   Widget _buildActionButtons(BuildContext context) {
-    final theme = Theme.of(context);
+    final theme = ThemeHelpers.getMaterialTheme(context);
     final l10n = AppLocalizations.of(context)!;
 
     return Column(

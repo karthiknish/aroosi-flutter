@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:aroosi_flutter/theme/colors.dart';
+import 'package:aroosi_flutter/theme/theme_helpers.dart';
 
 class CulturalIcebreakersWidget extends ConsumerStatefulWidget {
   const CulturalIcebreakersWidget({
@@ -40,7 +41,7 @@ class _CulturalIcebreakersWidgetState
                 const SizedBox(width: 8),
                 Text(
                   'Cultural Conversation Starters',
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  style: ThemeHelpers.getMaterialTheme(context).textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                     color: AppColors.primary,
                   ),
@@ -137,7 +138,7 @@ class _CulturalIcebreakersWidgetState
               icebreaker,
               style: TextStyle(
                 fontSize: 13,
-                color: Theme.of(context).colorScheme.onSurface.withAlpha(204),
+                color: ThemeHelpers.getMaterialTheme(context).colorScheme.onSurface.withAlpha(204),
               ),
             ),
           ),

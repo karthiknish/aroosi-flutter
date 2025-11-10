@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:aroosi_flutter/features/cultural/cultural_controller.dart';
 import 'package:aroosi_flutter/widgets/app_scaffold.dart';
+import 'package:aroosi_flutter/theme/theme_helpers.dart';
 
 class CulturalCompatibilityScreen extends ConsumerStatefulWidget {
   final String userId1;
@@ -91,7 +92,7 @@ class _CulturalCompatibilityScreenState extends ConsumerState<CulturalCompatibil
             _getCompatibilityDescription(percentage),
             textAlign: TextAlign.center,
             style: TextStyle(
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
+              color: ThemeHelpers.getMaterialTheme(context).colorScheme.onSurfaceVariant,
             ),
           ),
         ],
@@ -169,7 +170,7 @@ class _CulturalCompatibilityScreenState extends ConsumerState<CulturalCompatibil
             Text(
               value,
               style: TextStyle(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
+                color: ThemeHelpers.getMaterialTheme(context).colorScheme.onSurfaceVariant,
                 fontSize: 14,
               ),
             ),
@@ -177,14 +178,14 @@ class _CulturalCompatibilityScreenState extends ConsumerState<CulturalCompatibil
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                color: ThemeHelpers.getMaterialTheme(context).colorScheme.surfaceContainerHighest,
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Text(
                 insight,
                 style: TextStyle(
                   fontSize: 13,
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  color: ThemeHelpers.getMaterialTheme(context).colorScheme.onSurfaceVariant,
                   fontStyle: FontStyle.italic,
                 ),
               ),
@@ -203,9 +204,9 @@ class _CulturalCompatibilityScreenState extends ConsumerState<CulturalCompatibil
       children: [
         Text(
           'Key Insights',
-          style: Theme.of(context).textTheme.titleLarge?.copyWith(
+          style: ThemeHelpers.getMaterialTheme(context).textTheme.titleLarge?.copyWith(
             fontWeight: FontWeight.w600,
-            color: Theme.of(context).colorScheme.primary,
+            color: ThemeHelpers.getMaterialTheme(context).colorScheme.primary,
           ),
         ),
         const SizedBox(height: 16),
@@ -218,7 +219,7 @@ class _CulturalCompatibilityScreenState extends ConsumerState<CulturalCompatibil
               children: [
                 Icon(
                   Icons.lightbulb_outline,
-                  color: Theme.of(context).colorScheme.primary,
+                  color: ThemeHelpers.getMaterialTheme(context).colorScheme.primary,
                   size: 20,
                 ),
                 const SizedBox(width: 12),
@@ -226,7 +227,7 @@ class _CulturalCompatibilityScreenState extends ConsumerState<CulturalCompatibil
                   child: Text(
                     insight.toString(),
                     style: TextStyle(
-                      color: Theme.of(context).colorScheme.onSurface,
+                      color: ThemeHelpers.getMaterialTheme(context).colorScheme.onSurface,
                     ),
                   ),
                 ),
@@ -292,7 +293,7 @@ class _CulturalCompatibilityScreenState extends ConsumerState<CulturalCompatibil
 
         // Recommendations
         Card(
-          color: Theme.of(context).colorScheme.primaryContainer.withValues(alpha: 0.3),
+          color: ThemeHelpers.getMaterialTheme(context).colorScheme.primaryContainer.withValues(alpha: 0.3),
           child: Padding(
             padding: const EdgeInsets.all(16),
             child: Column(
@@ -302,14 +303,14 @@ class _CulturalCompatibilityScreenState extends ConsumerState<CulturalCompatibil
                   children: [
                     Icon(
                       Icons.recommend,
-                      color: Theme.of(context).colorScheme.primary,
+                      color: ThemeHelpers.getMaterialTheme(context).colorScheme.primary,
                     ),
                     const SizedBox(width: 8),
                     Text(
                       'Recommendations',
                       style: TextStyle(
                         fontWeight: FontWeight.w600,
-                        color: Theme.of(context).colorScheme.primary,
+                        color: ThemeHelpers.getMaterialTheme(context).colorScheme.primary,
                       ),
                     ),
                   ],
@@ -347,19 +348,19 @@ class _CulturalCompatibilityScreenState extends ConsumerState<CulturalCompatibil
                         Icon(
                           Icons.error_outline,
                           size: 64,
-                          color: Theme.of(context).colorScheme.error,
+                          color: ThemeHelpers.getMaterialTheme(context).colorScheme.error,
                         ),
                         const SizedBox(height: 16),
                         Text(
                           'Unable to load compatibility',
-                          style: Theme.of(context).textTheme.titleMedium,
+                          style: ThemeHelpers.getMaterialTheme(context).textTheme.titleMedium,
                         ),
                         const SizedBox(height: 8),
                         Text(
                           _error!,
                           textAlign: TextAlign.center,
                           style: TextStyle(
-                            color: Theme.of(context).colorScheme.onSurfaceVariant,
+                            color: ThemeHelpers.getMaterialTheme(context).colorScheme.onSurfaceVariant,
                           ),
                         ),
                         const SizedBox(height: 24),
@@ -380,16 +381,16 @@ class _CulturalCompatibilityScreenState extends ConsumerState<CulturalCompatibil
                       children: [
                         Text(
                           'Compatibility with ${widget.userName2 ?? 'this person'}',
-                          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                          style: ThemeHelpers.getMaterialTheme(context).textTheme.headlineSmall?.copyWith(
                             fontWeight: FontWeight.bold,
-                            color: Theme.of(context).colorScheme.primary,
+                            color: ThemeHelpers.getMaterialTheme(context).colorScheme.primary,
                           ),
                         ),
                         const SizedBox(height: 8),
                         Text(
                           'Cultural compatibility analysis based on religious background, values, and traditions.',
                           style: TextStyle(
-                            color: Theme.of(context).colorScheme.onSurfaceVariant,
+                            color: ThemeHelpers.getMaterialTheme(context).colorScheme.onSurfaceVariant,
                           ),
                         ),
                         const SizedBox(height: 32),
@@ -411,17 +412,17 @@ class _CulturalCompatibilityScreenState extends ConsumerState<CulturalCompatibil
                         Container(
                           padding: const EdgeInsets.all(16),
                           decoration: BoxDecoration(
-                            color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                            color: ThemeHelpers.getMaterialTheme(context).colorScheme.surfaceContainerHighest,
                             borderRadius: BorderRadius.circular(12),
                             border: Border.all(
-                              color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.3),
+                              color: ThemeHelpers.getMaterialTheme(context).colorScheme.outline.withValues(alpha: 0.3),
                             ),
                           ),
                           child: Row(
                             children: [
                               Icon(
                                 Icons.info_outline,
-                                color: Theme.of(context).colorScheme.primary,
+                                color: ThemeHelpers.getMaterialTheme(context).colorScheme.primary,
                               ),
                               const SizedBox(width: 12),
                               Expanded(
@@ -430,7 +431,7 @@ class _CulturalCompatibilityScreenState extends ConsumerState<CulturalCompatibil
                                   'Real compatibility depends on personal chemistry, communication, and mutual respect.',
                                   style: TextStyle(
                                     fontSize: 12,
-                                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                                    color: ThemeHelpers.getMaterialTheme(context).colorScheme.onSurfaceVariant,
                                     height: 1.4,
                                   ),
                                 ),

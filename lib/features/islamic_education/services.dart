@@ -1,5 +1,5 @@
 import 'dart:async';
-import 'dart:io';
+import 'dart:typed_data';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'models.dart';
@@ -302,6 +302,29 @@ class IslamicEducationService {
     });
   }
 
+  static Future<void> unlikeContent(String contentId, String userId) async {
+    final likeDocs = await _firestore
+        .collection('content_likes')
+        .where('contentId', isEqualTo: contentId)
+        .where('userId', isEqualTo: userId)
+        .limit(10)
+        .get();
+
+    for (final doc in likeDocs.docs) {
+      await doc.reference.delete();
+    }
+
+    await _firestore.runTransaction((transaction) async {
+      final docRef = _firestore.collection(_contentCollection).doc(contentId);
+      final doc = await transaction.get(docRef);
+      if (doc.exists) {
+        final currentLikes = doc.data()?['likeCount'] as int? ?? 0;
+        final nextCount = currentLikes > 0 ? currentLikes - 1 : 0;
+        transaction.update(docRef, {'likeCount': nextCount});
+      }
+    });
+  }
+
   static Future<void> bookmarkContent(String contentId, String userId) async {
     await _firestore.collection('user_bookmarks').add({
       'contentId': contentId,
@@ -316,6 +339,29 @@ class IslamicEducationService {
       if (doc.exists) {
         final currentBookmarks = doc.data()?['bookmarkCount'] as int? ?? 0;
         transaction.update(docRef, {'bookmarkCount': currentBookmarks + 1});
+      }
+    });
+  }
+
+  static Future<void> removeBookmark(String contentId, String userId) async {
+    final bookmarkDocs = await _firestore
+        .collection('user_bookmarks')
+        .where('contentId', isEqualTo: contentId)
+        .where('userId', isEqualTo: userId)
+        .limit(10)
+        .get();
+
+    for (final doc in bookmarkDocs.docs) {
+      await doc.reference.delete();
+    }
+
+    await _firestore.runTransaction((transaction) async {
+      final docRef = _firestore.collection(_contentCollection).doc(contentId);
+      final doc = await transaction.get(docRef);
+      if (doc.exists) {
+        final currentBookmarks = doc.data()?['bookmarkCount'] as int? ?? 0;
+        final nextCount = currentBookmarks > 0 ? currentBookmarks - 1 : 0;
+        transaction.update(docRef, {'bookmarkCount': nextCount});
       }
     });
   }
@@ -414,15 +460,31 @@ class IslamicEducationService {
     return docRef.id;
   }
 
-  static Future<String> uploadImageToStorage(
-    String filePath,
-    String fileName,
-  ) async {
+  static Future<String> uploadImageToStorage({
+    required Uint8List data,
+    required String fileName,
+    String? contentType,
+    Map<String, String>? metadata,
+  }) async {
     final ref = _storage.ref().child('educational_content/$fileName');
-    final uploadTask = await ref.putFile(filePath as File);
+    final inferredType = contentType ?? _inferContentType(fileName);
+    final uploadTask = await ref.putData(
+      data,
+      SettableMetadata(
+        contentType: inferredType,
+        customMetadata: metadata,
+      ),
+    );
     return await uploadTask.ref.getDownloadURL();
+  }
+
+  static String _inferContentType(String fileName) {
+    final lower = fileName.toLowerCase();
+    if (lower.endsWith('.png')) return 'image/png';
+    if (lower.endsWith('.jpg') || lower.endsWith('.jpeg')) return 'image/jpeg';
+    if (lower.endsWith('.webp')) return 'image/webp';
+    if (lower.endsWith('.gif')) return 'image/gif';
+    return 'application/octet-stream';
   }
 }
 
-// Note: Add File import at the top when using this in your actual project
-// import 'dart:io';

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:aroosi_flutter/theme/colors.dart';
+import 'package:aroosi_flutter/theme/theme_helpers.dart';
 
 /// Traditional insights card for Afghan matchmaking guidance
 class TraditionalInsightsCard extends StatelessWidget {
@@ -23,7 +24,7 @@ class TraditionalInsightsCard extends StatelessWidget {
                 const SizedBox(width: 8),
                 Text(
                   'Traditional Afghan Matchmaking',
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  style: ThemeHelpers.getMaterialTheme(context).textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                     color: AppColors.primary,
                   ),
@@ -73,7 +74,7 @@ class TraditionalInsightsCard extends StatelessWidget {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Icon(icon, size: 20, color: Theme.of(context).primaryColor),
+        Icon(icon, size: 20, color: ThemeHelpers.getMaterialTheme(context).primaryColor),
         const SizedBox(width: 12),
         Expanded(
           child: Column(
@@ -86,7 +87,7 @@ class TraditionalInsightsCard extends StatelessWidget {
                 ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600),
               ),
               const SizedBox(height: 4),
-              Text(description, style: Theme.of(context).textTheme.bodySmall),
+              Text(description, style: ThemeHelpers.getMaterialTheme(context).textTheme.bodySmall),
             ],
           ),
         ),
@@ -116,7 +117,7 @@ class ModernInsightsCard extends StatelessWidget {
                 const SizedBox(width: 8),
                 Text(
                   'Modern Afghan Dating',
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  style: ThemeHelpers.getMaterialTheme(context).textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                     color: AppColors.secondary,
                   ),
@@ -166,7 +167,7 @@ class ModernInsightsCard extends StatelessWidget {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Icon(icon, size: 20, color: Theme.of(context).primaryColor),
+        Icon(icon, size: 20, color: ThemeHelpers.getMaterialTheme(context).primaryColor),
         const SizedBox(width: 12),
         Expanded(
           child: Column(
@@ -179,7 +180,7 @@ class ModernInsightsCard extends StatelessWidget {
                 ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600),
               ),
               const SizedBox(height: 4),
-              Text(description, style: Theme.of(context).textTheme.bodySmall),
+              Text(description, style: ThemeHelpers.getMaterialTheme(context).textTheme.bodySmall),
             ],
           ),
         ),

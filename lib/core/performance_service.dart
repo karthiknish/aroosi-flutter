@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'dart:developer' as developer;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
@@ -24,7 +23,7 @@ class PerformanceService {
   
   // Firebase Performance Monitoring
   final Map<String, Trace> _firebaseTraces = {};
-  final FirebaseAnalytics? _analytics = FirebaseAnalytics.instance;
+  final FirebaseAnalytics _analytics = FirebaseAnalytics.instance;
 
   /// Start timing an operation with Firebase trace
   void startTimer(String operation, {bool enableFirebaseTrace = true}) {
@@ -94,7 +93,7 @@ class PerformanceService {
   /// Record custom metric to Firebase Analytics
   void recordCustomMetric(String name, int value, {Map<String, String>? parameters}) {
     if (!kDebugMode) {
-      _analytics?.logEvent(
+      _analytics.logEvent(
         name: 'performance_$name',
         parameters: {
           'value': value.toString(),
@@ -113,7 +112,7 @@ class PerformanceService {
     });
 
     if (!kDebugMode) {
-      _analytics?.logScreenView(
+      _analytics.logScreenView(
         screenName: screenName,
         parameters: {'load_time_ms': loadTime.inMilliseconds.toString()},
       );

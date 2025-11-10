@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:aroosi_flutter/utils/debug_logger.dart';
 
 enum ConsentStatus { unknown, pending, granted, denied }
 
@@ -33,17 +34,17 @@ class DataConsentService {
 
     try {
       final prefs = await SharedPreferences.getInstance();
-      print('Loading data consent preferences...');
+      logDebug('Loading data consent preferences...');
 
       // Initialize default consent for first-time users
       if (!prefs.containsKey(_keyConsentStatus)) {
-        print('First-time user - setting default consent to pending');
+        logDebug('First-time user - setting default consent to pending');
         await updateConsentStatus(ConsentStatus.pending);
       }
 
       _isInitialized = true;
     } catch (e) {
-      print('Failed to initialize DataConsentService: $e');
+      logDebug('Failed to initialize DataConsentService', error: e);
     }
   }
 
@@ -52,6 +53,10 @@ class DataConsentService {
     BuildContext context,
   ) async {
     final prefs = await SharedPreferences.getInstance();
+
+    if (!context.mounted) {
+      return {};
+    }
 
     // Check existing consents
     final existingAnalyticsConsent =
@@ -272,9 +277,9 @@ class DataConsentService {
     try {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString(_keyConsentStatus, status.name);
-      print('Updated consent status to: ${status.name}');
+      logDebug('Updated consent status', data: status.name);
     } catch (e) {
-      print('Failed to update consent status: $e');
+      logDebug('Failed to update consent status', error: e);
     }
   }
 
@@ -317,9 +322,19 @@ class DataConsentService {
           );
           break;
       }
-      print('Updated ${consentType.name} consent to: ${status.name}');
+      logDebug(
+        'Updated consent type',
+        data: {
+          'type': consentType.name,
+          'status': status.name,
+        },
+      );
     } catch (e) {
-      print('Failed to update consent type ${consentType.name}: $e');
+      logDebug(
+        'Failed to update consent type',
+        data: consentType.name,
+        error: e,
+      );
     }
   }
 
@@ -338,7 +353,7 @@ class DataConsentService {
           return ConsentStatus.unknown;
       }
     } catch (e) {
-      print('Error getting consent status: $e');
+      logDebug('Error getting consent status', error: e);
       return ConsentStatus.unknown;
     }
   }

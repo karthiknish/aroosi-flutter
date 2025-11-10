@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'base_step.dart';
 import 'step_constants.dart';
+import 'package:aroosi_flutter/theme/theme_helpers.dart';
 
 /// Location step widget
 class StepLocation extends StatefulWidget {
@@ -68,11 +69,11 @@ class _StepLocationState extends State<StepLocation> {
 
   BoxDecoration cupertinoDecoration(BuildContext context, {bool hasError = false}) {
     return BoxDecoration(
-      color: CupertinoTheme.of(context).scaffoldBackgroundColor,
+      color: CupertinoThemeHelpers.getMaterialTheme(context).scaffoldBackgroundColor,
       border: Border.all(
         color: hasError 
           ? CupertinoColors.systemRed 
-          : CupertinoTheme.of(context).primaryContrastingColor.withValues(alpha: 0.18),
+          : CupertinoThemeHelpers.getMaterialTheme(context).primaryContrastingColor.withValues(alpha: 0.18),
         width: hasError ? 2.0 : 1.0,
       ),
       borderRadius: BorderRadius.circular(10.0),
@@ -88,7 +89,7 @@ class _StepLocationState extends State<StepLocation> {
 
   @override
   Widget build(BuildContext context) {
-    final cupertinoTheme = CupertinoTheme.of(context);
+    final cupertinoTheme = CupertinoThemeHelpers.getMaterialTheme(context);
     final textStyle = cupertinoTheme.textTheme.textStyle;
 
     return Form(
@@ -275,7 +276,7 @@ class _StepLocationState extends State<StepLocation> {
                       return Center(
                         child: Text(
                           options[index],
-                          style: CupertinoTheme.of(context).textTheme.textStyle,
+                          style: CupertinoThemeHelpers.getMaterialTheme(context).textTheme.textStyle,
                         ),
                       );
                     }),

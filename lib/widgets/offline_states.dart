@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:aroosi_flutter/theme/colors.dart';
+import 'package:aroosi_flutter/theme/theme_helpers.dart';
 import 'package:aroosi_flutter/widgets/primary_button.dart';
 import 'package:aroosi_flutter/widgets/error_states.dart';
 
@@ -100,7 +101,7 @@ class OfflineActionState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final theme = ThemeHelpers.getMaterialTheme(context);
     final textTheme = theme.textTheme;
 
     return Padding(
@@ -187,7 +188,7 @@ class CachedContentState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final theme = ThemeHelpers.getMaterialTheme(context);
     final textTheme = theme.textTheme;
 
     return Container(
@@ -271,7 +272,7 @@ class OfflineBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final theme = ThemeHelpers.getMaterialTheme(context);
     final textTheme = theme.textTheme;
 
     return Container(
@@ -346,7 +347,7 @@ class OfflineSyncState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final theme = ThemeHelpers.getMaterialTheme(context);
     final textTheme = theme.textTheme;
 
     return Padding(

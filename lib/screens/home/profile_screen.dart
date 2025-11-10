@@ -7,6 +7,7 @@ import 'package:aroosi_flutter/platform/adaptive_dialogs.dart';
 import 'package:aroosi_flutter/widgets/app_scaffold.dart';
 import 'package:aroosi_flutter/widgets/primary_button.dart';
 import 'package:aroosi_flutter/widgets/retryable_network_image.dart';
+import 'package:aroosi_flutter/theme/theme_helpers.dart';
 
 // Simplified feature access - all features are free
 class FeatureAccess {
@@ -161,7 +162,7 @@ class _ProfileHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final theme = ThemeHelpers.getMaterialTheme(context);
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 20),
       decoration: BoxDecoration(

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:aroosi_flutter/theme/motion.dart';
+import 'package:aroosi_flutter/theme/theme_helpers.dart';
 import 'package:aroosi_flutter/widgets/animations/motion.dart';
 import 'package:aroosi_flutter/features/auth/auth_controller.dart';
 
@@ -11,7 +12,7 @@ class WelcomeScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final theme = Theme.of(context);
+    final theme = ThemeHelpers.getMaterialTheme(context);
     final auth = ref.watch(authControllerProvider);
     
     // If authenticated and has profile, redirect to search
@@ -51,8 +52,8 @@ class WelcomeScreen extends ConsumerWidget {
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
                     colors: [
-                      Colors.black.withOpacity(0.10),
-                      Colors.black.withOpacity(0.40),
+                      Colors.black.withValues(alpha: 0.10),
+                      Colors.black.withValues(alpha: 0.40),
                     ],
                   ),
                 ),
@@ -87,7 +88,7 @@ class WelcomeScreen extends ConsumerWidget {
                         'Let\'s create your profile and find your perfect match. We\'ll guide you through a few simple steps to get started.',
                         textAlign: TextAlign.center,
                         style: theme.textTheme.bodyLarge?.copyWith(
-                          color: Colors.white.withOpacity(0.9),
+                          color: Colors.white.withValues(alpha: 0.9),
                           height: 1.4,
                         ),
                       ),
@@ -139,7 +140,7 @@ class WelcomeScreen extends ConsumerWidget {
           if (auth.loading)
             Positioned.fill(
               child: Container(
-                color: Colors.black.withOpacity(0.4),
+                color: Colors.black.withValues(alpha: 0.4),
                 child: const Center(child: CircularProgressIndicator()),
               ),
             ),

@@ -1,8 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'package:aroosi_flutter/core/api_client.dart';
 import 'package:aroosi_flutter/core/firebase_service.dart';
 import 'package:aroosi_flutter/utils/debug_logger.dart';
 
@@ -13,11 +11,9 @@ final icebreakerRepositoryProvider = Provider<IcebreakerRepository>(
 );
 
 class IcebreakerRepository {
-  IcebreakerRepository({Dio? dio, FirebaseFirestore? firestore})
-    : _dio = dio ?? ApiClient.dio,
-      _firestore = firestore ?? FirebaseFirestore.instance;
+  IcebreakerRepository({FirebaseFirestore? firestore})
+      : _firestore = firestore ?? FirebaseFirestore.instance;
 
-  final Dio _dio;
   final FirebaseFirestore _firestore;
 
   /// Fetch today's icebreaker questions

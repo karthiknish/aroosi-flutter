@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:aroosi_flutter/utils/debug_logger.dart';
 import 'package:aroosi_flutter/core/error_handler.dart';
+import 'package:aroosi_flutter/core/performance_service.dart';
 
 /// Admin service for managing admin access and data monitoring
 /// 
@@ -18,6 +19,7 @@ class AdminService {
   final ErrorHandler _errorHandler = ErrorHandler();
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
+  final PerformanceService _performanceService = PerformanceService();
 
   // Admin role collection in Firestore
   static const String _adminRolesCollection = 'admin_roles';
@@ -140,7 +142,7 @@ class AdminService {
       // Get user counts
       final usersSnapshot = await _firestore.collection('users').get();
       final activeUsers = usersSnapshot.docs.where((doc) {
-        final data = doc.data() as Map<String, dynamic>;
+        final data = doc.data();
         final lastActive = data['lastActiveAt'] as Timestamp?;
         if (lastActive == null) return false;
         
@@ -150,7 +152,7 @@ class AdminService {
       }).length;
 
       final newUsersToday = usersSnapshot.docs.where((doc) {
-        final data = doc.data() as Map<String, dynamic>;
+        final data = doc.data();
         final createdAt = data['createdAt'] as Timestamp?;
         if (createdAt == null) return false;
         
@@ -187,16 +189,53 @@ class AdminService {
         throw Exception('Unauthorized access');
       }
 
-      // This would typically query a performance metrics collection
-      // For now, return mock data structure
+      // Get real performance data from PerformanceService
+      final performanceSummary = _performanceService.getPerformanceSummary();
+      final allStats = _performanceService.getAllMetricStats();
+      
+      // Calculate average response time from all metrics
+      double totalAverage = 0.0;
+      int metricCount = 0;
+      for (final stat in allStats.values) {
+        final avg = double.tryParse(stat['average'].toString()) ?? 0.0;
+        if (avg > 0) {
+          totalAverage += avg;
+          metricCount++;
+        }
+      }
+      final averageResponseTime = metricCount > 0 ? totalAverage / metricCount : 0.0;
+
+      // Get slow operations from performance summary
+      final slowOperations = (performanceSummary['slow_operations'] as List)
+          .map((op) => {
+                'operation': op['operation'] ?? 'unknown',
+                'avg_time': double.tryParse(op['average_ms']?.toString() ?? '0') ?? 0,
+              })
+          .toList();
+
+      // Get active sessions count from Firestore (users with recent activity)
+      int activeSessions = 0;
+      try {
+        final now = DateTime.now();
+        final oneHourAgo = now.subtract(const Duration(hours: 1));
+        final activeUsersSnapshot = await _firestore
+            .collection('users')
+            .where('lastActiveAt', isGreaterThan: Timestamp.fromDate(oneHourAgo))
+            .get();
+        activeSessions = activeUsersSnapshot.docs.length;
+      } catch (e) {
+        logDebug('Error getting active sessions', error: e);
+        // Fallback: estimate based on total users
+        final usersSnapshot = await _firestore.collection('users').limit(1000).get();
+        activeSessions = usersSnapshot.docs.length;
+      }
+
       return {
-        'average_response_time': 245.5,
-        'error_rate': 0.02,
-        'active_sessions': 1234,
-        'slow_operations': [
-          {'operation': 'profile_load', 'avg_time': 1250},
-          {'operation': 'message_send', 'avg_time': 890},
-        ],
+        'average_response_time': averageResponseTime,
+        'error_rate': 0.0, // Would need error tracking service for real data
+        'active_sessions': activeSessions,
+        'slow_operations': slowOperations,
+        'total_operations': allStats.length,
         'last_updated': DateTime.now().toIso8601String(),
       };
     } catch (e, stackTrace) {
@@ -226,12 +265,12 @@ class AdminService {
           .get();
 
       final pendingReports = reportsSnapshot.docs.where((doc) {
-        final data = doc.data() as Map<String, dynamic>;
+        final data = doc.data();
         return data['status'] == 'pending';
       }).length;
 
       final recentReports = reportsSnapshot.docs.where((doc) {
-        final data = doc.data() as Map<String, dynamic>;
+        final data = doc.data();
         final createdAt = data['createdAt'] as Timestamp?;
         if (createdAt == null) return false;
         
@@ -290,7 +329,7 @@ class AdminService {
   Future<bool> grantAdminRole(String userEmail, AdminRole role) async {
     try {
       final currentRole = await getAdminRole();
-      if (currentRole != AdminRole.super_admin) {
+      if (currentRole != AdminRole.superAdmin) {
         throw Exception('Insufficient permissions');
       }
 
@@ -593,42 +632,66 @@ class AdminService {
         throw Exception('Unauthorized access');
       }
 
-      // This would analyze actual performance data and provide recommendations
-      // For now, return mock recommendations based on common performance issues
-      final recommendations = [
-        {
+      // Analyze actual performance data and provide recommendations
+      final performanceData = await getPerformanceData();
+      final slowOperations = performanceData['slow_operations'] as List? ?? [];
+      final averageResponseTime = performanceData['average_response_time'] as double? ?? 0.0;
+      
+      final recommendations = <Map<String, dynamic>>[];
+
+      // Generate recommendations based on actual slow operations
+      for (final op in slowOperations) {
+        final operation = op['operation'] as String? ?? 'unknown';
+        final avgTime = op['avg_time'] as double? ?? 0.0;
+        
+        if (avgTime > 1000) {
+          recommendations.add({
+            'category': _getCategoryForOperation(operation),
+            'priority': 'high',
+            'issue': 'Slow performance detected for $operation',
+            'recommendation': _getRecommendationForOperation(operation),
+            'impact': 'Estimated ${((avgTime - 1000) / avgTime * 100).toStringAsFixed(0)}% improvement possible',
+            'effort': 'medium',
+            'current_avg_time': avgTime,
+          });
+        }
+      }
+
+      // Add general recommendations based on average response time
+      if (averageResponseTime > 500) {
+        recommendations.add({
+          'category': 'Performance',
+          'priority': 'medium',
+          'issue': 'Overall average response time is high',
+          'recommendation': 'Review and optimize slow operations, consider caching frequently accessed data',
+          'impact': 'Estimated 20-30% improvement in overall response times',
+          'effort': 'high',
+        });
+      }
+
+      // Add database optimization recommendation if many slow operations
+      if (slowOperations.length > 3) {
+        recommendations.add({
           'category': 'Database',
           'priority': 'high',
-          'issue': 'Slow query performance on user profiles',
-          'recommendation': 'Add composite indexes on frequently queried fields',
-          'impact': 'Estimated 40% improvement in profile load times',
+          'issue': 'Multiple slow database operations detected',
+          'recommendation': 'Add composite indexes on frequently queried fields, implement query result caching',
+          'impact': 'Estimated 40% improvement in database query performance',
           'effort': 'medium',
-        },
-        {
-          'category': 'Network',
-          'priority': 'medium',
-          'issue': 'Large image sizes in chat messages',
-          'recommendation': 'Implement image compression and lazy loading',
-          'impact': 'Estimated 25% reduction in data usage',
-          'effort': 'low',
-        },
-        {
-          'category': 'Memory',
-          'priority': 'medium',
-          'issue': 'Memory leaks in long-running conversations',
-          'recommendation': 'Implement proper stream disposal and message pagination',
-          'impact': 'Estimated 30% reduction in memory usage',
-          'effort': 'high',
-        },
-        {
-          'category': 'Caching',
+        });
+      }
+
+      // If no issues found, return empty recommendations
+      if (recommendations.isEmpty) {
+        recommendations.add({
+          'category': 'General',
           'priority': 'low',
-          'issue': 'No caching for static user data',
-          'recommendation': 'Implement Redis caching for user profiles and preferences',
-          'impact': 'Estimated 50% improvement in repeated data access',
-          'effort': 'high',
-        },
-      ];
+          'issue': 'No critical performance issues detected',
+          'recommendation': 'Continue monitoring performance metrics',
+          'impact': 'System performing well',
+          'effort': 'low',
+        });
+      }
 
       return {
         'recommendations': recommendations,
@@ -655,7 +718,7 @@ class AdminService {
   Future<bool> applyOptimization(String optimizationId) async {
     try {
       final currentRole = await getAdminRole();
-      if (currentRole != AdminRole.super_admin) {
+      if (currentRole != AdminRole.superAdmin) {
         throw Exception('Insufficient permissions');
       }
 
@@ -677,13 +740,41 @@ class AdminService {
       return false;
     }
   }
+
+  /// Helper method to get category for an operation
+  String _getCategoryForOperation(String operation) {
+    if (operation.contains('profile') || operation.contains('user')) {
+      return 'Database';
+    } else if (operation.contains('message') || operation.contains('chat')) {
+      return 'Network';
+    } else if (operation.contains('image') || operation.contains('upload')) {
+      return 'Storage';
+    } else if (operation.contains('search') || operation.contains('query')) {
+      return 'Database';
+    }
+    return 'Performance';
+  }
+
+  /// Helper method to get recommendation for an operation
+  String _getRecommendationForOperation(String operation) {
+    if (operation.contains('profile_load')) {
+      return 'Implement profile data caching and optimize Firestore queries with proper indexes';
+    } else if (operation.contains('message_send')) {
+      return 'Optimize message sending with batch operations and implement message queuing';
+    } else if (operation.contains('image_upload')) {
+      return 'Implement image compression before upload and use progressive image loading';
+    } else if (operation.contains('search')) {
+      return 'Add search indexes and implement search result caching';
+    }
+    return 'Review and optimize the operation, consider implementing caching or batch processing';
+  }
 }
 
 /// Admin role levels
 enum AdminRole {
-  viewer,      // Can view dashboard data
-  admin,       // Can manage most admin functions
-  super_admin, // Full access including role management
+  viewer,     // Can view dashboard data
+  admin,      // Can manage most admin functions
+  superAdmin, // Full access including role management
 }
 
 /// Admin permissions for different roles
@@ -705,7 +796,7 @@ class AdminPermissions {
       'manage_reports',
       'export_data',
     },
-    AdminRole.super_admin: {
+    AdminRole.superAdmin: {
       'view_dashboard',
       'view_user_stats',
       'view_performance',

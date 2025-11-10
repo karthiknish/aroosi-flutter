@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-
 import 'package:aroosi_flutter/theme/colors.dart';
+import 'package:aroosi_flutter/theme/theme_helpers.dart';
 
 class AroosiNavigationBar extends StatelessWidget {
   const AroosiNavigationBar({
@@ -28,7 +28,7 @@ class AroosiNavigationBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final theme = ThemeHelpers.getMaterialTheme(context);
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 4, 20, 20),
@@ -193,7 +193,7 @@ class _AroosiGlyph extends StatelessWidget {
       ),
       child: Text(
         'Aroosi',
-        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+        style: ThemeHelpers.getMaterialTheme(context).textTheme.labelSmall?.copyWith(
           fontFamily: 'Boldonse',
           fontWeight: FontWeight.w700,
           letterSpacing: 1.1,

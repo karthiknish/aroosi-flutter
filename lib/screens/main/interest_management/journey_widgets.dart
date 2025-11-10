@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'package:aroosi_flutter/features/profiles/list_controller.dart';
 import 'package:aroosi_flutter/theme/colors.dart';
+import 'package:aroosi_flutter/theme/theme_helpers.dart';
 import 'package:aroosi_flutter/theme/motion.dart';
 
 /// Journey intro widget for the interests management screen
@@ -17,7 +18,7 @@ class JourneyIntro extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final theme = ThemeHelpers.getMaterialTheme(context);
     final total = state.items.length;
     final modeCopy = <String, String>{
       'sent': 'Introductions you initiated',
@@ -90,7 +91,7 @@ class ModeSelector extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final theme = ThemeHelpers.getMaterialTheme(context);
     final modes = [
       {
         'value': 'sent',

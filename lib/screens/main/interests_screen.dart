@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:aroosi_flutter/features/profiles/list_controller.dart';
 import 'package:aroosi_flutter/core/toast_service.dart';
 import 'package:aroosi_flutter/widgets/app_scaffold.dart';
+import 'package:aroosi_flutter/theme/theme_helpers.dart';
 
 class InterestsScreen extends ConsumerStatefulWidget {
   const InterestsScreen({super.key});
@@ -57,7 +58,7 @@ class _InterestsScreenState extends ConsumerState<InterestsScreen> {
                 padding: const EdgeInsets.only(bottom: 12),
                 child: Text(
                   s.error!,
-                  style: TextStyle(color: Theme.of(context).colorScheme.error),
+                  style: TextStyle(color: ThemeHelpers.getMaterialTheme(context).colorScheme.error),
                 ),
               ),
             Wrap(

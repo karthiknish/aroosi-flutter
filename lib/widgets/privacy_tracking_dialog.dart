@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-
+import '../theme/theme_helpers.dart';
 import '../core/att_service.dart';
 
 /// Dialog for requesting App Tracking Transparency permission
@@ -15,7 +15,7 @@ class _PrivacyTrackingDialogState extends State<PrivacyTrackingDialog> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final theme = ThemeHelpers.getMaterialTheme(context);
 
     return AlertDialog(
       title: Text(
@@ -146,7 +146,7 @@ class _PrivacyTrackingDialogState extends State<PrivacyTrackingDialog> {
   }
 
   Future<void> _requestPermissionAndContinue() async {
-    final theme = Theme.of(context);
+    final theme = ThemeHelpers.getMaterialTheme(context);
     setState(() => _isLoading = true);
 
     try {
@@ -194,7 +194,7 @@ class PrivacySettingsDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final theme = ThemeHelpers.getMaterialTheme(context);
 
     return AlertDialog(
       title: Text(

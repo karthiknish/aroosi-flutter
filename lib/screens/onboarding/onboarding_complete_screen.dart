@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:aroosi_flutter/theme/motion.dart';
+import 'package:aroosi_flutter/theme/theme_helpers.dart';
 import 'package:aroosi_flutter/widgets/animations/motion.dart';
 
 class OnboardingCompleteScreen extends StatelessWidget {
@@ -25,7 +26,7 @@ class OnboardingCompleteScreen extends StatelessWidget {
                 child: Icon(
                   Icons.check_circle,
                   size: 96,
-                  color: Theme.of(context).colorScheme.primary,
+                  color: ThemeHelpers.getMaterialTheme(context).colorScheme.primary,
                 ),
               ),
               const SizedBox(height: 24),
@@ -33,7 +34,7 @@ class OnboardingCompleteScreen extends StatelessWidget {
                 delay: AppMotionDurations.fast,
                 child: Text(
                   'Your profile looks great',
-                  style: Theme.of(context).textTheme.headlineSmall,
+                  style: ThemeHelpers.getMaterialTheme(context).textTheme.headlineSmall,
                   textAlign: TextAlign.center,
                 ),
               ),

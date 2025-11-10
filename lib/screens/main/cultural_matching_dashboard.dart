@@ -8,6 +8,9 @@ import 'package:firebase_auth/firebase_auth.dart' as fb;
 import 'package:aroosi_flutter/theme/colors.dart';
 import 'package:aroosi_flutter/widgets/safe_image_network.dart';
 import 'package:aroosi_flutter/features/cultural/cultural_repository.dart';
+import 'package:aroosi_flutter/widgets/error_states.dart';
+import 'package:aroosi_flutter/widgets/empty_states.dart';
+import 'package:aroosi_flutter/widgets/offline_states.dart';
 
 class CulturalMatchingDashboard extends ConsumerStatefulWidget {
   const CulturalMatchingDashboard({super.key});
@@ -18,6 +21,7 @@ class CulturalMatchingDashboard extends ConsumerStatefulWidget {
 
 class _CulturalMatchingDashboardState extends ConsumerState<CulturalMatchingDashboard> {
   bool _isLoading = false;
+  String? _error;
   List<CulturalMatch> _matches = [];
   Map<String, dynamic>? _userProfile;
 
@@ -30,6 +34,7 @@ class _CulturalMatchingDashboardState extends ConsumerState<CulturalMatchingDash
   Future<void> _loadData() async {
     setState(() {
       _isLoading = true;
+      _error = null;
     });
 
     try {
@@ -59,20 +64,16 @@ class _CulturalMatchingDashboardState extends ConsumerState<CulturalMatchingDash
           }).toList();
           _userProfile = userProfile?.toJson();
           _isLoading = false;
+          _error = null;
         });
       }
     } catch (e) {
       if (mounted) {
         setState(() {
           _isLoading = false;
+          _error = e.toString();
         });
         debugPrint('Load cultural matching data error: $e');
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Failed to load cultural matching data'),
-            backgroundColor: AppColors.error,
-          ),
-        );
       }
     }
   }
@@ -110,9 +111,41 @@ class _CulturalMatchingDashboardState extends ConsumerState<CulturalMatchingDash
           ),
         ],
       ),
-      body: _isLoading
+      body: _isLoading && _matches.isEmpty
           ? const Center(child: CircularProgressIndicator())
-          : SingleChildScrollView(
+          : _error != null && _matches.isEmpty
+              ? Builder(
+                  builder: (context) {
+                    final error = _error!;
+                    final isOfflineError =
+                        error.toLowerCase().contains('network') ||
+                        error.toLowerCase().contains('connection') ||
+                        error.toLowerCase().contains('timeout') ||
+                        error.toLowerCase().contains('offline');
+
+                    return isOfflineError
+                        ? OfflineState(
+                            title: 'Connection Lost',
+                            subtitle: 'Unable to load cultural matches',
+                            description: 'Check your internet connection and try again',
+                            onRetry: _loadData,
+                          )
+                        : ErrorState(
+                            title: 'Failed to Load Cultural Matches',
+                            subtitle: 'Something went wrong',
+                            errorMessage: error,
+                            onRetryPressed: _loadData,
+                          );
+                  },
+                )
+              : _matches.isEmpty && !_isLoading && _error == null
+                  ? EmptyState(
+                      title: 'No cultural matches found',
+                      subtitle: 'Complete your cultural profile to find matches',
+                      description: 'Cultural matching helps you find partners with similar values and traditions',
+                      icon: Icon(Icons.people_outline, size: 64, color: Colors.grey[400]),
+                    )
+                  : SingleChildScrollView(
               padding: const EdgeInsets.all(16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,

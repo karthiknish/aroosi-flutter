@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 
+import 'package:aroosi_flutter/core/api_client.dart';
 import 'package:aroosi_flutter/core/firebase_service.dart';
 import 'package:aroosi_flutter/utils/debug_logger.dart';
 
@@ -52,8 +53,21 @@ class ProfilesRepository {
           .map((profile) => ProfileSummary.fromJson(profile))
           .toList();
 
+      final compatibilityScores = await _fetchCompatibilityScores(
+        items.map((profile) => profile.id).where((id) => id.isNotEmpty).toList(),
+      );
+
+      final enrichedItems = items
+          .map(
+            (profile) => profile.copyWith(
+              compatibilityScore:
+                  compatibilityScores[profile.id] ?? profile.compatibilityScore,
+            ),
+          )
+          .toList();
+
       return PagedResponse(
-        items: items,
+        items: enrichedItems,
         page: page,
         pageSize: pageSize,
         total: items.length,
@@ -62,6 +76,36 @@ class ProfilesRepository {
       logDebug('Error searching profiles', error: e);
       return const PagedResponse(items: [], page: 1, pageSize: 0, total: 0);
     }
+  }
+
+  Future<Map<String, int>> _fetchCompatibilityScores(List<String> userIds) async {
+    if (userIds.isEmpty) {
+      return {};
+    }
+
+    final scores = <String, int>{};
+    await Future.wait(userIds.map((userId) async {
+      try {
+        final response = await ApiClient.dio.get('/compatibility/$userId');
+        final data = response.data;
+        if (data is Map && data['success'] == true) {
+          final payload = data['data'] as Map<String, dynamic>? ?? {};
+          final score = payload['score'];
+          final asInt = score is num ? score.round() : int.tryParse('$score');
+          if (asInt != null) {
+            scores[userId] = asInt.clamp(0, 100).toInt();
+          }
+        }
+      } catch (e) {
+        logDebug(
+          'Error fetching compatibility score',
+          data: {'userId': userId},
+          error: e,
+        );
+      }
+    }));
+
+    return scores;
   }
 
   Future<PagedResponse<ProfileSummary>> getFavorites({
@@ -190,7 +234,10 @@ class ProfilesRepository {
           }
           break;
         case 'remove':
-          // This would need to be implemented
+          await _firebase.removeInterest(
+            interestId: interestId,
+            otherUserId: toUserId,
+          );
           break;
       }
 
@@ -231,8 +278,15 @@ class ProfilesRepository {
     required String fromUserId,
     required String toUserId,
   }) async {
-    // This would need to be implemented in FirebaseService
-    return null;
+    try {
+      return await _firebase.getInterestStatus(
+        fromUserId: fromUserId,
+        toUserId: toUserId,
+      );
+    } catch (e) {
+      logDebug('Error checking interest status', error: e);
+      return null;
+    }
   }
 
   Future<bool> sendInterest(String profileId) async {
@@ -258,13 +312,22 @@ class ProfilesRepository {
   }
 
   Future<Set<String>> getSelectedInterests() async {
-    // This would need to be implemented in FirebaseService
-    return <String>{};
+    try {
+      return await _firebase.getSelectedInterests();
+    } catch (e) {
+      logDebug('Error getting selected interests', error: e);
+      return <String>{};
+    }
   }
 
   Future<bool> saveSelectedInterests(Set<String> interests) async {
-    // This would need to be implemented in FirebaseService
-    return false;
+    try {
+      await _firebase.saveSelectedInterests(interests);
+      return true;
+    } catch (e) {
+      logDebug('Error saving selected interests', error: e);
+      return false;
+    }
   }
 
   /// Get profile details by user ID
@@ -326,9 +389,15 @@ class ProfilesRepository {
 
   Future<List<ProfileImage>> fetchProfileImages({String? userId}) async {
     try {
-      // This would need to be implemented in FirebaseService
-      return [];
+      final resolvedUserId = userId ?? _firebase.currentUser?.uid;
+      if (resolvedUserId == null || resolvedUserId.isEmpty) {
+        return [];
+      }
+
+      final images = await _firebase.getProfileImages(userId: resolvedUserId);
+      return images.map(ProfileImage.fromJson).toList();
     } catch (e) {
+      logDebug('Error fetching profile images', error: e);
       return [];
     }
   }
@@ -339,12 +408,21 @@ class ProfilesRepository {
     void Function(double progress)? onProgress,
   }) async {
     try {
-      final imageUrl = await _firebase.uploadProfileImage(file, userId);
+      final uploadResult = await _firebase.uploadProfileImage(file, userId);
+      final imageUrl = uploadResult['url'];
+      final storagePath = uploadResult['storagePath'];
 
-      final imageId = DateTime.now().millisecondsSinceEpoch.toString();
-      final storageId = imageId; // Use same ID for simplicity
+      if (imageUrl == null || storagePath == null) {
+        throw Exception('Upload did not return storage metadata');
+      }
 
-      return ProfileImage(id: imageId, storageId: storageId, url: imageUrl);
+      final metadata = await _firebase.addProfileImageRecord(
+        userId: userId,
+        url: imageUrl,
+        storagePath: storagePath,
+      );
+
+      return ProfileImage.fromJson(metadata);
     } catch (e) {
       logDebug('Error uploading profile image', error: e);
       rethrow;
@@ -355,14 +433,30 @@ class ProfilesRepository {
     required String userId,
     required String imageId,
   }) async {
-    // Implementation would go here
+    try {
+      await _firebase.deleteProfileImage(
+        userId: userId,
+        imageId: imageId,
+      );
+    } catch (e) {
+      logDebug('Error deleting profile image', error: e);
+      rethrow;
+    }
   }
 
   Future<void> reorderProfileImages({
     required String userId,
     required List<String> imageIds,
   }) async {
-    // Implementation would go here
+    try {
+      await _firebase.reorderProfileImages(
+        userId: userId,
+        orderedIds: imageIds,
+      );
+    } catch (e) {
+      logDebug('Error reordering profile images', error: e);
+      rethrow;
+    }
   }
 
   /// Get the current authenticated user's profile

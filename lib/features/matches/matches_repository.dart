@@ -1,7 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:aroosi_flutter/features/matches/models.dart';
 import 'package:aroosi_flutter/features/profiles/models.dart';
-import 'package:aroosi_flutter/core/api_client.dart';
 
 abstract class MatchesRepository {
   Stream<List<Match>> streamMatches(String userID);
@@ -9,7 +8,6 @@ abstract class MatchesRepository {
 }
 
 class FirestoreMatchesRepository implements MatchesRepository {
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final CollectionReference _matchesCollection = FirebaseFirestore.instance.collection('matches');
   final CollectionReference _profilesCollection = FirebaseFirestore.instance.collection('profiles');
 

@@ -38,7 +38,7 @@ Description: Find meaningful connections while honoring our rich cultural herita
 Keywords: afghan dating, cultural dating, family approval, traditional values
 Support URL: https://www.aroosi.app/support
 Marketing URL: https://www.aroosi.app
-Privacy Policy URL: [Add your privacy policy URL]
+Privacy Policy URL: https://www.aroosi.app/privacy
 ```
 
 ### 3. Age Rating

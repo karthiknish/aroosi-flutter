@@ -5,6 +5,8 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../theme/colors.dart';
 import '../../features/islamic_education/models.dart';
 import '../../features/islamic_education/services.dart';
+import '../../features/auth/auth_controller.dart';
+import 'islamic_education_quiz_screen.dart';
 
 class IslamicEducationContentScreen extends ConsumerStatefulWidget {
   final IslamicEducationalContent content;
@@ -19,8 +21,7 @@ class IslamicEducationContentScreen extends ConsumerStatefulWidget {
 }
 
 class _IslamicEducationContentScreenState extends ConsumerState<IslamicEducationContentScreen> {
-  bool _isLoading = false;
-  double _readingProgress = 0.0;
+  final double _readingProgress = 0.0;
   bool _isBookmarked = false;
   bool _isLiked = false;
 
@@ -33,7 +34,8 @@ class _IslamicEducationContentScreenState extends ConsumerState<IslamicEducation
   Future<void> _trackContentStart() async {
     // Track that user started reading this content
     // This would normally get current user ID from auth
-    final userId = 'current_user_id';
+    final userId = _currentUserId;
+    if (userId == null) return;
     await IslamicEducationService.trackContentProgress(
       userId: userId,
       contentId: widget.content.id,
@@ -85,7 +87,7 @@ class _IslamicEducationContentScreenState extends ConsumerState<IslamicEducation
                   const SizedBox(height: 24),
                   ...widget.content.content.sections.map((section) {
                     return _buildContentSection(section);
-                  }).toList(),
+                  }),
                   
                   if (widget.content.content.quranicVerses != null) ...[
                     const SizedBox(height: 24),
@@ -118,7 +120,7 @@ class _IslamicEducationContentScreenState extends ConsumerState<IslamicEducation
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: LinearProgressIndicator(
         value: _readingProgress,
-        backgroundColor: Colors.grey[300],
+        backgroundColor: AppColors.borderPrimary,
         valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary),
       ),
     );
@@ -155,14 +157,14 @@ class _IslamicEducationContentScreenState extends ConsumerState<IslamicEducation
                 vertical: 4,
               ),
               decoration: BoxDecoration(
-                color: Colors.grey[200],
+                color: AppColors.surfaceSecondary,
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Text(
                 _getDifficultyLabel(widget.content.difficultyLevel),
                 style: GoogleFonts.nunitoSans(
                   fontSize: 12,
-                  color: Colors.grey[700],
+                  color: AppColors.text,
                 ),
               ),
             ),
@@ -181,7 +183,7 @@ class _IslamicEducationContentScreenState extends ConsumerState<IslamicEducation
           widget.content.description,
           style: GoogleFonts.nunitoSans(
             fontSize: 16,
-            color: Colors.grey[600],
+            color: AppColors.muted,
           ),
         ),
         const SizedBox(height: 16),
@@ -190,28 +192,28 @@ class _IslamicEducationContentScreenState extends ConsumerState<IslamicEducation
             Icon(
               Icons.access_time,
               size: 16,
-              color: Colors.grey[600],
+              color: AppColors.muted,
             ),
             const SizedBox(width: 4),
             Text(
               '${widget.content.estimatedReadTime} min read',
               style: GoogleFonts.nunitoSans(
                 fontSize: 14,
-                color: Colors.grey[600],
+                color: AppColors.muted,
               ),
             ),
             const SizedBox(width: 16),
             Icon(
               Icons.visibility,
               size: 16,
-              color: Colors.grey[600],
+              color: AppColors.muted,
             ),
             const SizedBox(width: 4),
             Text(
               '${widget.content.viewCount} views',
               style: GoogleFonts.nunitoSans(
                 fontSize: 14,
-                color: Colors.grey[600],
+                color: AppColors.muted,
               ),
             ),
           ],
@@ -250,10 +252,10 @@ class _IslamicEducationContentScreenState extends ConsumerState<IslamicEducation
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.green.withValues(alpha: 0.05),
+        color: AppColors.success.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: Colors.green.withValues(alpha: 0.2),
+          color: AppColors.success.withValues(alpha: 0.2),
           width: 1,
         ),
       ),
@@ -264,7 +266,7 @@ class _IslamicEducationContentScreenState extends ConsumerState<IslamicEducation
             children: [
               Icon(
                 Icons.menu_book,
-                color: Colors.green,
+                color: AppColors.success,
                 size: 24,
               ),
               const SizedBox(width: 8),
@@ -273,7 +275,7 @@ class _IslamicEducationContentScreenState extends ConsumerState<IslamicEducation
                 style: GoogleFonts.nunitoSans(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
-                  color: Colors.green,
+                  color: AppColors.success,
                 ),
               ),
             ],
@@ -281,7 +283,7 @@ class _IslamicEducationContentScreenState extends ConsumerState<IslamicEducation
           const SizedBox(height: 16),
           ...widget.content.content.quranicVerses!.map((verse) {
             return _QuranicVerseCard(verse: verse);
-          }).toList(),
+          }),
         ],
       ),
     );
@@ -291,10 +293,10 @@ class _IslamicEducationContentScreenState extends ConsumerState<IslamicEducation
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.blue.withValues(alpha: 0.05),
+        color: AppColors.info.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: Colors.blue.withValues(alpha: 0.2),
+          color: AppColors.info.withValues(alpha: 0.2),
           width: 1,
         ),
       ),
@@ -322,7 +324,7 @@ class _IslamicEducationContentScreenState extends ConsumerState<IslamicEducation
           const SizedBox(height: 16),
           ...widget.content.content.hadiths!.map((hadith) {
             return _HadithCard(hadith: hadith);
-          }).toList(),
+          }),
         ],
       ),
     );
@@ -384,7 +386,7 @@ class _IslamicEducationContentScreenState extends ConsumerState<IslamicEducation
                 ],
               ),
             );
-          }).toList(),
+          }),
         ],
       ),
     );
@@ -417,55 +419,69 @@ class _IslamicEducationContentScreenState extends ConsumerState<IslamicEducation
           ),
         
         if (widget.content.quiz != null) const SizedBox(height: 12),
-        
-        SizedBox(
-          width: double.infinity,
-          child: OutlinedButton.icon(
-            onPressed: _shareContent,
-            icon: const Icon(Icons.share),
-            label: Text(
-              'Share',
-              style: GoogleFonts.nunitoSans(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            style: OutlinedButton.styleFrom(
-              padding: const EdgeInsets.symmetric(vertical: 16),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-              side: const BorderSide(color: AppColors.primary),
-            ),
-          ),
-        ),
       ],
     );
   }
 
   Future<void> _toggleBookmark() async {
-    setState(() {
-      _isBookmarked = !_isBookmarked;
-    });
+    final userId = _currentUserId;
+    if (userId == null) {
+      _showAuthRequiredMessage();
+      return;
+    }
 
-    if (_isBookmarked) {
-      final userId = 'current_user_id';
-      await IslamicEducationService.bookmarkContent(widget.content.id, userId);
+    final shouldBookmark = !_isBookmarked;
+    setState(() => _isBookmarked = shouldBookmark);
+
+    try {
+      if (shouldBookmark) {
+        await IslamicEducationService.bookmarkContent(widget.content.id, userId);
+      } else {
+        await IslamicEducationService.removeBookmark(widget.content.id, userId);
+      }
+    } catch (e) {
+      setState(() => _isBookmarked = !shouldBookmark);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Unable to update bookmark: $e')),
+        );
+      }
     }
   }
 
   Future<void> _toggleLike() async {
-    setState(() {
-      _isLiked = !_isLiked;
-    });
+    final userId = _currentUserId;
+    if (userId == null) {
+      _showAuthRequiredMessage();
+      return;
+    }
 
-    if (_isLiked) {
-      final userId = 'current_user_id';
-      await IslamicEducationService.likeContent(widget.content.id, userId);
+    final shouldLike = !_isLiked;
+    setState(() => _isLiked = shouldLike);
+
+    try {
+      if (shouldLike) {
+        await IslamicEducationService.likeContent(widget.content.id, userId);
+      } else {
+        await IslamicEducationService.unlikeContent(widget.content.id, userId);
+      }
+    } catch (e) {
+      setState(() => _isLiked = !shouldLike);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Unable to update like: $e')),
+        );
+      }
     }
   }
 
   void _navigateToQuiz() {
+    final userId = _currentUserId;
+    if (userId == null) {
+      _showAuthRequiredMessage();
+      return;
+    }
+
     Navigator.push(
       context,
       MaterialPageRoute(
@@ -473,21 +489,21 @@ class _IslamicEducationContentScreenState extends ConsumerState<IslamicEducation
           quiz: widget.content.quiz!,
           contentId: widget.content.id,
           contentTitle: widget.content.title,
+          currentUserId: userId,
         ),
       ),
     );
   }
 
-  void _shareContent() {
+  String? get _currentUserId => ref.read(authControllerProvider).profile?.id;
+
+  void _showAuthRequiredMessage() {
+    if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          'Share feature coming soon!',
-          style: GoogleFonts.nunitoSans(),
-        ),
-      ),
+      const SnackBar(content: Text('Please sign in to use this feature.')),
     );
   }
+
 
   String _getCategoryLabel(EducationCategory category) {
     switch (category) {
@@ -540,7 +556,7 @@ class _QuranicVerseCard extends StatelessWidget {
         color: Colors.white,
         borderRadius: BorderRadius.circular(8),
         border: Border.all(
-          color: Colors.green.withValues(alpha: 0.2),
+          color: AppColors.success.withValues(alpha: 0.2),
           width: 1,
         ),
       ),
@@ -578,7 +594,7 @@ class _QuranicVerseCard extends StatelessWidget {
               verse.transliteration,
               style: GoogleFonts.nunitoSans(
                 fontSize: 12,
-                color: Colors.grey[600],
+                color: AppColors.muted,
               ),
             ),
           ],
@@ -587,14 +603,14 @@ class _QuranicVerseCard extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: Colors.green.withValues(alpha: 0.1),
+                color: AppColors.success.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(4),
               ),
               child: Text(
                 '💡 ${verse.relevanceToMarriage}',
                 style: GoogleFonts.nunitoSans(
                   fontSize: 12,
-                  color: Colors.green[800],
+                  color: AppColors.success,
                 ),
               ),
             ),
@@ -619,7 +635,7 @@ class _HadithCard extends StatelessWidget {
         color: Colors.white,
         borderRadius: BorderRadius.circular(8),
         border: Border.all(
-          color: Colors.blue.withValues(alpha: 0.2),
+          color: AppColors.info.withValues(alpha: 0.2),
           width: 1,
         ),
       ),
@@ -662,7 +678,7 @@ class _HadithCard extends StatelessWidget {
             'Narrated by ${hadith.narrator}',
             style: GoogleFonts.nunitoSans(
               fontSize: 12,
-              color: Colors.grey[600],
+              color: AppColors.muted,
             ),
           ),
           const SizedBox(height: 12),
@@ -686,14 +702,14 @@ class _HadithCard extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: Colors.blue.withValues(alpha: 0.1),
+                color: AppColors.info.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(4),
               ),
               child: Text(
                 '💡 ${hadith.relevanceToMarriage}',
                 style: GoogleFonts.nunitoSans(
                   fontSize: 12,
-                  color: Colors.blue[800],
+                  color: AppColors.info,
                 ),
               ),
             ),
@@ -703,14 +719,14 @@ class _HadithCard extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: Colors.grey[100],
+                color: AppColors.surfaceSecondary,
                 borderRadius: BorderRadius.circular(4),
               ),
               child: Text(
                 '📖 ${hadith.explanation}',
                 style: GoogleFonts.nunitoSans(
                   fontSize: 12,
-                  color: Colors.grey[700],
+                  color: AppColors.text,
                 ),
               ),
             ),
@@ -765,31 +781,5 @@ class _HadithCard extends StatelessWidget {
       case AuthenticityGrade.mawdu:
         return Colors.red;
     }
-  }
-}
-
-// Placeholder quiz screen
-class IslamicEducationQuizScreen extends StatelessWidget {
-  final EducationalQuiz quiz;
-  final String contentId;
-  final String contentTitle;
-
-  const IslamicEducationQuizScreen({
-    super.key,
-    required this.quiz,
-    required this.contentId,
-    required this.contentTitle,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Quiz: $contentTitle'),
-      ),
-      body: Center(
-        child: Text('Quiz functionality coming soon!'),
-      ),
-    );
   }
 }

@@ -8,6 +8,10 @@ import 'package:aroosi_flutter/features/engagement/icebreaker_service.dart';
 import 'package:aroosi_flutter/features/engagement/quick_picks_provider.dart';
 import 'package:aroosi_flutter/widgets/swipeable_card.dart';
 import 'package:aroosi_flutter/features/icebreakers/icebreaker_repository.dart';
+import 'package:aroosi_flutter/widgets/error_states.dart';
+import 'package:aroosi_flutter/widgets/empty_states.dart';
+import 'package:aroosi_flutter/widgets/offline_states.dart';
+import 'package:aroosi_flutter/theme/theme_helpers.dart';
 
 class QuickPicksScreen extends ConsumerStatefulWidget {
   const QuickPicksScreen({super.key});
@@ -18,7 +22,7 @@ class QuickPicksScreen extends ConsumerStatefulWidget {
 
 class _QuickPicksScreenState extends ConsumerState<QuickPicksScreen> {
   final icebreakerRepository = IcebreakerRepository();
-  List<String> _icebreakers = [];
+  List<IcebreakerQuestion> _icebreakers = const <IcebreakerQuestion>[];
 
   @override
   void initState() {
@@ -34,7 +38,7 @@ class _QuickPicksScreenState extends ConsumerState<QuickPicksScreen> {
       final icebreakers = await IcebreakerService().getDailyIcebreakers();
       if (mounted) {
         setState(() {
-          _icebreakers = icebreakers.map((q) => q.text).toList();
+          _icebreakers = icebreakers;
         });
       }
     } catch (_) {
@@ -80,52 +84,40 @@ class _QuickPicksScreenState extends ConsumerState<QuickPicksScreen> {
     }
 
     if (state.error != null) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              'Error loading quick picks',
-              style: Theme.of(context).textTheme.headlineSmall,
-            ),
-            const SizedBox(height: 8),
-            Text(
-              state.error!,
-              style: Theme.of(context).textTheme.bodyMedium,
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: () {
+      final error = state.error!;
+      final isOfflineError =
+          error.toLowerCase().contains('network') ||
+          error.toLowerCase().contains('connection') ||
+          error.toLowerCase().contains('timeout') ||
+          error.toLowerCase().contains('offline');
+
+      return isOfflineError
+          ? OfflineState(
+              title: 'Connection Lost',
+              subtitle: 'Unable to load quick picks',
+              description: 'Check your internet connection and try again',
+              onRetry: () {
                 notifier.clearError();
                 notifier.loadQuickPicks();
               },
-              child: const Text('Retry'),
-            ),
-          ],
-        ),
-      );
+            )
+          : ErrorState(
+              title: 'Failed to Load Quick Picks',
+              subtitle: 'Something went wrong',
+              errorMessage: error,
+              onRetryPressed: () {
+                notifier.clearError();
+                notifier.loadQuickPicks();
+              },
+            );
     }
 
     if (state.profiles.isEmpty) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.check_circle_outline, size: 80, color: Colors.grey[400]),
-            const SizedBox(height: 16),
-            Text(
-              'All caught up!',
-              style: Theme.of(context).textTheme.headlineSmall,
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Check back tomorrow for more matches',
-              style: Theme.of(context).textTheme.bodyMedium,
-              textAlign: TextAlign.center,
-            ),
-          ],
-        ),
+      return EmptyState(
+        title: 'All caught up!',
+        subtitle: 'Check back tomorrow for more matches',
+        description: 'You\'ve seen all available quick picks for today',
+        icon: Icon(Icons.check_circle_outline, size: 64, color: Colors.grey[400]),
       );
     }
 
@@ -141,7 +133,7 @@ class _QuickPicksScreenState extends ConsumerState<QuickPicksScreen> {
                 children: [
                   Text(
                     'Daily Quick Picks',
-                    style: Theme.of(context).textTheme.titleMedium,
+                    style: ThemeHelpers.getMaterialTheme(context).textTheme.titleMedium,
                   ),
                   Container(
                     padding: const EdgeInsets.symmetric(
@@ -180,14 +172,14 @@ class _QuickPicksScreenState extends ConsumerState<QuickPicksScreen> {
                       value: (state.currentIndex + 1) / state.profiles.length,
                       backgroundColor: Colors.grey.shade300,
                       valueColor: AlwaysStoppedAnimation<Color>(
-                        Theme.of(context).primaryColor,
+                        ThemeHelpers.getMaterialTheme(context).primaryColor,
                       ),
                     ),
                   ),
                   const SizedBox(width: 12),
                   Text(
                     '${state.currentIndex + 1}/${state.profiles.length}',
-                    style: Theme.of(context).textTheme.bodySmall,
+                    style: ThemeHelpers.getMaterialTheme(context).textTheme.bodySmall,
                   ),
                 ],
               ),

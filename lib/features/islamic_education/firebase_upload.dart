@@ -1,8 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'models.dart';
 import 'content_data.dart';
 import 'services.dart';
+import 'package:aroosi_flutter/utils/debug_logger.dart';
+import 'package:flutter/services.dart' show rootBundle;
 
 class IslamicEducationFirebaseUploader {
   static final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -10,7 +11,7 @@ class IslamicEducationFirebaseUploader {
   /// Upload all initial educational content to Firebase
   static Future<void> uploadInitialContent() async {
     try {
-      print('Starting upload of Islamic educational content...');
+      logDebug('Starting upload of Islamic educational content');
 
       // Get initial content data
       final contentList = IslamicEducationalContentData.getInitialContent();
@@ -19,18 +20,18 @@ class IslamicEducationFirebaseUploader {
       // Upload educational content
       for (final content in contentList) {
         await IslamicEducationService.uploadEducationalContent(content);
-        print('Uploaded content: ${content.title}');
+        logDebug('Uploaded content', data: {'title': content.title});
       }
 
       // Upload Afghan traditions
       for (final tradition in traditionsList) {
         await IslamicEducationService.uploadAfghanTradition(tradition);
-        print('Uploaded tradition: ${tradition.name}');
+        logDebug('Uploaded tradition', data: {'name': tradition.name});
       }
 
-      print('✅ Successfully uploaded all content to Firebase!');
+      logDebug('Successfully uploaded all content to Firebase');
     } catch (e) {
-      print('❌ Error uploading content: $e');
+      logDebug('Error uploading content', error: e);
       rethrow;
     }
   }
@@ -49,10 +50,10 @@ class IslamicEducationFirebaseUploader {
       contentWithSearch['searchTerms'] = searchTerms;
 
       final docRef = await _firestore.collection('islamic_educational_content').add(contentWithSearch);
-      print('Uploaded content: ${content.title} (ID: ${docRef.id})');
+      logDebug('Uploaded content', data: {'title': content.title, 'id': docRef.id});
       return docRef.id;
     } catch (e) {
-      print('Error uploading content ${content.title}: $e');
+      logDebug('Error uploading content', error: e, data: {'title': content.title});
       rethrow;
     }
   }
@@ -61,10 +62,10 @@ class IslamicEducationFirebaseUploader {
   static Future<String> uploadSingleTradition(AfghanCulturalTradition tradition) async {
     try {
       final docRef = await _firestore.collection('afghan_cultural_traditions').add(tradition.toJson());
-      print('Uploaded tradition: ${tradition.name} (ID: ${docRef.id})');
+      logDebug('Uploaded tradition', data: {'name': tradition.name, 'id': docRef.id});
       return docRef.id;
     } catch (e) {
-      print('Error uploading tradition ${tradition.name}: $e');
+      logDebug('Error uploading tradition', error: e, data: {'name': tradition.name});
       rethrow;
     }
   }
@@ -98,9 +99,9 @@ class IslamicEducationFirebaseUploader {
         ],
       });
 
-      print('✅ Indexes created successfully!');
+      logDebug('Indexes created successfully');
     } catch (e) {
-      print('Error creating indexes: $e');
+      logDebug('Error creating indexes', error: e);
     }
   }
 
@@ -119,7 +120,7 @@ class IslamicEducationFirebaseUploader {
 
       return contentSnapshot.docs.isNotEmpty && traditionsSnapshot.docs.isNotEmpty;
     } catch (e) {
-      print('Error verifying upload: $e');
+      logDebug('Error verifying upload', error: e);
       return false;
     }
   }
@@ -127,7 +128,7 @@ class IslamicEducationFirebaseUploader {
   /// Clear all uploaded content (use with caution!)
   static Future<void> clearAllContent() async {
     try {
-      print('⚠️  WARNING: Clearing all educational content...');
+      logDebug('WARNING: Clearing all educational content');
       
       // Clear educational content
       final contentSnapshot = await _firestore.collection('islamic_educational_content').get();
@@ -147,9 +148,9 @@ class IslamicEducationFirebaseUploader {
         await doc.reference.delete();
       }
 
-      print('✅ All content cleared successfully!');
+      logDebug('All content cleared successfully');
     } catch (e) {
-      print('Error clearing content: $e');
+      logDebug('Error clearing content', error: e);
     }
   }
 
@@ -179,18 +180,17 @@ class IslamicEducationFirebaseUploader {
         'lastUpdated': DateTime.now().toIso8601String(),
       };
     } catch (e) {
-      print('Error getting statistics: $e');
+      logDebug('Error getting statistics', error: e);
       return {};
     }
   }
 
-  /// Upload sample images to Firebase Storage (if available)
-  static Future<void> uploadSampleImages() async {
+  /// Upload sample images to Firebase Storage
+  /// Note: This is a utility function for admin/development use
+  /// In production, images should be uploaded through the proper content management flow
+  static Future<List<Map<String, String>>> uploadSampleImages() async {
+    final uploads = <Map<String, String>>[];
     try {
-      // This would typically upload local image files
-      // For now, we'll just create placeholder entries
-      
-      // Sample image references (these would be actual files in production)
       final sampleImages = [
         'assets/images/islamic_marriage_principles.jpg',
         'assets/images/afghan_wedding.jpg',
@@ -199,13 +199,43 @@ class IslamicEducationFirebaseUploader {
       ];
 
       for (final imagePath in sampleImages) {
-        // In production, you would upload actual file data here
-        print('Placeholder for image: $imagePath');
+        try {
+          final byteData = await rootBundle.load(imagePath);
+          final bytes = byteData.buffer.asUint8List();
+          final filename = imagePath.split('/').last;
+
+          final downloadUrl = await IslamicEducationService.uploadImageToStorage(
+            data: bytes,
+            fileName: filename,
+            metadata: {
+              'sourcePath': imagePath,
+              'uploadedAt': DateTime.now().toIso8601String(),
+              'uploader': 'admin-sample-script',
+            },
+          );
+
+          uploads.add({'path': imagePath, 'url': downloadUrl});
+          logDebug('Uploaded sample image', data: {
+            'path': imagePath,
+            'filename': filename,
+            'url': downloadUrl,
+          });
+        } catch (e) {
+          logDebug(
+            'Error uploading sample image',
+            error: e,
+            data: {'path': imagePath},
+          );
+        }
       }
 
-      print('✅ Sample image references created!');
+      logDebug('Sample image upload process completed', data: {
+        'uploaded': uploads.length,
+      });
+      return uploads;
     } catch (e) {
-      print('Error uploading sample images: $e');
+      logDebug('Error in uploadSampleImages', error: e);
+      rethrow;
     }
   }
 }
@@ -219,9 +249,9 @@ class IslamicEducationAdminUtil {
           .collection('islamic_educational_content')
           .doc(contentId)
           .update(updates);
-      print('Updated content: $contentId');
+      logDebug('Updated content', data: {'contentId': contentId});
     } catch (e) {
-      print('Error updating content: $e');
+      logDebug('Error updating content', error: e);
     }
   }
 
@@ -232,9 +262,9 @@ class IslamicEducationAdminUtil {
           .collection('afghan_cultural_traditions')
           .doc(traditionId)
           .update(updates);
-      print('Updated tradition: $traditionId');
+      logDebug('Updated tradition', data: {'traditionId': traditionId});
     } catch (e) {
-      print('Error updating tradition: $e');
+      logDebug('Error updating tradition', error: e);
     }
   }
 
@@ -268,7 +298,7 @@ class IslamicEducationAdminUtil {
         'categoryDistribution': categoryCounts,
       };
     } catch (e) {
-      print('Error getting analytics: $e');
+      logDebug('Error getting analytics', error: e);
       return {};
     }
   }
@@ -281,9 +311,9 @@ class IslamicEducationAdminUtil {
           .doc(contentId)
           .update({'isFeatured': isFeatured});
       
-      print('${isFeatured ? 'Featured' : 'Unfeatured'} content: $contentId');
+      logDebug('${isFeatured ? 'Featured' : 'Unfeatured'} content', data: {'contentId': contentId});
     } catch (e) {
-      print('Error updating featured status: $e');
+      logDebug('Error updating featured status', error: e);
     }
   }
 
@@ -303,9 +333,9 @@ class IslamicEducationAdminUtil {
       }
       
       await batch.commit();
-      print('Bulk updated ${contentIds.length} content items');
+      logDebug('Bulk updated content items', data: {'count': contentIds.length});
     } catch (e) {
-      print('Error in bulk update: $e');
+      logDebug('Error in bulk update', error: e);
     }
   }
 }

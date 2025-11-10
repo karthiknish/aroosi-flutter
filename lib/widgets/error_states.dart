@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:aroosi_flutter/theme/colors.dart';
+import 'package:aroosi_flutter/theme/theme_helpers.dart';
 import 'package:aroosi_flutter/widgets/primary_button.dart';
 
 /// A comprehensive error state widget that can be customized for different error scenarios
@@ -39,7 +40,7 @@ class ErrorState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final theme = ThemeHelpers.getMaterialTheme(context);
     final textTheme = theme.textTheme;
 
     return Padding(
@@ -371,7 +372,7 @@ class InlineError extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final theme = ThemeHelpers.getMaterialTheme(context);
     final textTheme = theme.textTheme;
 
     return Container(
@@ -445,7 +446,7 @@ class ErrorStateWithRetry extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final theme = ThemeHelpers.getMaterialTheme(context);
 
     return Container(
       padding: const EdgeInsets.all(24),

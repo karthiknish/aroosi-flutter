@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:aroosi_flutter/theme/colors.dart';
+import 'package:aroosi_flutter/theme/theme_helpers.dart';
 
 class AfghanCourtshipWidget extends ConsumerStatefulWidget {
   const AfghanCourtshipWidget({
@@ -147,7 +148,7 @@ class _AfghanCourtshipWidgetState extends ConsumerState<AfghanCourtshipWidget>
                 const SizedBox(width: 8),
                 Text(
                   'Traditional Afghan Courtship Journey',
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  style: ThemeHelpers.getMaterialTheme(context).textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                     color: AppColors.primary,
                   ),
@@ -176,7 +177,7 @@ class _AfghanCourtshipWidgetState extends ConsumerState<AfghanCourtshipWidget>
             const SizedBox(height: 8),
             Text(
               'Step ${_currentStep + 1} of ${_courtshipSteps.length}',
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              style: ThemeHelpers.getMaterialTheme(context).textTheme.bodySmall?.copyWith(
                 color: AppColors.primary,
                 fontWeight: FontWeight.bold,
               ),
@@ -356,7 +357,7 @@ class _AfghanCourtshipWidgetState extends ConsumerState<AfghanCourtshipWidget>
             'The blessing of family elders is essential for a blessed and lasting union.',
             style: TextStyle(
               fontSize: 12,
-              color: Theme.of(context).colorScheme.onSurface.withAlpha(204),
+              color: ThemeHelpers.getMaterialTheme(context).colorScheme.onSurface.withAlpha(204),
             ),
           ),
         ],

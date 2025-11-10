@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'colors.dart';
 
 export 'colors.dart';
+export 'color_helpers.dart';
 export 'spacing.dart';
 export 'typography.dart';
 export 'motion.dart';

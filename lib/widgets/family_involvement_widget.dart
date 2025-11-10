@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:aroosi_flutter/theme/theme_helpers.dart';
 
 class FamilyInvolvementWidget extends ConsumerStatefulWidget {
   const FamilyInvolvementWidget({
@@ -60,7 +61,7 @@ class _FamilyInvolvementWidgetState
                 const SizedBox(width: 8),
                 Text(
                   'Family Involvement',
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  style: ThemeHelpers.getMaterialTheme(context).textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                     color: Colors.purple,
                   ),
@@ -219,7 +220,7 @@ class _FamilyInvolvementWidgetState
             'are essential for building a strong foundation for a lasting relationship.',
             style: TextStyle(
               fontSize: 12,
-              color: Theme.of(context).colorScheme.onSurface.withAlpha(204),
+              color: ThemeHelpers.getMaterialTheme(context).colorScheme.onSurface.withAlpha(204),
             ),
           ),
         ],

@@ -4,6 +4,7 @@ import 'package:aroosi_flutter/features/profiles/models.dart';
 import 'package:aroosi_flutter/features/cultural/cultural_constants.dart';
 import 'package:aroosi_flutter/widgets/app_scaffold.dart';
 import 'package:aroosi_flutter/widgets/primary_button.dart';
+import 'package:aroosi_flutter/theme/theme_helpers.dart';
 
 class CulturalSearchFiltersScreen extends ConsumerStatefulWidget {
   final SearchFilters currentFilters;
@@ -95,16 +96,16 @@ class _CulturalSearchFiltersScreenState extends ConsumerState<CulturalSearchFilt
       children: [
         Text(
           title,
-          style: Theme.of(context).textTheme.titleLarge?.copyWith(
+          style: ThemeHelpers.getMaterialTheme(context).textTheme.titleLarge?.copyWith(
             fontWeight: FontWeight.w600,
-            color: Theme.of(context).colorScheme.primary,
+            color: ThemeHelpers.getMaterialTheme(context).colorScheme.primary,
           ),
         ),
         const SizedBox(height: 4),
         Text(
           subtitle,
           style: TextStyle(
-            color: Theme.of(context).colorScheme.onSurfaceVariant,
+            color: ThemeHelpers.getMaterialTheme(context).colorScheme.onSurfaceVariant,
             fontSize: 14,
           ),
         ),
@@ -127,14 +128,14 @@ class _CulturalSearchFiltersScreenState extends ConsumerState<CulturalSearchFilt
       children: [
         Text(
           label,
-          style: Theme.of(context).textTheme.titleSmall?.copyWith(
+          style: ThemeHelpers.getMaterialTheme(context).textTheme.titleSmall?.copyWith(
             fontWeight: FontWeight.w600,
           ),
         ),
         const SizedBox(height: 8),
         Container(
           decoration: BoxDecoration(
-            border: Border.all(color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.3)),
+            border: Border.all(color: ThemeHelpers.getMaterialTheme(context).colorScheme.outline.withValues(alpha: 0.3)),
             borderRadius: BorderRadius.circular(12),
           ),
           child: DropdownButton<String>(
@@ -171,7 +172,7 @@ class _CulturalSearchFiltersScreenState extends ConsumerState<CulturalSearchFilt
       children: [
         Text(
           label,
-          style: Theme.of(context).textTheme.titleSmall?.copyWith(
+          style: ThemeHelpers.getMaterialTheme(context).textTheme.titleSmall?.copyWith(
             fontWeight: FontWeight.w600,
           ),
         ),
@@ -193,9 +194,9 @@ class _CulturalSearchFiltersScreenState extends ConsumerState<CulturalSearchFilt
                   }
                 });
               },
-              backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
-              selectedColor: Theme.of(context).colorScheme.primaryContainer,
-              checkmarkColor: Theme.of(context).colorScheme.onPrimaryContainer,
+              backgroundColor: ThemeHelpers.getMaterialTheme(context).colorScheme.surfaceContainerHighest,
+              selectedColor: ThemeHelpers.getMaterialTheme(context).colorScheme.primaryContainer,
+              checkmarkColor: ThemeHelpers.getMaterialTheme(context).colorScheme.onPrimaryContainer,
             );
           }).toList(),
         ),
@@ -215,7 +216,7 @@ class _CulturalSearchFiltersScreenState extends ConsumerState<CulturalSearchFilt
       children: [
         Text(
           label,
-          style: Theme.of(context).textTheme.titleSmall?.copyWith(
+          style: ThemeHelpers.getMaterialTheme(context).textTheme.titleSmall?.copyWith(
             fontWeight: FontWeight.w600,
           ),
         ),
@@ -230,7 +231,7 @@ class _CulturalSearchFiltersScreenState extends ConsumerState<CulturalSearchFilt
                   const SizedBox(height: 4),
                   Container(
                     decoration: BoxDecoration(
-                      border: Border.all(color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.3)),
+                      border: Border.all(color: ThemeHelpers.getMaterialTheme(context).colorScheme.outline.withValues(alpha: 0.3)),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: DropdownButton<int>(
@@ -265,7 +266,7 @@ class _CulturalSearchFiltersScreenState extends ConsumerState<CulturalSearchFilt
                   const SizedBox(height: 4),
                   Container(
                     decoration: BoxDecoration(
-                      border: Border.all(color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.3)),
+                      border: Border.all(color: ThemeHelpers.getMaterialTheme(context).colorScheme.outline.withValues(alpha: 0.3)),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: DropdownButton<int>(
@@ -308,16 +309,16 @@ class _CulturalSearchFiltersScreenState extends ConsumerState<CulturalSearchFilt
           children: [
             Text(
               'Find culturally compatible matches',
-              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+              style: ThemeHelpers.getMaterialTheme(context).textTheme.headlineSmall?.copyWith(
                 fontWeight: FontWeight.bold,
-                color: Theme.of(context).colorScheme.primary,
+                color: ThemeHelpers.getMaterialTheme(context).colorScheme.primary,
               ),
             ),
             const SizedBox(height: 8),
             Text(
               'Filter by religious background, cultural values, and family traditions.',
               style: TextStyle(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
+                color: ThemeHelpers.getMaterialTheme(context).colorScheme.onSurfaceVariant,
               ),
             ),
             const SizedBox(height: 32),
@@ -443,7 +444,7 @@ class _CulturalSearchFiltersScreenState extends ConsumerState<CulturalSearchFilt
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 12,
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  color: ThemeHelpers.getMaterialTheme(context).colorScheme.onSurfaceVariant,
                 ),
               ),
             ),

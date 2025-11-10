@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:aroosi_flutter/features/onboarding/matrimony/models.dart';
 import 'package:aroosi_flutter/features/onboarding/matrimony/constants.dart';
-import 'package:aroosi_flutter/l10n/app_localizations.dart';
+import 'package:aroosi_flutter/theme/theme_helpers.dart';
 
 class CompletionStep extends StatelessWidget {
   final MatrimonyOnboardingData? onboardingData;
@@ -17,9 +17,7 @@ class CompletionStep extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final l10n = AppLocalizations.of(context)!;
-
+    final theme = ThemeHelpers.getMaterialTheme(context);
     if (onboardingData == null) {
       return const Center(child: CircularProgressIndicator());
     }
@@ -175,12 +173,12 @@ class CompletionStep extends StatelessWidget {
   }
 
   Widget _buildPreferencesSummary(BuildContext context, MatrimonyOnboardingData data) {
-    final theme = Theme.of(context);
+    final theme = ThemeHelpers.getMaterialTheme(context);
     
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceVariant.withAlpha(50),
+        color: theme.colorScheme.surfaceContainerHighest.withAlpha(50),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
           color: theme.colorScheme.outline.withAlpha(20),
@@ -241,13 +239,15 @@ class CompletionStep extends StatelessWidget {
           ],
           
           // Family involvement
-          const SizedBox(height: 12),
-          _buildSummaryItem(
-            context,
-            'Family Involvement',
-            data.requiresFamilyApproval ? 'Required' : 'Independent',
-            data.requiresFamilyApproval ? Icons.groups : Icons.person,
-          ),
+          if (data.requiresFamilyApproval != null) ...[
+            const SizedBox(height: 12),
+            _buildSummaryItem(
+              context,
+              'Family Involvement',
+              data.requiresFamilyApproval! ? 'Required' : 'Independent',
+              data.requiresFamilyApproval! ? Icons.groups : Icons.person,
+            ),
+          ],
         ],
       ),
     );
@@ -259,7 +259,7 @@ class CompletionStep extends StatelessWidget {
     String value,
     IconData icon,
   ) {
-    final theme = Theme.of(context);
+    final theme = ThemeHelpers.getMaterialTheme(context);
     
     return Row(
       children: [

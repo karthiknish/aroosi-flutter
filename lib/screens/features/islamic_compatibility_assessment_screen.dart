@@ -1,10 +1,16 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import '../../core/firebase_service.dart';
 import '../../theme/colors.dart';
 import '../../features/compatibility/models.dart';
 import '../../features/compatibility/questions_data.dart';
+import '../../features/auth/auth_controller.dart';
+import '../../features/profiles/selection.dart';
+import '../../utils/debug_logger.dart';
+import '../../features/compatibility/compatibility_service.dart';
 
 class IslamicCompatibilityAssessmentScreen extends ConsumerStatefulWidget {
   const IslamicCompatibilityAssessmentScreen({super.key});
@@ -288,6 +294,21 @@ class _IslamicCompatibilityAssessmentScreenState extends ConsumerState<IslamicCo
     }
   }
 
+  Map<String, dynamic> _serializeResponses(Map<String, dynamic> source) {
+    final normalized = <String, dynamic>{};
+    source.forEach((key, value) {
+      if (value == null) {
+        return;
+      }
+      if (value is List) {
+        normalized[key] = value.map((item) => item.toString()).toList();
+      } else {
+        normalized[key] = value.toString();
+      }
+    });
+    return normalized;
+  }
+
   void _showValidationDialog(List<CompatibilityQuestion> unansweredQuestions) {
     showDialog(
       context: context,
@@ -317,7 +338,7 @@ class _IslamicCompatibilityAssessmentScreenState extends ConsumerState<IslamicCo
                     const Text('• ', style: TextStyle(fontWeight: FontWeight.bold)),
                     Expanded(
                       child: Text(
-                        question.text ?? 'Question text not available',
+                        question.text,
                         style: GoogleFonts.nunitoSans(fontSize: 14),
                       ),
                     ),
@@ -392,16 +413,161 @@ class _IslamicCompatibilityAssessmentScreenState extends ConsumerState<IslamicCo
     });
     
     try {
-      // Create response object (would normally get user ID from auth)
-      CompatibilityResponse(
-        userId: 'current_user_id', // This should come from auth
-        responses: _responses,
+      final userId = ref.read(authControllerProvider).profile?.id;
+      if (userId == null) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                'Please sign in to save your compatibility assessment.',
+                style: GoogleFonts.nunitoSans(),
+              ),
+            ),
+          );
+        }
+        return;
+      }
+
+      final firebase = FirebaseService();
+      final normalizedResponses = _serializeResponses(_responses);
+      final response = CompatibilityResponse(
+        userId: userId,
+        responses: normalizedResponses,
         completedAt: DateTime.now(),
       );
-      
-      // Here you would normally save the response to your backend
-      // For now, we'll just show completion dialog
-      
+
+      final categories = _categories;
+      if (!CompatibilityService.validateResponse(response, categories)) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                'Some required answers are missing. Please review and try again.',
+                style: GoogleFonts.nunitoSans(),
+              ),
+              backgroundColor: Colors.orange,
+            ),
+          );
+        }
+        return;
+      }
+
+      await firebase.saveCompatibilityResponse(
+        userId: response.userId,
+        responses: response.responses,
+        completedAt: response.completedAt,
+      );
+
+      final partnerIds = <String>{};
+      final lastSelected = ref.read(lastSelectedProfileIdProvider);
+      if (lastSelected != null && lastSelected.isNotEmpty && lastSelected != userId) {
+        partnerIds.add(lastSelected);
+      }
+      partnerIds.addAll(await firebase.getCompatibilityPartnerIds(userId));
+
+      var scoresGenerated = 0;
+
+      for (final partnerId in partnerIds) {
+        if (partnerId == userId || partnerId.isEmpty) {
+          continue;
+        }
+
+        try {
+          final partnerData = await firebase.getCompatibilityResponse(partnerId);
+          if (partnerData == null) {
+            continue;
+          }
+
+          final partnerResponsesRaw = partnerData['responses'];
+          if (partnerResponsesRaw is! Map<String, dynamic>) {
+            continue;
+          }
+
+          final partnerResponses = _serializeResponses(
+            Map<String, dynamic>.from(partnerResponsesRaw),
+          );
+          final partnerResponse = CompatibilityResponse(
+            userId: partnerData['userId']?.toString() ?? partnerId,
+            responses: partnerResponses,
+            completedAt: partnerData['completedAt'] as DateTime,
+          );
+
+          if (!CompatibilityService.validateResponse(partnerResponse, categories)) {
+            continue;
+          }
+
+          final score = CompatibilityService.calculateCompatibility(response, partnerResponse);
+          await firebase.saveCompatibilityScore(
+            userId1: response.userId,
+            userId2: partnerResponse.userId,
+            overallScore: score.overallScore,
+            categoryScores: score.categoryScores,
+            calculatedAt: score.calculatedAt,
+            detailedBreakdown: score.detailedBreakdown,
+          );
+
+          final report = CompatibilityService.createReport(
+            score,
+            response.userId,
+            partnerResponse.userId,
+          );
+
+          await firebase.saveCompatibilityReport(
+            reportId: report.id,
+            data: {
+              'userId1': report.userId1,
+              'userId2': report.userId2,
+              'generatedAt': Timestamp.fromDate(report.generatedAt),
+              'isShared': report.isShared,
+              'scores': {
+                'overallScore': score.overallScore,
+                'categoryScores': score.categoryScores,
+                'calculatedAt': Timestamp.fromDate(score.calculatedAt),
+                if (score.detailedBreakdown != null)
+                  'detailedBreakdown': score.detailedBreakdown,
+              },
+              if (report.familyFeedback != null)
+                'familyFeedback': report.familyFeedback!
+                    .map((feedback) => {
+                          'id': feedback.id,
+                          'familyMemberName': feedback.familyMemberName,
+                          'relationship': feedback.relationship,
+                          'feedback': feedback.feedback,
+                          'createdAt': Timestamp.fromDate(feedback.createdAt),
+                          'approvalStatus': feedback.approvalStatus.name,
+                        })
+                    .toList(),
+            },
+          );
+
+          await firebase.updateCompatibilityScoreCache(
+            userId: response.userId,
+            partnerId: partnerResponse.userId,
+            overallScore: score.overallScore,
+          );
+          await firebase.updateCompatibilityScoreCache(
+            userId: partnerResponse.userId,
+            partnerId: response.userId,
+            overallScore: score.overallScore,
+          );
+
+          scoresGenerated++;
+        } catch (partnerError) {
+          logDebug('Failed to compute compatibility for $partnerId', error: partnerError);
+        }
+      }
+
+      if (mounted && scoresGenerated > 0) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Saved assessment and refreshed $scoresGenerated compatibility score${scoresGenerated == 1 ? '' : 's'}.',
+              style: GoogleFonts.nunitoSans(),
+            ),
+          ),
+        );
+      }
+
       if (mounted) {
         _showCompletionDialog();
       }
@@ -606,7 +772,6 @@ class _QuestionCardState extends State<_QuestionCard> {
       case QuestionType.multipleChoice:
         return _buildMultipleChoiceOptions();
     }
-    return const SizedBox(); // Default case
   }
 
   Widget _buildSingleChoiceOptions() {

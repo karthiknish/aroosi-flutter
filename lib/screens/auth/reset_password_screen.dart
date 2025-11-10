@@ -9,6 +9,7 @@ import 'package:aroosi_flutter/widgets/app_scaffold.dart';
 import 'package:aroosi_flutter/widgets/input_field.dart';
 import 'package:aroosi_flutter/widgets/primary_button.dart';
 import 'package:aroosi_flutter/utils/debug_logger.dart';
+import 'package:aroosi_flutter/theme/theme_helpers.dart';
 
 class ResetPasswordScreen extends ConsumerStatefulWidget {
   const ResetPasswordScreen({super.key});
@@ -67,7 +68,7 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
               padding: const EdgeInsets.only(bottom: 12),
               child: Text(
                 auth.error!,
-                style: TextStyle(color: Theme.of(context).colorScheme.error),
+                style: TextStyle(color: ThemeHelpers.getMaterialTheme(context).colorScheme.error),
               ),
             ),
           InputField(controller: _email, label: 'Email'),

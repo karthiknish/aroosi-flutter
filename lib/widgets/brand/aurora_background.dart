@@ -2,8 +2,8 @@ import 'dart:math';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
-
 import 'package:aroosi_flutter/theme/colors.dart';
+import 'package:aroosi_flutter/theme/theme_helpers.dart';
 
 /// Decorative background used across primary surfaces to give Aroosi a
 /// distinctive "aurora" identity. It renders a layered gradient canvas with
@@ -24,7 +24,7 @@ class AuroraBackground extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final theme = ThemeHelpers.getMaterialTheme(context);
 
     return DecoratedBox(
       decoration: BoxDecoration(
@@ -168,7 +168,7 @@ class _DotTexture extends StatelessWidget {
   Widget build(BuildContext context) {
     return CustomPaint(
       painter: _DotTexturePainter(
-        Theme.of(context).colorScheme.primary.withValues(alpha: 0.08),
+        ThemeHelpers.getMaterialTheme(context).colorScheme.primary.withValues(alpha: 0.08),
       ),
     );
   }

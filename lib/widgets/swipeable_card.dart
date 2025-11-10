@@ -5,6 +5,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:aroosi_flutter/features/profiles/models.dart';
 import 'package:aroosi_flutter/features/profiles/list_controller.dart';
 import 'package:aroosi_flutter/core/api_client.dart';
+import 'package:aroosi_flutter/theme/colors.dart';
+import 'package:aroosi_flutter/features/engagement/icebreaker_service.dart';
 
 import 'package:aroosi_flutter/core/responsive.dart';
 
@@ -17,7 +19,7 @@ class SwipeableCard extends ConsumerStatefulWidget {
     required this.onSwipeComplete,
     required this.compatibilityScore,
     this.isTopCard = true,
-    this.icebreakers = const [],
+    this.icebreakers = const <IcebreakerQuestion>[],
     this.onProfileTap,
     this.showCompatibility = true,
     this.enableHapticFeedback = true,
@@ -27,7 +29,7 @@ class SwipeableCard extends ConsumerStatefulWidget {
   final Function(SwipeDirection) onSwipeComplete;
   final int compatibilityScore;
   final bool isTopCard;
-  final List<String> icebreakers;
+  final List<IcebreakerQuestion> icebreakers;
   final VoidCallback? onProfileTap;
   final bool showCompatibility;
   final bool enableHapticFeedback;
@@ -156,7 +158,7 @@ class _SwipeableCardState extends ConsumerState<SwipeableCard>
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Failed to send interest'),
-            backgroundColor: Colors.red,
+            backgroundColor: AppColors.error,
             duration: const Duration(seconds: 2),
           ),
         );
@@ -193,7 +195,7 @@ class _SwipeableCardState extends ConsumerState<SwipeableCard>
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Failed to skip profile'),
-            backgroundColor: Colors.red,
+            backgroundColor: AppColors.error,
             duration: const Duration(seconds: 2),
           ),
         );
@@ -267,7 +269,7 @@ class _SwipeableCardState extends ConsumerState<SwipeableCard>
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(isShortlisted ? 'Added to shortlist' : 'Removed from shortlist'),
-              backgroundColor: isShortlisted ? Colors.green : Colors.orange,
+              backgroundColor: isShortlisted ? AppColors.success : AppColors.warning,
               duration: const Duration(seconds: 2),
             ),
           );
@@ -277,7 +279,7 @@ class _SwipeableCardState extends ConsumerState<SwipeableCard>
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(result['error'] ?? 'Failed to update shortlist'),
-              backgroundColor: Colors.red,
+              backgroundColor: AppColors.error,
               duration: const Duration(seconds: 2),
             ),
           );
@@ -289,7 +291,7 @@ class _SwipeableCardState extends ConsumerState<SwipeableCard>
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Failed to update shortlist'),
-            backgroundColor: Colors.red,
+            backgroundColor: AppColors.error,
             duration: const Duration(seconds: 2),
           ),
         );
@@ -300,7 +302,7 @@ class _SwipeableCardState extends ConsumerState<SwipeableCard>
   }
 
   Color _getCardColor() {
-    if (!widget.isTopCard) return Colors.white;
+    if (!widget.isTopCard) return AppColors.background;
     
     final dx = _dragOffset.dx;
     final screenWidth = MediaQuery.of(context).size.width;
@@ -308,13 +310,13 @@ class _SwipeableCardState extends ConsumerState<SwipeableCard>
 
     if (percentage > 0) {
       // Green for like
-      return Color.lerp(Colors.white, Colors.green.shade50, percentage)!;
+      return Color.lerp(AppColors.background, AppColors.success.withValues(alpha: 0.2), percentage)!;
     } else if (percentage < 0) {
       // Red for skip
-      return Color.lerp(Colors.white, Colors.red.shade50, (-percentage))!;
+      return Color.lerp(AppColors.background, AppColors.error.withValues(alpha: 0.2), (-percentage))!;
     }
     
-    return Colors.white;
+    return AppColors.background;
   }
 
   Widget _buildOverlay() {
@@ -332,11 +334,11 @@ class _SwipeableCardState extends ConsumerState<SwipeableCard>
 
     if (dx > 0) {
       actionText = 'LIKE';
-      overlayColor = Colors.green;
+      overlayColor = AppColors.success;
       actionIcon = Icons.favorite;
     } else if (dx < 0) {
       actionText = 'SKIP';
-      overlayColor = Colors.red;
+      overlayColor = AppColors.error;
       actionIcon = Icons.close;
     }
 
@@ -599,49 +601,70 @@ class _SwipeableCardState extends ConsumerState<SwipeableCard>
                         ),
                         const SizedBox(height: 8),
                         Wrap(
-                          spacing: 4,
-                          runSpacing: 4,
-                          children: widget.icebreakers.map((icebreaker) {
-                            final index = widget.icebreakers.indexOf(icebreaker);
-                            bool isAnswered = index < 2; // Mock answered state for display
+                          spacing: 6,
+                          runSpacing: 6,
+                          children: widget.icebreakers.map((question) {
+                            final answered = question.answered;
+                            final answer = question.answer;
+                            final borderColor = answered
+                                ? Colors.green.shade400
+                                : Colors.grey[300]!;
+                            final background = answered
+                                ? Colors.green.withValues(alpha: 0.08)
+                                : Colors.white;
+                            final icon = answered
+                                ? Icons.check_circle
+                                : Icons.lightbulb_outline;
+                            final iconColor = answered
+                                ? Colors.green.shade600
+                                : Colors.amber.shade700;
+
                             return Container(
+                              constraints: const BoxConstraints(maxWidth: 220),
                               padding: const EdgeInsets.symmetric(
-                                horizontal: 8,
-                                vertical: 4,
+                                horizontal: 10,
+                                vertical: 6,
                               ),
                               decoration: BoxDecoration(
-                                color: isAnswered
-                                    ? Colors.white.withValues(alpha: 0.8)
-                                    : Colors.white,
-                                borderRadius: BorderRadius.circular(6),
-                                border: Border.all(
-                                  color: isAnswered
-                                      ? Colors.green.withValues(alpha: 0.3)
-                                      : Colors.grey[300]!),
+                                color: background,
+                                borderRadius: BorderRadius.circular(8),
+                                border: Border.all(color: borderColor),
                               ),
                               child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  if (isAnswered)
-                                    Icon(
-                                      Icons.check_circle,
-                                      size: 16,
-                                      color: Colors.green,
+                                  Icon(icon, size: 14, color: iconColor),
+                                  const SizedBox(width: 6),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          question.text,
+                                          style: TextStyle(
+                                            fontSize: 11,
+                                            fontWeight: FontWeight.w600,
+                                            color: Colors.grey.shade800,
+                                          ),
+                                          maxLines: 2,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                        if (answered && (answer?.isNotEmpty ?? false))
+                                          Padding(
+                                            padding: const EdgeInsets.only(top: 4),
+                                            child: Text(
+                                              answer!,
+                                              style: TextStyle(
+                                                fontSize: 10,
+                                                color: Colors.green.shade700,
+                                              ),
+                                              maxLines: 2,
+                                              overflow: TextOverflow.ellipsis,
+                                            ),
+                                          ),
+                                      ],
                                     ),
-                                  if (isAnswered) const SizedBox(width: 4),
-                                  Text(
-                                    icebreaker,
-                                    style: TextStyle(
-                                      fontSize: 10,
-                                      color: isAnswered
-                                          ? Colors.green.shade700
-                                          : Colors.grey.shade700,
-                                      decoration: isAnswered
-                                          ? TextDecoration.lineThrough
-                                          : TextDecoration.none,
-                                    ),
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
                                   ),
                                 ],
                               ),

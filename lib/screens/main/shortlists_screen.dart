@@ -11,6 +11,10 @@ import 'package:aroosi_flutter/features/profiles/list_controller.dart';
 import 'package:aroosi_flutter/utils/pagination.dart';
 import 'package:aroosi_flutter/core/toast_service.dart';
 import 'package:aroosi_flutter/features/profiles/selection.dart';
+import 'package:aroosi_flutter/widgets/error_states.dart';
+import 'package:aroosi_flutter/widgets/empty_states.dart';
+import 'package:aroosi_flutter/widgets/offline_states.dart';
+import 'package:aroosi_flutter/theme/theme_helpers.dart';
 
 class ShortlistsScreen extends ConsumerStatefulWidget {
   const ShortlistsScreen({super.key});
@@ -51,24 +55,42 @@ class _ShortlistsScreenState extends ConsumerState<ShortlistsScreen> {
   Widget build(BuildContext context) {
     final state = ref.watch(shortlistControllerProvider);
 
-    // Error state when nothing loaded
-    if (!state.loading && state.error != null && state.items.isEmpty) {
+    // Loading state
+    if (state.loading && state.items.isEmpty) {
       return AppScaffold(
         title: 'Shortlists',
-        child: Center(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(state.error!),
-              const SizedBox(height: 12),
-              FilledButton(
-                onPressed: () =>
-                    ref.read(shortlistControllerProvider.notifier).refresh(),
-                child: const Text('Retry'),
-              ),
-            ],
-          ),
+        child: const Center(
+          child: CircularProgressIndicator(),
         ),
+      );
+    }
+
+    // Error state when nothing loaded
+    if (!state.loading && state.error != null && state.items.isEmpty) {
+      final error = state.error!;
+      final isOfflineError =
+          error.toLowerCase().contains('network') ||
+          error.toLowerCase().contains('connection') ||
+          error.toLowerCase().contains('timeout') ||
+          error.toLowerCase().contains('offline');
+
+      return AppScaffold(
+        title: 'Shortlists',
+        child: isOfflineError
+            ? OfflineState(
+                title: 'Connection Lost',
+                subtitle: 'Unable to load shortlist',
+                description: 'Check your internet connection and try again',
+                onRetry: () =>
+                    ref.read(shortlistControllerProvider.notifier).refresh(),
+              )
+            : ErrorState(
+                title: 'Failed to Load Shortlist',
+                subtitle: 'Something went wrong',
+                errorMessage: error,
+                onRetryPressed: () =>
+                    ref.read(shortlistControllerProvider.notifier).refresh(),
+              ),
       );
     }
 
@@ -76,7 +98,9 @@ class _ShortlistsScreenState extends ConsumerState<ShortlistsScreen> {
     if (!state.loading && state.error == null && state.items.isEmpty) {
       return AppScaffold(
         title: 'Shortlists',
-        child: const Center(child: Text('No profiles in your shortlist yet.')),
+        child: EmptyShortlistState(
+          onExplore: () => context.push('/search'),
+        ),
       );
     }
 
@@ -107,17 +131,15 @@ class _ShortlistsScreenState extends ConsumerState<ShortlistsScreen> {
                     ? Icons.note
                     : Icons.note_add_outlined,
                 color: entry.note != null && entry.note!.isNotEmpty
-                    ? Theme.of(context).primaryColor
+                    ? ThemeHelpers.getMaterialTheme(context).primaryColor
                     : null,
               ),
               onPressed: () async {
                 _draftNote = entry.note ?? '';
-
-                if (!mounted) return;
-
+                if (!context.mounted) return;
                 await showDialog(
                   context: context,
-                  builder: (context) => AlertDialog(
+                  builder: (dialogContext) => AlertDialog(
                     title: const Text('Edit Note'),
                     content: TextField(
                       maxLines: 5,
@@ -130,7 +152,7 @@ class _ShortlistsScreenState extends ConsumerState<ShortlistsScreen> {
                     ),
                     actions: [
                       TextButton(
-                        onPressed: () => Navigator.of(context).pop(),
+                        onPressed: () => Navigator.of(dialogContext).pop(),
                         child: const Text('Cancel'),
                       ),
                       TextButton(
@@ -138,9 +160,8 @@ class _ShortlistsScreenState extends ConsumerState<ShortlistsScreen> {
                           final success = await ref
                               .read(shortlistControllerProvider.notifier)
                               .setNote(entry.userId, _draftNote.trim());
-                          if (mounted) {
-                            Navigator.of(context).pop();
-                          }
+                          if (!dialogContext.mounted) return;
+                          Navigator.of(dialogContext).pop();
 
                           if (success) {
                             ToastService.instance.success('Note saved');
@@ -164,11 +185,12 @@ class _ShortlistsScreenState extends ConsumerState<ShortlistsScreen> {
                   title: 'Remove from shortlist?',
                   message: 'This will remove the match from your shortlist.',
                 );
+                if (!context.mounted) return;
                 if (confirmed == true) {
                   final result = await ref
                       .read(shortlistControllerProvider.notifier)
                       .toggleShortlist(entry.userId);
-                  if (!mounted) return;
+                  if (!context.mounted) return;
 
                   if (result['success'] == true) {
                     ToastService.instance.success('Removed from shortlist');
@@ -180,8 +202,6 @@ class _ShortlistsScreenState extends ConsumerState<ShortlistsScreen> {
 
                     if (isPlanLimit) {
                       // Show upgrade dialog for plan limits
-                      if (!mounted) return;
-
                       final shouldUpgrade = await showAdaptiveConfirm(
                         context,
                         title: 'Limit Reached',
@@ -189,7 +209,8 @@ class _ShortlistsScreenState extends ConsumerState<ShortlistsScreen> {
                         confirmText: 'OK',
                         cancelText: 'Cancel',
                       );
-                      if (shouldUpgrade && mounted) {
+                      if (!context.mounted) return;
+                      if (shouldUpgrade) {
                         // Limit reached - no action needed
                       }
                     } else {
@@ -228,7 +249,7 @@ class _ShortlistsScreenState extends ConsumerState<ShortlistsScreen> {
     final content = AdaptiveRefresh(
       onRefresh: () async {
         await ref.read(shortlistControllerProvider.notifier).refresh();
-        if (!mounted) return;
+        if (!context.mounted) return;
         ToastService.instance.success('Refreshed');
       },
       controller: _scrollController,

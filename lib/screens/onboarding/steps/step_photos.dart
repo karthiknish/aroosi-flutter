@@ -10,6 +10,7 @@ import 'package:firebase_auth/firebase_auth.dart' as fb;
 import 'package:aroosi_flutter/features/auth/auth_controller.dart';
 import 'base_step.dart';
 import 'step_constants.dart';
+import 'package:aroosi_flutter/theme/theme_helpers.dart';
 
 /// Photos step widget
 class StepPhotos extends ConsumerStatefulWidget {
@@ -337,7 +338,7 @@ class _StepPhotosState extends ConsumerState<StepPhotos> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final theme = ThemeHelpers.getMaterialTheme(context);
 
     return Form(
       key: widget.formKey,
@@ -535,7 +536,7 @@ class _StepPhotosState extends ConsumerState<StepPhotos> {
   }
 
   Widget _buildPendingThumbnail(BuildContext context, _PendingUpload upload) {
-    final theme = Theme.of(context);
+    final theme = ThemeHelpers.getMaterialTheme(context);
 
     return SizedBox(
       width: 110,
@@ -588,7 +589,7 @@ class _StepPhotosState extends ConsumerState<StepPhotos> {
   }
 
   Widget _buildImageThumbnail(BuildContext context, ProfileImage image) {
-    final theme = Theme.of(context);
+    final theme = ThemeHelpers.getMaterialTheme(context);
     final isPrimary = _images.isNotEmpty && image == _images.first;
 
     return SizedBox(

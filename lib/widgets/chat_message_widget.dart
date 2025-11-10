@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:aroosi_flutter/features/chat/chat_models.dart';
 import 'package:aroosi_flutter/features/chat/delivery_receipt_service.dart';
 import 'package:aroosi_flutter/theme/colors.dart';
+import 'package:aroosi_flutter/theme/theme_helpers.dart';
 import 'package:aroosi_flutter/widgets/voice_message_bubble.dart';
 
 /// Enhanced chat message widget with modern UI/UX
@@ -29,7 +30,7 @@ class ChatMessageWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final theme = ThemeHelpers.getMaterialTheme(context);
     final isMe = message.isMine;
     final messageColor = isMe
         ? theme.colorScheme.primaryContainer
@@ -122,7 +123,7 @@ class ChatMessageWidget extends StatelessWidget {
   }
 
   Widget _buildTextMessage(BuildContext context) {
-    final theme = Theme.of(context);
+    final theme = ThemeHelpers.getMaterialTheme(context);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -185,7 +186,7 @@ class ChatMessageWidget extends StatelessWidget {
   }
 
   Widget _buildDeliveryReceipt(BuildContext context) {
-    final theme = Theme.of(context);
+    final theme = ThemeHelpers.getMaterialTheme(context);
     
     // Use delivery receipt if available, otherwise fall back to message.isRead
     final status = deliveryReceipt?.status;
@@ -253,7 +254,7 @@ class ChatMessageWidget extends StatelessWidget {
   }
 
   Widget _buildReactionsRow(BuildContext context) {
-    final theme = Theme.of(context);
+    final theme = ThemeHelpers.getMaterialTheme(context);
 
     return Wrap(
       spacing: 4,
@@ -292,7 +293,7 @@ class ChatMessageSkeleton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final theme = ThemeHelpers.getMaterialTheme(context);
     final isDark = theme.brightness == Brightness.dark;
 
     return Padding(
@@ -355,7 +356,7 @@ class TypingIndicator extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final theme = ThemeHelpers.getMaterialTheme(context);
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),

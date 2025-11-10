@@ -4,7 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:aroosi_flutter/features/profiles/models.dart';
 import 'package:aroosi_flutter/features/profiles/list_controller.dart';
 import 'package:aroosi_flutter/widgets/app_scaffold.dart';
-import 'package:aroosi_flutter/l10n/app_localizations.dart';
+import 'package:aroosi_flutter/theme/theme_helpers.dart';
 
 class AdvancedSearchFiltersScreen extends ConsumerStatefulWidget {
   final SearchFilters? initialFilters;
@@ -66,9 +66,6 @@ class _AdvancedSearchFiltersScreenState extends ConsumerState<AdvancedSearchFilt
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    final theme = Theme.of(context);
-
     return AppScaffold(
       title: 'Advanced Search',
       child: Column(
@@ -94,7 +91,7 @@ class _AdvancedSearchFiltersScreenState extends ConsumerState<AdvancedSearchFilt
   }
 
   Widget _buildTabBar() {
-    final theme = Theme.of(context);
+    final theme = ThemeHelpers.getMaterialTheme(context);
     
     return Container(
       color: theme.colorScheme.surface,
@@ -508,7 +505,7 @@ class _AdvancedSearchFiltersScreenState extends ConsumerState<AdvancedSearchFilt
   }
 
   Widget _buildSectionTitle(String title) {
-    final theme = Theme.of(context);
+    final theme = ThemeHelpers.getMaterialTheme(context);
     
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
@@ -524,7 +521,7 @@ class _AdvancedSearchFiltersScreenState extends ConsumerState<AdvancedSearchFilt
 
   Widget _buildDropdownField(String label, String? value, List<String> options, Function(String?) onChanged) {
     return DropdownButtonFormField<String>(
-      value: value,
+      initialValue: value,
       decoration: InputDecoration(
         labelText: label,
         border: const OutlineInputBorder(),
@@ -580,7 +577,7 @@ class _AdvancedSearchFiltersScreenState extends ConsumerState<AdvancedSearchFilt
   }
 
   Widget _buildBottomActions() {
-    final theme = Theme.of(context);
+    final theme = ThemeHelpers.getMaterialTheme(context);
     
     return Container(
       padding: const EdgeInsets.all(16),

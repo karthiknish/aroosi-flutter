@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:aroosi_flutter/theme/colors.dart';
+import 'package:aroosi_flutter/theme/theme_helpers.dart';
 import 'package:aroosi_flutter/core/permissions.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
@@ -117,7 +118,7 @@ class _ChatInputWidgetState extends State<ChatInputWidget> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final theme = ThemeHelpers.getMaterialTheme(context);
     final hasText = widget.textController.text.trim().isNotEmpty;
 
     return Column(
@@ -285,7 +286,7 @@ class _ChatInputWidgetState extends State<ChatInputWidget> {
                   child: Container(
                     constraints: const BoxConstraints(minHeight: 40),
                     decoration: BoxDecoration(
-                      color: CupertinoTheme.of(context).scaffoldBackgroundColor,
+                      color: CupertinoThemeHelpers.getMaterialTheme(context).scaffoldBackgroundColor,
                       borderRadius: BorderRadius.circular(20),
                       border: Border.all(
                         color: AppColors.primary.withAlpha(128),
@@ -308,7 +309,7 @@ class _ChatInputWidgetState extends State<ChatInputWidget> {
                         horizontal: 16,
                         vertical: 10,
                       ),
-                      style: CupertinoTheme.of(context).textTheme.textStyle,
+                      style: CupertinoThemeHelpers.getMaterialTheme(context).textTheme.textStyle,
                       decoration: BoxDecoration(
                         color: Colors.transparent,
                         border: Border.all(color: Colors.transparent),
@@ -404,7 +405,7 @@ class _VoiceRecordingWidgetState extends State<VoiceRecordingWidget>
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final theme = ThemeHelpers.getMaterialTheme(context);
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -471,7 +472,7 @@ class ChatInputLoadingWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final theme = ThemeHelpers.getMaterialTheme(context);
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),

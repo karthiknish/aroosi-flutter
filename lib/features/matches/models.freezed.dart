@@ -326,7 +326,7 @@ MatchListItem _$MatchListItemFromJson(Map<String, dynamic> json) {
 mixin _$MatchListItem {
   String get id => throw _privateConstructorUsedError;
   Match get match => throw _privateConstructorUsedError;
-  @JsonKey(ignore: true)
+  @JsonKey(includeFromJson: false, includeToJson: false)
   ProfileSummary? get counterpartProfile => throw _privateConstructorUsedError;
   int get unreadCount => throw _privateConstructorUsedError;
 
@@ -350,7 +350,8 @@ abstract class $MatchListItemCopyWith<$Res> {
   $Res call({
     String id,
     Match match,
-    @JsonKey(ignore: true) ProfileSummary? counterpartProfile,
+    @JsonKey(includeFromJson: false, includeToJson: false)
+    ProfileSummary? counterpartProfile,
     int unreadCount,
   });
 
@@ -423,7 +424,8 @@ abstract class _$$MatchListItemImplCopyWith<$Res>
   $Res call({
     String id,
     Match match,
-    @JsonKey(ignore: true) ProfileSummary? counterpartProfile,
+    @JsonKey(includeFromJson: false, includeToJson: false)
+    ProfileSummary? counterpartProfile,
     int unreadCount,
   });
 
@@ -479,7 +481,8 @@ class _$MatchListItemImpl implements _MatchListItem {
   const _$MatchListItemImpl({
     required this.id,
     required this.match,
-    @JsonKey(ignore: true) this.counterpartProfile,
+    @JsonKey(includeFromJson: false, includeToJson: false)
+    this.counterpartProfile,
     this.unreadCount = 0,
   });
 
@@ -491,7 +494,7 @@ class _$MatchListItemImpl implements _MatchListItem {
   @override
   final Match match;
   @override
-  @JsonKey(ignore: true)
+  @JsonKey(includeFromJson: false, includeToJson: false)
   final ProfileSummary? counterpartProfile;
   @override
   @JsonKey()
@@ -538,7 +541,8 @@ abstract class _MatchListItem implements MatchListItem {
   const factory _MatchListItem({
     required final String id,
     required final Match match,
-    @JsonKey(ignore: true) final ProfileSummary? counterpartProfile,
+    @JsonKey(includeFromJson: false, includeToJson: false)
+    final ProfileSummary? counterpartProfile,
     final int unreadCount,
   }) = _$MatchListItemImpl;
 
@@ -550,7 +554,7 @@ abstract class _MatchListItem implements MatchListItem {
   @override
   Match get match;
   @override
-  @JsonKey(ignore: true)
+  @JsonKey(includeFromJson: false, includeToJson: false)
   ProfileSummary? get counterpartProfile;
   @override
   int get unreadCount;

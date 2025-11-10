@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:aroosi_flutter/theme/theme.dart';
+import 'package:aroosi_flutter/theme/theme_helpers.dart';
 
 // Provider for toast service messenger key
 final toastMessengerKeyProvider = Provider<GlobalKey<ScaffoldMessengerState>>(
@@ -105,8 +106,8 @@ class ToastService {
 
     scaffoldMessenger.hideCurrentSnackBar();
 
-    final palette = _resolvePalette(type, Theme.of(context).colorScheme);
-    final theme = Theme.of(context);
+    final palette = _resolvePalette(type, ThemeHelpers.getMaterialTheme(context).colorScheme);
+    final theme = ThemeHelpers.getMaterialTheme(context);
 
     final snackBar = SnackBar(
       behavior: SnackBarBehavior.floating,
@@ -153,7 +154,7 @@ class ToastService {
     final context = _messengerKey.currentContext;
     if (context == null) return;
 
-    final theme = Theme.of(context);
+    final theme = ThemeHelpers.getMaterialTheme(context);
     final errorColor = theme.colorScheme.error;
 
     SnackBar snackBar;

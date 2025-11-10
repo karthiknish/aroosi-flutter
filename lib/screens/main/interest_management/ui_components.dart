@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:aroosi_flutter/theme/theme_helpers.dart';
 
 /// Avatar widget for displaying user profile images with fallback to initials
 class InterestAvatar extends StatelessWidget {
@@ -64,7 +65,7 @@ class TraitPill extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final theme = ThemeHelpers.getMaterialTheme(context);
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
@@ -134,7 +135,7 @@ class TimelineChips extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final theme = ThemeHelpers.getMaterialTheme(context);
     return Wrap(
       spacing: 8,
       runSpacing: 6,

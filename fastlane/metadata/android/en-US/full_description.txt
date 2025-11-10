@@ -1,1 +1,20 @@
-Aroosi is a modern matchmaking app with advanced filters, verified profiles, and secure messaging. Find meaningful connections with a clean, fast, and privacy-first experience.
+Aroosi is the cultural matchmaking app built for Afghans and Muslims who want intentional relationships that respect tradition. We combine family guidance, halal dating principles, and smart technology so you can meet compatible matches with confidence.
+
+Why people choose Aroosi
+- Cultural compatibility profiles covering faith, language, family expectations, and long-term goals
+- Family approval workspace that invites loved ones to review matches, share advice, and celebrate progress
+- Halal messaging with voice notes, guided prompts, and moderation safeguards to keep conversations respectful
+- Advanced filters for age, radius, education, lifestyle, and religious practice so you can focus on the right matches
+- Verified profiles, safety reporting, and in-app privacy controls that prioritise trust from the first message
+
+Made for our community
+- Built by the Afghan diaspora with full English, Dari, and Pashto localisation
+- Cultural guidance and halal dating tips woven throughout the experience
+- Compatibility insights that highlight shared traditions, marriage intentions, and family values
+
+Privacy-first design
+- Data encrypted in transit and at rest using Firebase security standards
+- Transparent privacy policy, consent reminders, and clear controls for analytics and notifications
+- Request to download or delete your data at any time directly from the app
+
+Whether you are looking for serious courtship or families exploring introductions together, Aroosi keeps you in control while honouring the traditions that matter most.

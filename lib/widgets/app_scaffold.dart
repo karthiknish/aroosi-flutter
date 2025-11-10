@@ -22,14 +22,6 @@ class AppScaffold extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final content = SafeArea(
-      bottom: false,
-      child: Padding(
-        padding: const EdgeInsets.all(Spacing.md),
-        child: child,
-      ),
-    );
-    
     return AuroraBackground(
       enableTexture: true,
       child: CupertinoPageScaffold(

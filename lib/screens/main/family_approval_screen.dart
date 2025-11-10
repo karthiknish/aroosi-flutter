@@ -7,6 +7,7 @@ import 'package:dio/dio.dart';
 import 'package:aroosi_flutter/core/api_client.dart';
 import 'package:aroosi_flutter/core/api_error_handler.dart';
 import 'package:aroosi_flutter/theme/colors.dart';
+import 'package:aroosi_flutter/theme/theme_helpers.dart';
 
 class FamilyApprovalScreen extends ConsumerStatefulWidget {
   const FamilyApprovalScreen({super.key});
@@ -469,7 +470,7 @@ class _CreateFamilyApprovalDialogState
     bool hasError = false,
   }) {
     return BoxDecoration(
-      color: CupertinoTheme.of(context).scaffoldBackgroundColor,
+      color: CupertinoThemeHelpers.getMaterialTheme(context).scaffoldBackgroundColor,
       border: Border.all(
         color: hasError ? CupertinoColors.destructiveRed : AppColors.primary,
         width: 1.5,

@@ -1,5 +1,5 @@
-import 'package:flutter/foundation.dart';
 import 'package:aroosi_flutter/utils/debug_logger.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 
 /// Standardized error handling for the Aroosi app
 /// 
@@ -233,12 +233,33 @@ class ErrorHandler {
   }
 
   void _reportError(AppError error) {
-    // In production, you might want to send errors to a service like Crashlytics
-    if (kReleaseMode && error.severity.index >= ErrorSeverity.high.index) {
-      // TODO: Integrate with crash reporting service
-      logDebug('Critical error would be reported to crash service', data: {
+    // Report high severity errors to Firebase Crashlytics
+    if (error.severity.index >= ErrorSeverity.high.index) {
+      try {
+        FirebaseCrashlytics.instance.recordError(
+          error,
+          error.stackTrace,
+          reason: '${error.code}: ${error.message}',
+          information: [
+            if (error.details != null) error.details!,
+            'Timestamp: ${error.timestamp.toIso8601String()}',
+            'Severity: ${error.severity.name}',
+          ],
+          fatal: error.severity == ErrorSeverity.critical,
+        );
+        
+        // Set custom keys for better filtering in Crashlytics
+        FirebaseCrashlytics.instance.setCustomKey('error_code', error.code);
+        FirebaseCrashlytics.instance.setCustomKey('error_severity', error.severity.name);
+        
+        logDebug('Error reported to Crashlytics', data: {
         'error': error.toString(),
+          'severity': error.severity.name,
       });
+      } catch (e) {
+        // Fallback logging if Crashlytics fails
+        logDebug('Failed to report error to Crashlytics', error: e);
+      }
     }
   }
 

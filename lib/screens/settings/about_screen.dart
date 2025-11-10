@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
 import 'package:aroosi_flutter/theme/theme.dart';
+import 'package:aroosi_flutter/theme/theme_helpers.dart';
 
 const String _releaseChannel = String.fromEnvironment(
   'AROOSI_RELEASE_CHANNEL',
@@ -96,7 +97,7 @@ class _AboutScreenState extends State<AboutScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final theme = ThemeHelpers.getMaterialTheme(context);
 
     return Scaffold(
       appBar: AppBar(title: const Text('About')),
@@ -156,7 +157,7 @@ class _InfoCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final theme = ThemeHelpers.getMaterialTheme(context);
     final textTheme = theme.textTheme;
     final borderColor = theme.colorScheme.outlineVariant.withValues(alpha: 0.4);
 
@@ -223,7 +224,7 @@ class _MetaRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final theme = ThemeHelpers.getMaterialTheme(context);
     final textTheme = theme.textTheme;
 
     return Padding(
@@ -257,7 +258,7 @@ class _LinkGroup extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final theme = ThemeHelpers.getMaterialTheme(context);
     final borderRadius = BorderRadius.circular(20);
     final borderColor = theme.colorScheme.outlineVariant.withValues(alpha: 0.4);
 
@@ -311,7 +312,7 @@ class _Footer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final textTheme = Theme.of(context).textTheme;
+    final textTheme = ThemeHelpers.getMaterialTheme(context).textTheme;
     final year = DateTime.now().year;
 
     return Column(

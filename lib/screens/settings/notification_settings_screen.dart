@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:aroosi_flutter/theme/colors.dart';
+import 'package:aroosi_flutter/theme/theme_helpers.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:aroosi_flutter/utils/debug_logger.dart';
 import 'package:aroosi_flutter/core/push_notification_service.dart';
 import 'package:aroosi_flutter/core/responsive.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:aroosi_flutter/widgets/error_states.dart';
+import 'package:aroosi_flutter/widgets/offline_states.dart';
 
 class NotificationSettingsScreen extends ConsumerStatefulWidget {
   const NotificationSettingsScreen({super.key});
@@ -18,6 +22,7 @@ class _NotificationSettingsScreenState
     extends ConsumerState<NotificationSettingsScreen> {
   bool _pushEnabled = false;
   bool _isLoading = true;
+  String? _error;
   late PushNotificationService _pushService;
   
   // Granular notification preferences
@@ -55,6 +60,7 @@ class _NotificationSettingsScreenState
       if (mounted) {
         setState(() {
           _isLoading = false;
+          _error = e.toString();
         });
       }
     }
@@ -168,6 +174,7 @@ class _NotificationSettingsScreenState
       await _pushService.setNotificationEnabled(value);
 
       if (mounted) {
+        final colorScheme = ThemeHelpers.getMaterialTheme(context).colorScheme;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
@@ -175,7 +182,9 @@ class _NotificationSettingsScreenState
                   ? 'Push notifications enabled'
                   : 'Push notifications disabled',
             ),
-            backgroundColor: value ? Colors.green : Colors.grey,
+            backgroundColor: value
+                ? AppColors.success
+                : colorScheme.surfaceContainerHighest,
             duration: const Duration(seconds: 3),
           ),
         );
@@ -186,10 +195,11 @@ class _NotificationSettingsScreenState
         setState(() {
           _pushEnabled = !value; // Revert on error
         });
+        final colorScheme = ThemeHelpers.getMaterialTheme(context).colorScheme;
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Failed to change notification settings'),
-            backgroundColor: Colors.red,
+          SnackBar(
+            content: const Text('Failed to change notification settings'),
+            backgroundColor: colorScheme.error,
           ),
         );
       }
@@ -198,17 +208,25 @@ class _NotificationSettingsScreenState
 
   @override
   Widget build(BuildContext context) {
+    final theme = ThemeHelpers.getMaterialTheme(context);
+    final colorScheme = theme.colorScheme;
+    final textColor = ThemeHelpers.getTextColor(context);
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Notification Settings'),
+        title: Text(
+          'Notification Settings',
+          style: theme.textTheme.titleLarge?.copyWith(color: textColor),
+        ),
+        backgroundColor: ThemeHelpers.getSurfaceColor(context),
         flexibleSpace: Container(
           decoration: BoxDecoration(
             gradient: LinearGradient(
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
               colors: [
-                Colors.pink.withValues(alpha: 0.1),
-                Colors.pink.withValues(alpha: 0.05),
+                colorScheme.primary.withValues(alpha: 0.12),
+                colorScheme.primary.withValues(alpha: 0.05),
               ],
             ),
           ),
@@ -216,7 +234,32 @@ class _NotificationSettingsScreenState
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
-          : SingleChildScrollView(
+          : _error != null
+              ? Builder(
+                  builder: (context) {
+                    final error = _error!;
+                    final isOfflineError =
+                        error.toLowerCase().contains('network') ||
+                        error.toLowerCase().contains('connection') ||
+                        error.toLowerCase().contains('timeout') ||
+                        error.toLowerCase().contains('offline');
+
+                    return isOfflineError
+                        ? OfflineState(
+                            title: 'Connection Lost',
+                            subtitle: 'Unable to load notification settings',
+                            description: 'Check your internet connection and try again',
+                            onRetry: _loadNotificationSettings,
+                          )
+                        : ErrorState(
+                            title: 'Failed to Load Settings',
+                            subtitle: 'Something went wrong',
+                            errorMessage: error,
+                            onRetryPressed: _loadNotificationSettings,
+                          );
+                  },
+                )
+              : SingleChildScrollView(
               padding: Responsive.screenPadding(context),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -238,26 +281,29 @@ class _NotificationSettingsScreenState
   }
 
   Widget _buildAPNsDisclosure() {
+    final theme = ThemeHelpers.getMaterialTheme(context);
+    final colorScheme = theme.colorScheme;
+    final textTheme = theme.textTheme;
+
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.blue.shade50,
+        color: AppColors.info.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.blue.shade200),
+        border: Border.all(color: AppColors.info.withValues(alpha: 0.3)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              Icon(Icons.apple, color: Colors.blue[700], size: 20),
+              Icon(Icons.apple, color: AppColors.info, size: 20),
               const SizedBox(width: 8),
               Text(
                 'Apple Push Notification Service (APNs)',
-                style: TextStyle(
-                  fontSize: 16,
+                style: textTheme.titleMedium?.copyWith(
                   fontWeight: FontWeight.bold,
-                  color: Colors.blue[700],
+                  color: AppColors.info,
                 ),
               ),
             ],
@@ -265,9 +311,8 @@ class _NotificationSettingsScreenState
           const SizedBox(height: 12),
           Text(
             'Aroosi uses Apple\'s Push Notification service to deliver important app notifications. We only use APNs for:',
-            style: TextStyle(
-              fontSize: 14,
-              color: Colors.grey[700],
+            style: textTheme.bodyMedium?.copyWith(
+              color: colorScheme.onSurfaceVariant,
               height: 1.4,
             ),
           ),
@@ -282,17 +327,18 @@ class _NotificationSettingsScreenState
               padding: const EdgeInsets.only(left: 8, top: 4),
               child: Text(
                 item,
-                style: TextStyle(fontSize: 13, color: Colors.grey[600]),
+                style: textTheme.bodySmall?.copyWith(
+                  color: colorScheme.onSurfaceVariant,
+                ),
               ),
             ),
           ),
           const SizedBox(height: 12),
           Text(
             'Your privacy is protected. We do not collect personal data through APNs beyond what\'s necessary for notification delivery.',
-            style: TextStyle(
-              fontSize: 12,
+            style: textTheme.bodySmall?.copyWith(
               fontStyle: FontStyle.italic,
-              color: Colors.grey[500],
+              color: colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
             ),
           ),
         ],
@@ -301,6 +347,10 @@ class _NotificationSettingsScreenState
   }
 
   Widget _buildNotificationTypes() {
+    final theme = ThemeHelpers.getMaterialTheme(context);
+    final colorScheme = theme.colorScheme;
+    final textColor = ThemeHelpers.getTextColor(context);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -309,17 +359,17 @@ class _NotificationSettingsScreenState
           style: TextStyle(
             fontSize: 20,
             fontWeight: FontWeight.bold,
-            color: Colors.black87,
+            color: textColor,
           ),
         ),
         const SizedBox(height: 16),
         Container(
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: colorScheme.surface,
             borderRadius: BorderRadius.circular(12),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withValues(alpha: 0.05),
+                color: colorScheme.shadow.withValues(alpha: 0.08),
                 blurRadius: 10,
                 offset: const Offset(0, 2),
               ),
@@ -328,17 +378,21 @@ class _NotificationSettingsScreenState
           child: SwitchListTile(
             title: Row(
               children: [
-                Icon(Icons.notifications_active, color: Colors.pink, size: 20),
+                Icon(Icons.notifications_active, color: colorScheme.primary, size: 20),
                 const SizedBox(width: 12),
                 const Text('Enable Push Notifications'),
               ],
             ),
-            subtitle: const Text(
+            subtitle: Text(
               'Get notified about matches, messages, and activity',
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: colorScheme.onSurfaceVariant,
+              ),
             ),
             value: _pushEnabled,
             onChanged: _togglePushNotifications,
-            activeThumbColor: Colors.pink,
+            activeThumbColor: colorScheme.primary,
+            activeTrackColor: colorScheme.primary.withValues(alpha: 0.25),
           ),
         ),
         const SizedBox(height: 16),
@@ -346,15 +400,15 @@ class _NotificationSettingsScreenState
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: Colors.orange.shade50,
+              color: AppColors.warning.withValues(alpha: 0.08),
               borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: Colors.orange.shade200),
+              border: Border.all(color: AppColors.warning.withValues(alpha: 0.3)),
             ),
             child: Row(
               children: [
                 Icon(
                   Icons.info_outline,
-                  color: Colors.orange.shade700,
+                  color: AppColors.warning,
                   size: 16,
                 ),
                 const SizedBox(width: 8),
@@ -372,6 +426,10 @@ class _NotificationSettingsScreenState
   }
 
   Widget _buildGranularNotificationSettings() {
+    final theme = ThemeHelpers.getMaterialTheme(context);
+    final colorScheme = theme.colorScheme;
+    final textColor = ThemeHelpers.getTextColor(context);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -380,17 +438,17 @@ class _NotificationSettingsScreenState
           style: TextStyle(
             fontSize: 20,
             fontWeight: FontWeight.bold,
-            color: Colors.black87,
+            color: textColor,
           ),
         ),
         const SizedBox(height: 16),
         Container(
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: colorScheme.surface,
             borderRadius: BorderRadius.circular(12),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withValues(alpha: 0.05),
+                color: colorScheme.shadow.withValues(alpha: 0.08),
                 blurRadius: 10,
                 offset: const Offset(0, 2),
               ),
@@ -402,7 +460,7 @@ class _NotificationSettingsScreenState
                 icon: Icons.favorite,
                 title: 'New Matches',
                 description: 'Get notified when someone matches with you',
-                color: Colors.pink,
+                color: colorScheme.primary,
                 value: _newMatchesEnabled,
                 onChanged: (value) {
                   setState(() {
@@ -416,7 +474,7 @@ class _NotificationSettingsScreenState
                 icon: Icons.chat,
                 title: 'Messages',
                 description: 'Never miss important conversations',
-                color: Colors.blue,
+                color: AppColors.info,
                 value: _messagesEnabled,
                 onChanged: (value) {
                   setState(() {
@@ -430,7 +488,7 @@ class _NotificationSettingsScreenState
                 icon: Icons.visibility,
                 title: 'Profile Views',
                 description: 'Know when someone views your profile',
-                color: Colors.green,
+                color: AppColors.success,
                 value: _profileViewsEnabled,
                 onChanged: (value) {
                   setState(() {
@@ -444,7 +502,7 @@ class _NotificationSettingsScreenState
                 icon: Icons.announcement,
                 title: 'App Updates',
                 description: 'Important safety and feature announcements',
-                color: Colors.orange,
+                color: AppColors.warning,
                 value: _appUpdatesEnabled,
                 onChanged: (value) {
                   setState(() {
@@ -468,6 +526,9 @@ class _NotificationSettingsScreenState
     required bool value,
     required ValueChanged<bool> onChanged,
   }) {
+    final theme = ThemeHelpers.getMaterialTheme(context);
+    final colorScheme = theme.colorScheme;
+
     return SwitchListTile(
       title: Row(
         children: [
@@ -493,7 +554,9 @@ class _NotificationSettingsScreenState
                 ),
                 Text(
                   description,
-                  style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: colorScheme.onSurfaceVariant,
+                  ),
                 ),
               ],
             ),
@@ -503,21 +566,27 @@ class _NotificationSettingsScreenState
       value: value && _pushEnabled,
       onChanged: _pushEnabled ? onChanged : null,
       activeThumbColor: color,
-      activeTrackColor: color.withValues(alpha: 0.2),
+      activeTrackColor: color.withValues(alpha: 0.25),
     );
   }
 
   Widget _buildDivider() {
+    final colorScheme = ThemeHelpers.getMaterialTheme(context).colorScheme;
     return Divider(
       height: 1,
       thickness: 1,
       indent: 16,
       endIndent: 16,
-      color: Colors.grey.shade200,
+      color: colorScheme.outlineVariant,
     );
   }
 
   Widget _buildQuietHoursSettings() {
+    final theme = ThemeHelpers.getMaterialTheme(context);
+    final colorScheme = theme.colorScheme;
+    final textColor = ThemeHelpers.getTextColor(context);
+    const quietAccent = AppColors.auroraIris;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -526,25 +595,24 @@ class _NotificationSettingsScreenState
           style: TextStyle(
             fontSize: 20,
             fontWeight: FontWeight.bold,
-            color: Colors.black87,
+            color: textColor,
           ),
         ),
         const SizedBox(height: 8),
         Text(
           'Disable notifications during specific hours',
-          style: TextStyle(
-            fontSize: 14,
-            color: Colors.grey.shade600,
+          style: theme.textTheme.bodyMedium?.copyWith(
+            color: colorScheme.onSurfaceVariant,
           ),
         ),
         const SizedBox(height: 16),
         Container(
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: colorScheme.surface,
             borderRadius: BorderRadius.circular(12),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withValues(alpha: 0.05),
+                color: colorScheme.shadow.withValues(alpha: 0.08),
                 blurRadius: 10,
                 offset: const Offset(0, 2),
               ),
@@ -555,7 +623,7 @@ class _NotificationSettingsScreenState
               SwitchListTile(
                 title: Row(
                   children: [
-                    Icon(Icons.bedtime, color: Colors.purple, size: 20),
+                    const Icon(Icons.bedtime, color: quietAccent, size: 20),
                     const SizedBox(width: 12),
                     const Text('Enable Quiet Hours'),
                   ],
@@ -564,6 +632,9 @@ class _NotificationSettingsScreenState
                   _quietHoursEnabled
                       ? 'Quiet from ${_quietHoursStart.format(context)} to ${_quietHoursEnd.format(context)}'
                       : 'Turn on to set quiet hours',
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: colorScheme.onSurfaceVariant,
+                  ),
                 ),
                 value: _quietHoursEnabled && _pushEnabled,
                 onChanged: _pushEnabled ? (value) {
@@ -572,8 +643,8 @@ class _NotificationSettingsScreenState
                   });
                   _saveQuietHoursSettings();
                 } : null,
-                activeThumbColor: Colors.purple,
-                activeTrackColor: Colors.purple.withValues(alpha: 0.2),
+                activeThumbColor: quietAccent,
+                activeTrackColor: quietAccent.withValues(alpha: 0.25),
               ),
               if (_quietHoursEnabled) ...[
                 _buildDivider(),
@@ -582,14 +653,14 @@ class _NotificationSettingsScreenState
                   trailing: Container(
                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                     decoration: BoxDecoration(
-                      color: Colors.purple.withValues(alpha: 0.1),
+                      color: quietAccent.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Text(
                       _quietHoursStart.format(context),
-                      style: const TextStyle(
+                      style: theme.textTheme.bodySmall?.copyWith(
                         fontWeight: FontWeight.w600,
-                        color: Colors.purple,
+                        color: quietAccent,
                       ),
                     ),
                   ),
@@ -601,14 +672,14 @@ class _NotificationSettingsScreenState
                   trailing: Container(
                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                     decoration: BoxDecoration(
-                      color: Colors.purple.withValues(alpha: 0.1),
+                      color: quietAccent.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Text(
                       _quietHoursEnd.format(context),
-                      style: const TextStyle(
+                      style: theme.textTheme.bodySmall?.copyWith(
                         fontWeight: FontWeight.w600,
-                        color: Colors.purple,
+                        color: quietAccent,
                       ),
                     ),
                   ),
@@ -647,6 +718,10 @@ class _NotificationSettingsScreenState
   }
 
   Widget _buildAppNotificationSettings() {
+    final theme = ThemeHelpers.getMaterialTheme(context);
+    final colorScheme = theme.colorScheme;
+    final textColor = ThemeHelpers.getTextColor(context);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -655,7 +730,7 @@ class _NotificationSettingsScreenState
           style: TextStyle(
             fontSize: 20,
             fontWeight: FontWeight.bold,
-            color: Colors.black87,
+            color: textColor,
           ),
         ),
         const SizedBox(height: 16),
@@ -665,36 +740,36 @@ class _NotificationSettingsScreenState
             'title': 'Matches & Likes',
             'description':
                 'When someone matches with you or likes your profile',
-            'color': Colors.pink,
+            'color': colorScheme.primary,
           },
           {
             'icon': Icons.chat,
             'title': 'Messages',
             'description': 'New messages from your matches',
-            'color': Colors.blue,
+            'color': AppColors.info,
           },
           {
             'icon': Icons.visibility,
             'title': 'Profile Views',
             'description': 'When someone views your profile',
-            'color': Colors.green,
+            'color': AppColors.success,
           },
           {
             'icon': Icons.announcement,
             'title': 'App Updates',
             'description': 'Important announcements and security updates',
-            'color': Colors.orange,
+            'color': AppColors.warning,
           },
         ].map(
           (item) => Container(
             margin: const EdgeInsets.only(bottom: 12),
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: colorScheme.surface,
               borderRadius: BorderRadius.circular(12),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.05),
+                  color: colorScheme.shadow.withValues(alpha: 0.08),
                   blurRadius: 10,
                   offset: const Offset(0, 2),
                 ),
@@ -729,7 +804,9 @@ class _NotificationSettingsScreenState
                       const SizedBox(height: 4),
                       Text(
                         item['description'] as String,
-                        style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: colorScheme.onSurfaceVariant,
+                        ),
                       ),
                     ],
                   ),
@@ -739,7 +816,9 @@ class _NotificationSettingsScreenState
                   style: TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w600,
-                    color: _pushEnabled ? Colors.green : Colors.grey,
+                    color: _pushEnabled
+                        ? AppColors.success
+                        : colorScheme.onSurfaceVariant,
                   ),
                 ),
               ],

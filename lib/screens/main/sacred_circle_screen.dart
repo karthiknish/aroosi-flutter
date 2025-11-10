@@ -10,6 +10,7 @@ import 'package:aroosi_flutter/widgets/app_scaffold.dart';
 import 'package:aroosi_flutter/widgets/retryable_network_image.dart';
 import 'package:aroosi_flutter/widgets/error_states.dart';
 import 'package:aroosi_flutter/theme/motion.dart';
+import 'package:aroosi_flutter/theme/theme_helpers.dart';
 import 'package:aroosi_flutter/l10n/app_localizations.dart';
 
 class SacredCircleScreen extends ConsumerStatefulWidget {
@@ -151,7 +152,7 @@ class _SacredCircleContentState extends State<_SacredCircleContent> {
   }
 
   Widget _buildHeader(BuildContext context) {
-    final theme = Theme.of(context);
+    final theme = ThemeHelpers.getMaterialTheme(context);
     final l10n = AppLocalizations.of(context);
 
     return Container(
@@ -280,15 +281,15 @@ class _SacredCircleContentState extends State<_SacredCircleContent> {
                       shape: BoxShape.circle,
                       gradient: LinearGradient(
                         colors: [
-                          Theme.of(context).colorScheme.primary.withValues(alpha: 0.9),
-                          Theme.of(context).colorScheme.secondary.withValues(alpha: 0.7),
+                          ThemeHelpers.getMaterialTheme(context).colorScheme.primary.withValues(alpha: 0.9),
+                          ThemeHelpers.getMaterialTheme(context).colorScheme.secondary.withValues(alpha: 0.7),
                         ],
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
                       ),
                       boxShadow: [
                         BoxShadow(
-                          color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.4),
+                          color: ThemeHelpers.getMaterialTheme(context).colorScheme.primary.withValues(alpha: 0.4),
                           blurRadius: 25,
                           spreadRadius: 8,
                         ),
@@ -299,14 +300,14 @@ class _SacredCircleContentState extends State<_SacredCircleContent> {
                       children: [
                         Icon(
                           Icons.family_restroom_rounded,
-                          color: Theme.of(context).colorScheme.onPrimary,
+                          color: ThemeHelpers.getMaterialTheme(context).colorScheme.onPrimary,
                           size: 28,
                         ),
                         const SizedBox(height: 2),
           Text(
             l10n?.sacredCircleFamilyUnity ?? 'Unity',
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: Theme.of(context).colorScheme.onPrimary,
+            style: ThemeHelpers.getMaterialTheme(context).textTheme.bodySmall?.copyWith(
+              color: ThemeHelpers.getMaterialTheme(context).colorScheme.onPrimary,
               fontWeight: FontWeight.w600,
             ),
           ),
@@ -323,7 +324,7 @@ class _SacredCircleContentState extends State<_SacredCircleContent> {
   }
 
   Widget _buildEmptyCircle(BuildContext context) {
-    final theme = Theme.of(context);
+    final theme = ThemeHelpers.getMaterialTheme(context);
     final l10n = AppLocalizations.of(context);
 
     return Center(
@@ -377,7 +378,7 @@ class _SacredCircleContentState extends State<_SacredCircleContent> {
     }
 
     final profile = widget.profiles[widget.selectedIndex];
-    final theme = Theme.of(context);
+    final theme = ThemeHelpers.getMaterialTheme(context);
 
     return Container(
       margin: const EdgeInsets.all(20),
@@ -559,7 +560,7 @@ class _ProfileCircle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final theme = ThemeHelpers.getMaterialTheme(context);
 
     return GestureDetector(
       onTap: onTap,

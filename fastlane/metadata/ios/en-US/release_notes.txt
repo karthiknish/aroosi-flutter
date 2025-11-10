@@ -1,1 +1,3 @@
-Performance improvements and UX polish across profiles, search, and subscriptions.
+- Refined cultural compatibility profiles with clearer shared-values insights
+- Faster shortlist and messaging screens plus smarter offline caching
+- Expanded privacy controls and clearer consent prompts for analytics and tracking

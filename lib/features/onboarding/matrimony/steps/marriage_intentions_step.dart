@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:aroosi_flutter/features/onboarding/matrimony/constants.dart';
-import 'package:aroosi_flutter/l10n/app_localizations.dart';
+import 'package:aroosi_flutter/features/onboarding/matrimony/models.dart';
+import 'package:aroosi_flutter/theme/theme_helpers.dart';
 
 class MarriageIntentionsStep extends StatelessWidget {
   final String? selectedIntentionId;
@@ -16,8 +17,7 @@ class MarriageIntentionsStep extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final l10n = AppLocalizations.of(context)!;
+    final theme = ThemeHelpers.getMaterialTheme(context);
 
     return Padding(
       padding: const EdgeInsets.all(24),
@@ -96,7 +96,7 @@ class MarriageIntentionsStep extends StatelessWidget {
     bool isSelected,
     VoidCallback onTap,
   ) {
-    final theme = Theme.of(context);
+    final theme = ThemeHelpers.getMaterialTheme(context);
     
     return Container(
       margin: const EdgeInsets.only(bottom: 16),

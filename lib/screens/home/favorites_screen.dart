@@ -11,6 +11,9 @@ import 'package:aroosi_flutter/features/profiles/list_controller.dart';
 import 'package:aroosi_flutter/utils/pagination.dart';
 import 'package:aroosi_flutter/core/toast_service.dart';
 import 'package:aroosi_flutter/features/profiles/selection.dart';
+import 'package:aroosi_flutter/widgets/error_states.dart';
+import 'package:aroosi_flutter/widgets/empty_states.dart';
+import 'package:aroosi_flutter/widgets/offline_states.dart';
 
 class FavoritesScreen extends ConsumerStatefulWidget {
   const FavoritesScreen({super.key});
@@ -56,24 +59,42 @@ class _FavoritesScreenState extends ConsumerState<FavoritesScreen> {
   Widget build(BuildContext context) {
     final state = ref.watch(favoritesControllerProvider);
 
-    // Error state when nothing loaded
-    if (!state.loading && state.error != null && state.items.isEmpty) {
+    // Loading state
+    if (state.loading && state.items.isEmpty) {
       return AppScaffold(
         title: 'Favorites',
-        child: Center(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(state.error!),
-              const SizedBox(height: 12),
-              FilledButton(
-                onPressed: () =>
-                    ref.read(favoritesControllerProvider.notifier).refresh(),
-                child: const Text('Retry'),
-              ),
-            ],
-          ),
+        child: const Center(
+          child: CircularProgressIndicator(),
         ),
+      );
+    }
+
+    // Error state when nothing loaded
+    if (!state.loading && state.error != null && state.items.isEmpty) {
+      final error = state.error!;
+      final isOfflineError =
+          error.toLowerCase().contains('network') ||
+          error.toLowerCase().contains('connection') ||
+          error.toLowerCase().contains('timeout') ||
+          error.toLowerCase().contains('offline');
+
+      return AppScaffold(
+        title: 'Favorites',
+        child: isOfflineError
+            ? OfflineState(
+                title: 'Connection Lost',
+                subtitle: 'Unable to load favorites',
+                description: 'Check your internet connection and try again',
+                onRetry: () =>
+                    ref.read(favoritesControllerProvider.notifier).refresh(),
+              )
+            : ErrorState(
+                title: 'Failed to Load Favorites',
+                subtitle: 'Something went wrong',
+                errorMessage: error,
+                onRetryPressed: () =>
+                    ref.read(favoritesControllerProvider.notifier).refresh(),
+              ),
       );
     }
 
@@ -81,8 +102,8 @@ class _FavoritesScreenState extends ConsumerState<FavoritesScreen> {
     if (!state.loading && state.error == null && state.items.isEmpty) {
       return AppScaffold(
         title: 'Favorites',
-        child: const Center(
-          child: Text("You haven't added any favorites yet."),
+        child: EmptyFavoritesState(
+          onExplore: () => context.push('/search'),
         ),
       );
     }

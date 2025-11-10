@@ -200,7 +200,7 @@ Both partners have equal spiritual status before Allah, and their rights complem
 
 5. **Extended Family**: Maintaining good relations with both families.
 
-6. **Personal Growth**: Supporting each other\'s personal and spiritual development.''',
+6. **Personal Growth**: Supporting each other's personal and spiritual development.''',
             order: 4,
           ),
         ],
@@ -340,13 +340,13 @@ Traditional Afghan weddings typically span several days and involve various cere
 - Setting of the wedding date
 
 **2. Henna Night (Mehndi)**
-- Application of henna designs to bride\'s hands and feet
+- Application of henna designs to bride's hands and feet
 - Female family members gather for celebration
 - Songs, dances, and traditional foods
 
 **3. Ahesta Boro (Bridal Procession)**
 - Traditional song sung as the bride prepares
-- Symbolizes the bride\'s transition to married life
+- Symbolizes the bride's transition to married life
             ''',
             order: 2,
           ),

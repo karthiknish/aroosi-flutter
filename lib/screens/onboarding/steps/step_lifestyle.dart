@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:aroosi_flutter/theme/colors.dart';
+import 'package:aroosi_flutter/theme/theme_helpers.dart';
 import 'base_step.dart';
 import 'step_constants.dart';
 
@@ -171,7 +172,7 @@ class _StepLifestyleState extends State<StepLifestyle> {
     bool hasError = false,
   }) {
     return BoxDecoration(
-      color: CupertinoTheme.of(context).scaffoldBackgroundColor,
+      color: CupertinoThemeHelpers.getMaterialTheme(context).scaffoldBackgroundColor,
       border: Border.all(
         color: hasError ? CupertinoColors.systemRed : AppColors.primary,
         width: hasError ? 2.0 : 1.0,
@@ -189,7 +190,7 @@ class _StepLifestyleState extends State<StepLifestyle> {
 
   @override
   Widget build(BuildContext context) {
-    final cupertinoTheme = CupertinoTheme.of(context);
+    final cupertinoTheme = CupertinoThemeHelpers.getMaterialTheme(context);
     final textStyle = cupertinoTheme.textTheme.textStyle;
 
     return Form(
@@ -697,7 +698,7 @@ class _StepLifestyleState extends State<StepLifestyle> {
                       return Center(
                         child: Text(
                           capitalize(options[index]),
-                          style: CupertinoTheme.of(context).textTheme.textStyle,
+                          style: CupertinoThemeHelpers.getMaterialTheme(context).textTheme.textStyle,
                         ),
                       );
                     }),
@@ -768,7 +769,7 @@ class _StepLifestyleState extends State<StepLifestyle> {
                       return Center(
                         child: Text(
                           capitalize(options[index]),
-                          style: CupertinoTheme.of(context).textTheme.textStyle,
+                          style: CupertinoThemeHelpers.getMaterialTheme(context).textTheme.textStyle,
                         ),
                       );
                     }),
@@ -838,7 +839,7 @@ class _StepLifestyleState extends State<StepLifestyle> {
                       return Center(
                         child: Text(
                           capitalize(options[index]),
-                          style: CupertinoTheme.of(context).textTheme.textStyle,
+                          style: CupertinoThemeHelpers.getMaterialTheme(context).textTheme.textStyle,
                         ),
                       );
                     }),
@@ -908,7 +909,7 @@ class _StepLifestyleState extends State<StepLifestyle> {
                       return Center(
                         child: Text(
                           capitalize(options[index]),
-                          style: CupertinoTheme.of(context).textTheme.textStyle,
+                          style: CupertinoThemeHelpers.getMaterialTheme(context).textTheme.textStyle,
                         ),
                       );
                     }),

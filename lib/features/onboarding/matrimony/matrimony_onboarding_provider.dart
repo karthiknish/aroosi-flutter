@@ -278,16 +278,6 @@ final matrimonyOnboardingProvider = NotifierProvider<MatrimonyOnboardingNotifier
 );
 
 /// Extension for easy access to current step data
-extension MatrimonyOnboardingStateExtension on MatrimonyOnboardingState {
-  MatrimonyOnboardingStep? get currentStep {
-    if (currentStepIndex >= 0 && currentStepIndex < steps.length) {
-      return steps[currentStepIndex];
-    }
-    return null;
-  }
-
-  bool get isFirstStep => currentStepIndex == 0;
-  bool get isLastStep => currentStepIndex == steps.length - 1;
-  double get progress => steps.isEmpty ? 0.0 : (currentStepIndex + 1) / steps.length;
+extension MatrimonyOnboardingStateX on MatrimonyOnboardingState {
   int get completedSteps => steps.where((step) => step.isCompleted).length;
 }

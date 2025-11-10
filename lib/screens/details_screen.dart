@@ -4,9 +4,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:aroosi_flutter/features/profiles/detail_controller.dart';
 import 'package:aroosi_flutter/widgets/app_scaffold.dart';
 import 'package:aroosi_flutter/theme/motion.dart';
+import 'package:aroosi_flutter/theme/theme_helpers.dart';
 import 'package:aroosi_flutter/widgets/animations/motion.dart';
 import 'package:aroosi_flutter/features/safety/safety_controller.dart';
 import 'package:aroosi_flutter/core/toast_service.dart';
+import 'package:aroosi_flutter/widgets/error_states.dart';
+import 'package:aroosi_flutter/widgets/offline_states.dart';
 
 class DetailsScreen extends ConsumerStatefulWidget {
   const DetailsScreen({super.key, required this.id});
@@ -58,7 +61,7 @@ class _DetailsScreenState extends ConsumerState<DetailsScreen> {
                 Icon(
                   Icons.lock_outline,
                   size: 48,
-                  color: Theme.of(context).colorScheme.primary,
+                  color: ThemeHelpers.getMaterialTheme(context).colorScheme.primary,
                 ),
                 const SizedBox(height: 16),
                 Text(
@@ -185,20 +188,33 @@ class _DetailsScreenState extends ConsumerState<DetailsScreen> {
               : state.error != null
               ? FadeIn(
                   duration: AppMotionDurations.short,
-                  child: Center(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(state.error!),
-                        const SizedBox(height: 12),
-                        FilledButton(
-                          onPressed: () => ref
-                              .read(profileDetailControllerProvider.notifier)
-                              .load(widget.id),
-                          child: const Text('Retry'),
-                        ),
-                      ],
-                    ),
+                  child: Builder(
+                    builder: (context) {
+                      final error = state.error!;
+                      final isOfflineError =
+                          error.toLowerCase().contains('network') ||
+                          error.toLowerCase().contains('connection') ||
+                          error.toLowerCase().contains('timeout') ||
+                          error.toLowerCase().contains('offline');
+
+                      return isOfflineError
+                          ? OfflineState(
+                              title: 'Connection Lost',
+                              subtitle: 'Unable to load profile',
+                              description: 'Check your internet connection and try again',
+                              onRetry: () => ref
+                                  .read(profileDetailControllerProvider.notifier)
+                                  .load(widget.id),
+                            )
+                          : ErrorState(
+                              title: 'Failed to Load Profile',
+                              subtitle: 'Something went wrong',
+                              errorMessage: error,
+                              onRetryPressed: () => ref
+                                  .read(profileDetailControllerProvider.notifier)
+                                  .load(widget.id),
+                            );
+                    },
                   ),
                 )
               : _buildContent(context, data),

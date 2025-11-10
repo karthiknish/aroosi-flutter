@@ -5,6 +5,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 
 import 'package:aroosi_flutter/theme/motion.dart';
+import 'package:aroosi_flutter/theme/theme_helpers.dart';
 
 class FadeIn extends StatefulWidget {
   const FadeIn({
@@ -916,7 +917,7 @@ class _ShimmerCardState extends State<ShimmerCard>
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final theme = ThemeHelpers.getMaterialTheme(context);
     return Container(
       height: widget.height,
       width: widget.width,
@@ -1016,7 +1017,7 @@ class _LoadingOverlayState extends State<LoadingOverlay>
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final theme = ThemeHelpers.getMaterialTheme(context);
 
     return Stack(
       children: [

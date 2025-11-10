@@ -7,6 +7,7 @@ import 'package:aroosi_flutter/core/toast_service.dart';
 import 'package:aroosi_flutter/features/auth/auth_controller.dart';
 import 'package:aroosi_flutter/features/profiles/profiles_repository.dart';
 import 'package:aroosi_flutter/theme/motion.dart';
+import 'package:aroosi_flutter/theme/theme_helpers.dart';
 import 'package:aroosi_flutter/widgets/animations/motion.dart';
 import 'package:aroosi_flutter/l10n/app_localizations.dart';
 
@@ -342,7 +343,7 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
   }
 
   Widget _buildHeader(BuildContext context) {
-    final theme = CupertinoTheme.of(context);
+    final theme = CupertinoThemeHelpers.getMaterialTheme(context);
 
     return Container(
       margin: const EdgeInsets.only(bottom: 24),
@@ -615,7 +616,7 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = CupertinoTheme.of(context);
+    final theme = CupertinoThemeHelpers.getMaterialTheme(context);
 
     Widget stepContent = _buildStepContent();
 

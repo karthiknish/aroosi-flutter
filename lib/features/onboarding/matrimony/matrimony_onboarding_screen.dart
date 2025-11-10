@@ -3,9 +3,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:aroosi_flutter/features/onboarding/matrimony/matrimony_onboarding_provider.dart';
 import 'package:aroosi_flutter/features/onboarding/matrimony/constants.dart';
+import 'package:aroosi_flutter/features/onboarding/matrimony/models.dart';
 import 'package:aroosi_flutter/theme/motion.dart';
+import 'package:aroosi_flutter/theme/theme_helpers.dart';
 import 'package:aroosi_flutter/widgets/animations/motion.dart';
-import 'package:aroosi_flutter/widgets/app_scaffold.dart';
 import 'package:aroosi_flutter/l10n/app_localizations.dart';
 
 import 'steps/welcome_step.dart';
@@ -79,19 +80,19 @@ class _MatrimonyOnboardingScreenState extends ConsumerState<MatrimonyOnboardingS
     });
 
     if (onboardingState.isLoading && onboardingState.data == null) {
-      return const AppScaffold(
+      return const Scaffold(
         body: Center(child: CircularProgressIndicator()),
       );
     }
 
     final currentStep = onboardingState.currentStep;
     if (currentStep == null) {
-      return const AppScaffold(
+      return const Scaffold(
         body: Center(child: CircularProgressIndicator()),
       );
     }
 
-    return AppScaffold(
+    return Scaffold(
       body: SafeArea(
         child: Column(
           children: [
@@ -111,7 +112,7 @@ class _MatrimonyOnboardingScreenState extends ConsumerState<MatrimonyOnboardingS
   }
 
   Widget _buildHeader(BuildContext context, MatrimonyOnboardingState state, AppLocalizations l10n) {
-    final theme = Theme.of(context);
+    final theme = ThemeHelpers.getMaterialTheme(context);
     final currentStep = state.currentStep;
     
     return Container(
@@ -171,12 +172,12 @@ class _MatrimonyOnboardingScreenState extends ConsumerState<MatrimonyOnboardingS
             children: [
               Text(
                 'Step ${state.currentStepIndex + 1} of ${state.steps.length}',
-                style: Theme.of(context).textTheme.bodySmall,
+                style: ThemeHelpers.getMaterialTheme(context).textTheme.bodySmall,
               ),
               const Spacer(),
               Text(
                 '${state.completedSteps}/${state.steps.length} completed',
-                style: Theme.of(context).textTheme.bodySmall,
+                style: ThemeHelpers.getMaterialTheme(context).textTheme.bodySmall,
               ),
             ],
           ),
@@ -186,9 +187,9 @@ class _MatrimonyOnboardingScreenState extends ConsumerState<MatrimonyOnboardingS
             builder: (context, child) {
               return LinearProgressIndicator(
                 value: state.progress,
-                backgroundColor: Theme.of(context).colorScheme.surfaceVariant,
+                backgroundColor: ThemeHelpers.getMaterialTheme(context).colorScheme.surfaceContainerHighest,
                 valueColor: AlwaysStoppedAnimation<Color>(
-                  Theme.of(context).colorScheme.primary,
+                  ThemeHelpers.getMaterialTheme(context).colorScheme.primary,
                 ),
               );
             },
@@ -263,7 +264,7 @@ class _MatrimonyOnboardingScreenState extends ConsumerState<MatrimonyOnboardingS
           key: key,
           duration: AppMotionDurations.medium,
           child: FamilyInvolvementStep(
-            requiresFamilyApproval: state.data?.requiresFamilyApproval ?? false,
+            requiresFamilyApproval: state.data?.requiresFamilyApproval,
             familyApprovalDetails: state.data?.familyApprovalDetails,
             onInvolvementUpdated: (requiresApproval, details) {
               ref.read(matrimonyOnboardingProvider.notifier).updateFamilyInvolvement(
@@ -336,12 +337,14 @@ class _MatrimonyOnboardingScreenState extends ConsumerState<MatrimonyOnboardingS
     ref.read(matrimonyOnboardingProvider.notifier).previousStep();
   }
 
-  void _handleComplete() {
+  Future<void> _handleComplete() async {
     final notifier = ref.read(matrimonyOnboardingProvider.notifier);
-    notifier.completeOnboarding().then((_) {
-      if (notifier.state.isCompleted) {
-        context.go('/home');
-      }
-    });
+    await notifier.completeOnboarding();
+    if (!mounted) return;
+
+    final latestState = ref.read(matrimonyOnboardingProvider);
+    if (latestState.isCompleted) {
+      context.go('/home');
+    }
   }
 }

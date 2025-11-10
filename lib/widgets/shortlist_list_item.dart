@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:aroosi_flutter/widgets/shimmer.dart';
+import 'package:aroosi_flutter/theme/theme_helpers.dart';
 
 import 'package:aroosi_flutter/features/profiles/models.dart';
 
@@ -21,7 +22,7 @@ class ShortlistListItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final theme = ThemeHelpers.getMaterialTheme(context);
 
     // Get the first image URL from the list, or null if empty
     final imageUrl = entry.profileImageUrls?.isNotEmpty == true
@@ -99,12 +100,15 @@ class ShortlistListSkeleton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final base = Theme.of(context).brightness == Brightness.dark
-        ? Colors.grey.shade800
-        : Colors.grey.shade300;
-    final hilite = Theme.of(context).brightness == Brightness.dark
-        ? Colors.grey.shade700
-        : Colors.grey.shade200;
+    final theme = ThemeHelpers.getMaterialTheme(context);
+    final colorScheme = theme.colorScheme;
+    final isDark = theme.brightness == Brightness.dark;
+    final base = isDark
+      ? colorScheme.surfaceContainerHigh
+      : colorScheme.surfaceContainerHighest;
+    final hilite = isDark
+        ? colorScheme.surfaceContainerHighest
+        : colorScheme.surface;
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 6),
       child: Shimmer(

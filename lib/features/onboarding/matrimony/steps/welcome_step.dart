@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:aroosi_flutter/theme/motion.dart';
-import 'package:aroosi_flutter/widgets/animations/motion.dart';
-import 'package:aroosi_flutter/l10n/app_localizations.dart';
+import 'package:aroosi_flutter/theme/theme_helpers.dart';
 
 class WelcomeStep extends StatelessWidget {
   final VoidCallback onNext;
@@ -13,9 +11,7 @@ class WelcomeStep extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final l10n = AppLocalizations.of(context)!;
-
+    final theme = ThemeHelpers.getMaterialTheme(context);
     return Padding(
       padding: const EdgeInsets.all(24),
       child: Column(
@@ -134,12 +130,12 @@ class WelcomeStep extends StatelessWidget {
   }
 
   Widget _buildFeatureCard(BuildContext context, IconData icon, String title, String description) {
-    final theme = Theme.of(context);
+    final theme = ThemeHelpers.getMaterialTheme(context);
     
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceVariant.withAlpha(50),
+        color: theme.colorScheme.surfaceContainerHighest.withAlpha(50),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
           color: theme.colorScheme.outline.withAlpha(20),

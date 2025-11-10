@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:aroosi_flutter/theme/theme_helpers.dart';
 
 class AIChatbotScreen extends StatelessWidget {
   const AIChatbotScreen({super.key});
@@ -18,7 +19,7 @@ class AIChatbotScreen extends StatelessWidget {
             margin: const EdgeInsets.symmetric(vertical: 6),
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.surfaceContainerHighest,
+              color: ThemeHelpers.getMaterialTheme(context).colorScheme.surfaceContainerHighest,
               borderRadius: BorderRadius.circular(12),
             ),
             child: Text(

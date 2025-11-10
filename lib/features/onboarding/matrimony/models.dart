@@ -67,7 +67,7 @@ class MatrimonyOnboardingData with _$MatrimonyOnboardingData {
     @Default([]) List<String> familyValueIds,
     String? religiousPreferenceId,
     PartnerPreferences? partnerPreferences,
-    @Default(false) bool requiresFamilyApproval,
+    bool? requiresFamilyApproval,
     String? familyApprovalDetails,
   }) = _MatrimonyOnboardingData;
 

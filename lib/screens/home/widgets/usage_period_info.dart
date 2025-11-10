@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:aroosi_flutter/theme/theme_helpers.dart';
 
 class UsagePeriodInfo extends StatelessWidget {
   const UsagePeriodInfo({
@@ -14,7 +15,7 @@ class UsagePeriodInfo extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surfaceContainerHighest,
+        color: ThemeHelpers.getMaterialTheme(context).colorScheme.surfaceContainerHighest,
         borderRadius: BorderRadius.circular(10),
       ),
       child: Column(

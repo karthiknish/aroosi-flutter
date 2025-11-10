@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:aroosi_flutter/l10n/app_localizations.dart';
+import 'package:aroosi_flutter/theme/theme_helpers.dart';
 
 class FamilyInvolvementStep extends StatefulWidget {
-  final bool requiresFamilyApproval;
+  final bool? requiresFamilyApproval;
   final String? familyApprovalDetails;
-  final Function(bool value, {String? details}) onInvolvementUpdated;
+  final void Function(bool requiresFamilyApproval, String? familyApprovalDetails)
+      onInvolvementUpdated;
   final VoidCallback onNext;
 
   const FamilyInvolvementStep({
@@ -20,7 +21,7 @@ class FamilyInvolvementStep extends StatefulWidget {
 }
 
 class _FamilyInvolvementStepState extends State<FamilyInvolvementStep> {
-  late bool _requiresFamilyApproval;
+  bool? _requiresFamilyApproval;
   late TextEditingController _detailsController;
   final _formKey = GlobalKey<FormState>();
 
@@ -38,14 +39,16 @@ class _FamilyInvolvementStepState extends State<FamilyInvolvementStep> {
   }
 
   void _updateInvolvement() {
-    final details = _requiresFamilyApproval ? _detailsController.text.trim() : null;
-    widget.onInvolvementUpdated(_requiresFamilyApproval, familyApprovalDetails: details);
+    final requiresApproval = _requiresFamilyApproval;
+    if (requiresApproval == null) return;
+
+    final details = requiresApproval ? _detailsController.text.trim() : null;
+    widget.onInvolvementUpdated(requiresApproval, details);
   }
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final l10n = AppLocalizations.of(context)!;
+    final theme = ThemeHelpers.getMaterialTheme(context);
 
     return Padding(
       padding: const EdgeInsets.all(24),
@@ -111,7 +114,7 @@ class _FamilyInvolvementStepState extends State<FamilyInvolvementStep> {
                   const Spacer(),
                   
                   // Additional details section (only shown if family approval is required)
-                  if (_requiresFamilyApproval) ...[
+                  if (_requiresFamilyApproval == true) ...[
                     const SizedBox(height: 24),
                     
                     Text(
@@ -142,10 +145,10 @@ class _FamilyInvolvementStepState extends State<FamilyInvolvementStep> {
                           borderRadius: BorderRadius.circular(12),
                         ),
                         filled: true,
-                        fillColor: theme.colorScheme.surfaceVariant.withAlpha(50),
+                        fillColor: theme.colorScheme.surfaceContainerHighest.withAlpha(50),
                       ),
                       validator: (value) {
-                        if (_requiresFamilyApproval && (value == null || value.trim().isEmpty)) {
+                        if (_requiresFamilyApproval == true && (value == null || value.trim().isEmpty)) {
                           return 'Please provide details about family involvement';
                         }
                         if (value != null && value.trim().length < 10) {
@@ -173,7 +176,7 @@ class _FamilyInvolvementStepState extends State<FamilyInvolvementStep> {
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                onPressed: _isValid() ? onNext : null,
+                onPressed: _isValid() ? widget.onNext : null,
                 style: ElevatedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 16),
                   shape: RoundedRectangleBorder(
@@ -203,7 +206,7 @@ class _FamilyInvolvementStepState extends State<FamilyInvolvementStep> {
     IconData icon,
     VoidCallback onTap,
   ) {
-    final theme = Theme.of(context);
+    final theme = ThemeHelpers.getMaterialTheme(context);
     final isSelected = _requiresFamilyApproval == isApprovalRequired;
     
     return Material(
@@ -299,7 +302,7 @@ class _FamilyInvolvementStepState extends State<FamilyInvolvementStep> {
   }
 
   Widget _buildQuickOptions() {
-    final theme = Theme.of(context);
+    final theme = ThemeHelpers.getMaterialTheme(context);
     
     final options = [
       'Parents should meet potential matches first',
@@ -330,10 +333,12 @@ class _FamilyInvolvementStepState extends State<FamilyInvolvementStep> {
               ),
               onPressed: () {
                 final currentText = _detailsController.text;
-                final newText = currentText.isEmpty 
-                    ? option 
+                final newText = currentText.isEmpty
+                    ? option
                     : '$currentText; $option';
-                _detailsController.text = newText;
+                setState(() {
+                  _detailsController.text = newText;
+                });
                 _updateInvolvement();
               },
             );
@@ -344,9 +349,12 @@ class _FamilyInvolvementStepState extends State<FamilyInvolvementStep> {
   }
 
   bool _isValid() {
-    if (!_requiresFamilyApproval) return true;
-    
+    final requiresApproval = _requiresFamilyApproval;
+    if (requiresApproval != true) {
+      return requiresApproval == false;
+    }
+
     return _formKey.currentState?.validate() == true &&
-           _detailsController.text.trim().isNotEmpty;
+        _detailsController.text.trim().isNotEmpty;
   }
 }
