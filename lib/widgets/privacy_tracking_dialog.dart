@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../theme/theme_helpers.dart';
 import '../core/att_service.dart';
+import '../core/privacy_manager.dart';
 
 /// Dialog for requesting App Tracking Transparency permission
 class PrivacyTrackingDialog extends StatefulWidget {
@@ -150,8 +151,7 @@ class _PrivacyTrackingDialogState extends State<PrivacyTrackingDialog> {
     setState(() => _isLoading = true);
 
     try {
-      final granted = await AppTrackingTransparencyService()
-          .requestTrackingPermission();
+        final granted = await PrivacyManager().requestAttPermission();
 
       if (granted && mounted) {
         // Show success message

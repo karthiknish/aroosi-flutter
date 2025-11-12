@@ -1,4 +1,9 @@
+import 'dart:async';
+import 'dart:io';
 
+import 'package:firebase_analytics/firebase_analytics.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
+import 'package:firebase_performance/firebase_performance.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -17,18 +22,21 @@ class PrivacyManager {
 
   bool _isInitialized = false;
   bool _hasRequestedPermission = false;
+  bool _isAppInBackground = false;
 
   /// Initialize privacy services
   Future<void> initialize() async {
     if (_isInitialized) return;
 
     try {
-      // Initialize ATT service
+      // Initialize ATT service and apply initial SDK state
       await _attService.initialize();
-      
+      await _updateSdkCollectionStates();
+
       // Initialize analytics service (will respect ATT permissions)
       await AnalyticsService().initialize();
-      
+      await _updateSdkCollectionStates(includeAnalytics: true);
+
       // Load saved preference
       final prefs = await SharedPreferences.getInstance();
       _hasRequestedPermission = prefs.getBool('has_requested_att_permission') ?? false;
@@ -45,8 +53,8 @@ class PrivacyManager {
 
   /// Handle ATT status changes
   void _onAttStatusChanged() {
-    // Update analytics collection status when ATT permission changes
-    AnalyticsService().updateAnalyticsStatus();
+    // Update SDK collection status when ATT permission changes
+    unawaited(_updateSdkCollectionStates(includeAnalytics: true));
   }
 
   /// Check if ATT permission is needed
@@ -61,8 +69,10 @@ class PrivacyManager {
     // Save preference
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('has_requested_att_permission', true);
+    final granted = await _attService.requestTrackingPermission();
 
-    return await _attService.requestTrackingPermission();
+    await _updateSdkCollectionStates(includeAnalytics: true);
+    return granted;
   }
 
   /// Check if tracking is authorized
@@ -70,18 +80,44 @@ class PrivacyManager {
 
   /// Show privacy tracking dialog
   Future<bool> showPrivacyDialog() async {
+    final context = navigatorKey.currentContext;
+    if (context == null) return false;
+
     return await showDialog<bool>(
-      context: navigatorKey.currentContext!,
-      builder: (context) => const PrivacyTrackingDialog(),
+      context: context,
+      builder: (dialogContext) => const PrivacyTrackingDialog(),
     ) ?? false;
   }
 
   /// Show privacy settings dialog
   Future<void> showPrivacySettings() async {
+    final context = navigatorKey.currentContext;
+    if (context == null) return;
+
     await showDialog(
-      context: navigatorKey.currentContext!,
-      builder: (context) => const PrivacySettingsDialog(),
+      context: context,
+      builder: (dialogContext) => const PrivacySettingsDialog(),
     );
+  }
+
+  /// Respond to lifecycle changes to throttle background telemetry
+  void handleAppLifecycleState(AppLifecycleState state) {
+    final wasBackground = _isAppInBackground;
+    switch (state) {
+      case AppLifecycleState.resumed:
+        _isAppInBackground = false;
+        break;
+      case AppLifecycleState.inactive:
+      case AppLifecycleState.paused:
+      case AppLifecycleState.detached:
+      case AppLifecycleState.hidden:
+        _isAppInBackground = true;
+        break;
+    }
+
+    if (wasBackground != _isAppInBackground) {
+      unawaited(_updateSdkCollectionStates());
+    }
   }
 
   /// Reset privacy preferences (for testing)
@@ -89,6 +125,36 @@ class PrivacyManager {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove('has_requested_att_permission');
     _hasRequestedPermission = false;
+  }
+
+  Future<void> _updateSdkCollectionStates({bool includeAnalytics = false}) async {
+    final isAuthorized = !Platform.isIOS || _attService.isTrackingAuthorized;
+    final allowDiagnostics = isAuthorized && !_isAppInBackground;
+
+    try {
+      await FirebasePerformance.instance.setPerformanceCollectionEnabled(allowDiagnostics);
+    } catch (e) {
+      debugPrint('Failed to update Firebase Performance state: $e');
+    }
+
+    try {
+      await FirebaseCrashlytics.instance.setCrashlyticsCollectionEnabled(isAuthorized);
+    } catch (e) {
+      debugPrint('Failed to update Crashlytics state: $e');
+    }
+
+    try {
+      await FirebaseAnalytics.instance.setConsent(
+        adStorageConsentGranted: isAuthorized,
+        analyticsStorageConsentGranted: isAuthorized,
+      );
+    } catch (e) {
+      debugPrint('Failed to update Firebase Analytics consent: $e');
+    }
+
+    if (includeAnalytics) {
+      await AnalyticsService().updateAnalyticsStatus();
+    }
   }
 }
 

@@ -19,19 +19,38 @@ class App extends ConsumerStatefulWidget {
   ConsumerState<App> createState() => _AppState();
 }
 
-class _AppState extends ConsumerState<App> {
+class _AppState extends ConsumerState<App> with WidgetsBindingObserver {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _initializeApp();
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
   }
 
   Future<void> _initializeApp() async {
     // Initialize privacy manager
     await PrivacyManager().initialize();
+
+    if (PrivacyManager().needsAttPermission()) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        PrivacyManager().showPrivacyDialog();
+      });
+    }
     
     // Initialize push notification service
     await PushNotificationService().initialize();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+    PrivacyManager().handleAppLifecycleState(state);
   }
 
   @override

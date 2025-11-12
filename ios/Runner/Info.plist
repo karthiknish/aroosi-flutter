@@ -32,18 +32,11 @@
 	<array>
 		<string>UIInterfaceOrientationPortrait</string>
 	</array>
-	<key>UISupportedInterfaceOrientations~ipad</key>
-	<array>
-	</array>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
 	<key>UIMainStoryboardFile</key>
 	<string>Main</string>
-	<key>UISupportedInterfaceOrientations</key>
-	<array>
-		<string>UIInterfaceOrientationPortrait</string>
-	</array>
-		<key>CADisableMinimumFrameDurationOnPhone</key>
+	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
@@ -71,17 +64,6 @@
 			</array>
 		</dict>
 	</array>
-	<!-- Photo library / camera usage descriptions -->
-	<key>NSCameraUsageDescription</key>
-	<string>This app needs camera access to take profile photos.</string>
-	<key>NSPhotoLibraryUsageDescription</key>
-	<string>This app needs photo library access to select profile photos.</string>
-	<key>NSPhotoLibraryAddUsageDescription</key>
-	<string>This app may save images to your library when needed.</string>
-	<!-- Microphone access for optional voice messages -->
-	<key>NSMicrophoneUsageDescription</key>
-	<string>This app needs microphone access to record voice messages.</string>
-	<!-- App Store submission requirements -->
 	<key>NSAppTransportSecurity</key>
 	<dict>
 		<key>NSAllowsArbitraryLoads</key>
@@ -117,21 +99,11 @@
 			</dict>
 		</dict>
 	</dict>
-	<!-- Face ID support for future authentication -->
-	<key>NSFaceIDUsageDescription</key>
-	<string>Use Face ID to securely access your account.</string>
-	<!-- Location permissions for location-based matching -->
-	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>This app uses your location to find matches near you.</string>
 	<!-- Push notifications -->
 	<key>UIBackgroundModes</key>
 	<array>
-		<string>fetch</string>
 		<string>remote-notification</string>
 	</array>
-	<!-- App Store rating and review -->
-	<key>ITSAppUsesNonExemptEncryption</key>
-	<false/>
 	<!-- iPad orientations -->
 	<key>UISupportedInterfaceOrientations~ipad</key>
 	<array>

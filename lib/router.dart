@@ -53,6 +53,7 @@ import 'package:aroosi_flutter/screens/cultural/compatibility_details_screen.dar
 import 'package:aroosi_flutter/screens/settings/language_settings_screen.dart';
 import 'package:aroosi_flutter/utils/debug_logger.dart';
 import 'features/auth/auth_state.dart';
+import 'core/privacy_manager.dart';
 
 /// ChangeNotifier that listens to auth state and notifies GoRouter without
 /// forcing a full router reconstruction (prevents losing navigation actions
@@ -85,6 +86,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
   final router = GoRouter(
     initialLocation: '/startup',
     refreshListenable: refresh,
+    navigatorKey: navigatorKey,
     observers: [_RouteObserver()],
     routes: [
       GoRoute(
