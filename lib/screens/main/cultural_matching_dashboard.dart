@@ -12,6 +12,8 @@ import 'package:aroosi_flutter/widgets/error_states.dart';
 import 'package:aroosi_flutter/widgets/empty_states.dart';
 import 'package:aroosi_flutter/widgets/offline_states.dart';
 
+import 'package:aroosi_flutter/widgets/app_scaffold.dart';
+
 class CulturalMatchingDashboard extends ConsumerStatefulWidget {
   const CulturalMatchingDashboard({super.key});
 
@@ -93,25 +95,16 @@ class _CulturalMatchingDashboardState extends ConsumerState<CulturalMatchingDash
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          'Cultural Matches',
-          style: GoogleFonts.nunitoSans(
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
-          ),
+    return AppScaffold(
+      title: 'Cultural Matches',
+      usePadding: false,
+      actions: [
+        IconButton(
+          icon: const Icon(Icons.refresh),
+          onPressed: _loadData,
         ),
-        backgroundColor: AppColors.surfaceSecondary,
-        elevation: 0,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh),
-            onPressed: _loadData,
-          ),
-        ],
-      ),
-      body: _isLoading && _matches.isEmpty
+      ],
+      child: _isLoading && _matches.isEmpty
           ? const Center(child: CircularProgressIndicator())
           : _error != null && _matches.isEmpty
               ? Builder(
@@ -143,7 +136,7 @@ class _CulturalMatchingDashboardState extends ConsumerState<CulturalMatchingDash
                       title: 'No cultural matches found',
                       subtitle: 'Complete your cultural profile to find matches',
                       description: 'Cultural matching helps you find partners with similar values and traditions',
-                      icon: Icon(Icons.people_outline, size: 64, color: Colors.grey[400]),
+                      icon: Icon(Icons.people_outline, size: 64, color: AppColors.muted),
                     )
                   : SingleChildScrollView(
               padding: const EdgeInsets.all(16),
@@ -214,7 +207,7 @@ class _CulturalMatchingDashboardState extends ConsumerState<CulturalMatchingDash
             style: GoogleFonts.nunitoSans(
               fontSize: 18,
               fontWeight: FontWeight.bold,
-              color: Colors.white,
+              color: AppColors.onPrimary,
             ),
           ),
           const SizedBox(height: 12),
@@ -222,21 +215,21 @@ class _CulturalMatchingDashboardState extends ConsumerState<CulturalMatchingDash
             'Religion: ${_userProfile!['religion'] ?? 'Not specified'}',
             style: GoogleFonts.nunitoSans(
               fontSize: 14,
-              color: Colors.white.withValues(alpha: 0.9),
+              color: AppColors.onPrimary.withValues(alpha: 0.9),
             ),
           ),
           Text(
             'Language: ${_userProfile!['motherTongue'] ?? 'Not specified'}',
             style: GoogleFonts.nunitoSans(
               fontSize: 14,
-              color: Colors.white.withValues(alpha: 0.9),
+              color: AppColors.onPrimary.withValues(alpha: 0.9),
             ),
           ),
           Text(
             'Family Values: ${_userProfile!['familyValues'] ?? 'Not specified'}',
             style: GoogleFonts.nunitoSans(
               fontSize: 14,
-              color: Colors.white.withValues(alpha: 0.9),
+              color: AppColors.onPrimary.withValues(alpha: 0.9),
             ),
           ),
         ],
@@ -334,7 +327,7 @@ class _CulturalMatchingDashboardState extends ConsumerState<CulturalMatchingDash
           Icon(
             Icons.diversity_3,
             size: 64,
-            color: Colors.grey[400],
+            color: AppColors.muted,
           ),
           const SizedBox(height: 16),
           Text(
@@ -342,7 +335,7 @@ class _CulturalMatchingDashboardState extends ConsumerState<CulturalMatchingDash
             style: GoogleFonts.nunitoSans(
               fontSize: 18,
               fontWeight: FontWeight.bold,
-              color: Colors.grey[600],
+              color: AppColors.text,
             ),
           ),
           const SizedBox(height: 8),
@@ -350,7 +343,7 @@ class _CulturalMatchingDashboardState extends ConsumerState<CulturalMatchingDash
             'Complete your cultural assessment to find compatible matches',
             style: GoogleFonts.nunitoSans(
               fontSize: 14,
-              color: Colors.grey[500],
+              color: AppColors.muted,
             ),
             textAlign: TextAlign.center,
           ),
@@ -422,7 +415,7 @@ class _CulturalMatchingDashboardState extends ConsumerState<CulturalMatchingDash
                         match.age.toString(),
                         style: GoogleFonts.nunitoSans(
                           fontSize: 14,
-                          color: Colors.grey[600],
+                          color: AppColors.muted,
                         ),
                       ),
                     ],
@@ -497,7 +490,7 @@ class _CulturalMatchingDashboardState extends ConsumerState<CulturalMatchingDash
                     child: Text(
                       'View Profile',
                       style: GoogleFonts.nunitoSans(
-                        color: Colors.white,
+                        color: AppColors.onPrimary,
                         fontWeight: FontWeight.w600,
                       ),
                     ),

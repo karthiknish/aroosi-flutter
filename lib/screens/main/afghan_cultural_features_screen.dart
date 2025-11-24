@@ -4,24 +4,17 @@ import 'package:google_fonts/google_fonts.dart';
 
 import 'package:aroosi_flutter/theme/colors.dart';
 
+import 'package:aroosi_flutter/widgets/app_scaffold.dart';
+
 class AfghanCulturalFeaturesScreen extends ConsumerWidget {
   const AfghanCulturalFeaturesScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          'Afghan Cultural Features',
-          style: GoogleFonts.nunitoSans(
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        backgroundColor: AppColors.surfaceSecondary,
-        elevation: 0,
-      ),
-      body: SingleChildScrollView(
+    return AppScaffold(
+      title: 'Afghan Cultural Features',
+      usePadding: false,
+      child: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -79,7 +72,7 @@ class AfghanCulturalFeaturesScreen extends ConsumerWidget {
           Icon(
             Icons.diversity_3,
             size: 64,
-            color: Colors.white,
+            color: AppColors.onPrimary,
           ),
           const SizedBox(height: 16),
           Text(
@@ -87,7 +80,7 @@ class AfghanCulturalFeaturesScreen extends ConsumerWidget {
             style: GoogleFonts.nunitoSans(
               fontSize: 24,
               fontWeight: FontWeight.bold,
-              color: Colors.white,
+              color: AppColors.onPrimary,
             ),
             textAlign: TextAlign.center,
           ),
@@ -96,7 +89,7 @@ class AfghanCulturalFeaturesScreen extends ConsumerWidget {
             'Find meaningful connections while honoring our rich cultural heritage and traditions',
             style: GoogleFonts.nunitoSans(
               fontSize: 16,
-              color: Colors.white.withValues(alpha: 0.9),
+              color: AppColors.onPrimary.withValues(alpha: 0.9),
             ),
             textAlign: TextAlign.center,
           ),
@@ -155,7 +148,7 @@ class AfghanCulturalFeaturesScreen extends ConsumerWidget {
                       tradition,
                       style: GoogleFonts.nunitoSans(
                         fontSize: 14,
-                        color: Colors.grey[700],
+                        color: AppColors.muted,
                       ),
                     ),
                   ),
@@ -172,7 +165,7 @@ class AfghanCulturalFeaturesScreen extends ConsumerWidget {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
           color: AppColors.borderPrimary,
@@ -218,7 +211,7 @@ class AfghanCulturalFeaturesScreen extends ConsumerWidget {
                       guideline,
                       style: GoogleFonts.nunitoSans(
                         fontSize: 14,
-                        color: Colors.grey[700],
+                        color: AppColors.muted,
                       ),
                     ),
                   ),
@@ -332,7 +325,7 @@ class AfghanCulturalFeaturesScreen extends ConsumerWidget {
                       value,
                       style: GoogleFonts.nunitoSans(
                         fontSize: 14,
-                        color: Colors.grey[700],
+                        color: AppColors.muted,
                       ),
                     ),
                   ),
@@ -349,7 +342,7 @@ class AfghanCulturalFeaturesScreen extends ConsumerWidget {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
           color: AppColors.borderPrimary,
@@ -439,7 +432,7 @@ class AfghanCulturalFeaturesScreen extends ConsumerWidget {
             'Share the joy of Afghan culinary traditions with your matches. Food is an important part of Afghan culture and relationships.',
             style: GoogleFonts.nunitoSans(
               fontSize: 14,
-              color: Colors.grey[700],
+              color: AppColors.muted,
             ),
           ),
           const SizedBox(height: 16),
@@ -460,7 +453,6 @@ class AfghanCulturalFeaturesScreen extends ConsumerWidget {
       ),
     );
   }
-
 }
 
 class _EventCard extends StatelessWidget {
@@ -479,7 +471,7 @@ class _EventCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
           color: AppColors.borderPrimary,
@@ -507,7 +499,7 @@ class _EventCard extends StatelessWidget {
             subtitle,
             style: GoogleFonts.nunitoSans(
               fontSize: 10,
-              color: Colors.grey[600],
+              color: AppColors.muted,
             ),
             textAlign: TextAlign.center,
           ),
@@ -543,7 +535,6 @@ final List<String> _familyValues = [
   'Cultural education and preservation',
   'Balancing personal happiness with family expectations',
 ];
-
 
 final List<_CulturalEvent> _culturalEvents = [
   _CulturalEvent(

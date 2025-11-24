@@ -235,15 +235,6 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
 
         if (isOfflineError) {
           ToastService.instance.error('Connection error while loading chat messages');
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Connection error while loading chat messages'),
-              action: SnackBarAction(
-                label: 'Retry',
-                onPressed: () => ref.read(chatControllerProvider.notifier).refresh(),
-              ),
-            ),
-          );
         } else {
           ToastService.instance.error('Failed to load chat messages: $error');
         }
@@ -252,6 +243,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
 
     return AppScaffold(
       title: 'Chat',
+      usePadding: false,
       floatingActionButton: _showJumpToLatest
           ? FloatingActionButton.small(
               onPressed: () {

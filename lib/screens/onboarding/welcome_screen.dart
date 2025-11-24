@@ -4,8 +4,10 @@ import 'package:go_router/go_router.dart';
 
 import 'package:aroosi_flutter/theme/motion.dart';
 import 'package:aroosi_flutter/theme/theme_helpers.dart';
+import 'package:aroosi_flutter/theme/colors.dart';
 import 'package:aroosi_flutter/widgets/animations/motion.dart';
 import 'package:aroosi_flutter/features/auth/auth_controller.dart';
+import 'package:aroosi_flutter/widgets/app_scaffold.dart';
 
 class WelcomeScreen extends ConsumerWidget {
   const WelcomeScreen({super.key});
@@ -20,13 +22,18 @@ class WelcomeScreen extends ConsumerWidget {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         context.go('/search');
       });
-      return const Scaffold(
-        body: Center(child: CircularProgressIndicator()),
+      return const AppScaffold(
+        title: 'Welcome',
+        usePadding: false,
+        child: Center(child: CircularProgressIndicator()),
       );
     }
 
-    return Scaffold(
-      body: Stack(
+    return AppScaffold(
+      title: 'Welcome',
+      usePadding: false,
+      showNavBar: false,
+      child: Stack(
         children: [
           // Background image filling the screen
           Positioned.fill(
@@ -37,7 +44,7 @@ class WelcomeScreen extends ConsumerWidget {
                 fit: BoxFit.cover,
                 errorBuilder: (context, error, stackTrace) {
                   return Container(
-                    color: theme.colorScheme.surfaceContainerHighest,
+                    color: AppColors.surfaceSecondary,
                   );
                 },
               ),
@@ -62,78 +69,90 @@ class WelcomeScreen extends ConsumerWidget {
           ),
           // Foreground content
           SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24),
-              child: FadeThrough(
-                delay: AppMotionDurations.fast,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    const Spacer(),
-                    FadeIn(
-                      delay: const Duration(milliseconds: 80),
-                      child: Text(
-                        'Welcome to Aroosi',
-                        textAlign: TextAlign.center,
-                        style: theme.textTheme.headlineMedium?.copyWith(
-                          fontWeight: FontWeight.w700,
-                          color: Colors.white,
-                        ),
-                      ),
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                return SingleChildScrollView(
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(
+                      minHeight: constraints.maxHeight,
                     ),
-                    const SizedBox(height: 12),
-                    FadeIn(
-                      delay: const Duration(milliseconds: 140),
-                      child: Text(
-                        'Let\'s create your profile and find your perfect match. We\'ll guide you through a few simple steps to get started.',
-                        textAlign: TextAlign.center,
-                        style: theme.textTheme.bodyLarge?.copyWith(
-                          color: Colors.white.withValues(alpha: 0.9),
-                          height: 1.4,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 24),
-                    FadeScaleIn(
-                      delay: AppMotionDurations.fast,
-                      child: Container(
-                        width: double.infinity,
-                        decoration: BoxDecoration(
-                          color: Colors.black,
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: TextButton.icon(
-                          icon: const Icon(Icons.apple, color: Colors.white, size: 20),
-                          label: const Text(
-                            'Sign in with Apple',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.w600,
-                              fontSize: 16,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 24),
+                      child: FadeThrough(
+                        delay: AppMotionDurations.fast,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
+                            const SizedBox(height: 40), // Top spacing
+                            FadeIn(
+                              delay: const Duration(milliseconds: 80),
+                              child: Text(
+                                'Welcome to Aroosi',
+                                textAlign: TextAlign.center,
+                                style: theme.textTheme.headlineMedium?.copyWith(
+                                  fontWeight: FontWeight.w700,
+                                  color: Colors.white,
+                                ),
+                              ),
                             ),
-                          ),
-                          onPressed: () {
-                            ref.read(authControllerProvider.notifier).loginWithApple();
-                          },
+                            const SizedBox(height: 12),
+                            FadeIn(
+                              delay: const Duration(milliseconds: 140),
+                              child: Text(
+                                'Let\'s create your profile and find your perfect match. We\'ll guide you through a few simple steps to get started.',
+                                textAlign: TextAlign.center,
+                                style: theme.textTheme.bodyLarge?.copyWith(
+                                  color: Colors.white.withValues(alpha: 0.9),
+                                  height: 1.4,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 24),
+                            FadeScaleIn(
+                              delay: AppMotionDurations.fast,
+                              child: Container(
+                                width: double.infinity,
+                                decoration: BoxDecoration(
+                                  color: Colors.black,
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: TextButton.icon(
+                                  icon: const Icon(Icons.apple, color: Colors.white, size: 20),
+                                  label: const Text(
+                                    'Sign in with Apple',
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.w600,
+                                      fontSize: 16,
+                                    ),
+                                  ),
+                                  onPressed: () {
+                                    ref.read(authControllerProvider.notifier).loginWithApple();
+                                  },
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 16),
+                            FadeIn(
+                              delay: const Duration(milliseconds: 200),
+                              child: Text(
+                                'Apple Sign In includes "Hide My Email" for privacy',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: Colors.white.withValues(alpha: 0.8),
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
+                            const SizedBox(height: 24),
+                          ],
                         ),
                       ),
                     ),
-                    const SizedBox(height: 16),
-                    FadeIn(
-                      delay: const Duration(milliseconds: 200),
-                      child: Text(
-                        'Apple Sign In includes "Hide My Email" for privacy',
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: Colors.white.withValues(alpha: 0.8),
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                    ),
-                    const SizedBox(height: 24),
-                  ],
-                ),
-              ),
+                  ),
+                );
+              },
             ),
           ),
           // Loader overlay

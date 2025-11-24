@@ -4,26 +4,20 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 
+import 'package:aroosi_flutter/core/toast_service.dart';
 import 'package:aroosi_flutter/theme/colors.dart';
+
+import 'package:aroosi_flutter/widgets/app_scaffold.dart';
 
 class LanguageScreen extends ConsumerWidget {
   const LanguageScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          'language'.tr(),
-          style: GoogleFonts.nunitoSans(
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        backgroundColor: AppColors.surfaceSecondary,
-        elevation: 0,
-      ),
-      body: SingleChildScrollView(
+    return AppScaffold(
+      title: 'language'.tr(),
+      usePadding: false,
+      child: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -48,7 +42,7 @@ class LanguageScreen extends ConsumerWidget {
                   Icon(
                     Icons.language,
                     size: 64,
-                    color: Colors.white,
+                    color: AppColors.onPrimary,
                   ),
                   const SizedBox(height: 16),
                   Text(
@@ -56,7 +50,7 @@ class LanguageScreen extends ConsumerWidget {
                     style: GoogleFonts.nunitoSans(
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
-                      color: Colors.white,
+                      color: AppColors.onPrimary,
                     ),
                     textAlign: TextAlign.center,
                   ),
@@ -65,7 +59,7 @@ class LanguageScreen extends ConsumerWidget {
                     'Connect with people in your preferred language',
                     style: GoogleFonts.nunitoSans(
                       fontSize: 16,
-                      color: Colors.white.withValues(alpha: 0.9),
+                      color: AppColors.onPrimary.withValues(alpha: 0.9),
                     ),
                     textAlign: TextAlign.center,
                   ),
@@ -155,7 +149,7 @@ class LanguageScreen extends ConsumerWidget {
                     'Choose the language that best represents your cultural identity and comfort. This will help you connect more authentically with potential matches who share your language and cultural background.',
                     style: GoogleFonts.nunitoSans(
                       fontSize: 14,
-                      color: Colors.grey[700],
+                      color: AppColors.muted,
                     ),
                   ),
                 ],
@@ -190,7 +184,7 @@ class LanguageScreen extends ConsumerWidget {
                         benefit,
                         style: GoogleFonts.nunitoSans(
                           fontSize: 14,
-                          color: Colors.grey[700],
+                          color: AppColors.muted,
                         ),
                       ),
                     ),
@@ -209,12 +203,7 @@ class LanguageScreen extends ConsumerWidget {
     await context.setLocale(newLocale);
 
     if (context.mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Language changed successfully'),
-          backgroundColor: AppColors.success,
-        ),
-      );
+      ToastService.instance.success('Language changed successfully');
     }
   }
 }
@@ -243,7 +232,7 @@ class _LanguageOption extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: isSelected ? AppColors.primary.withValues(alpha: 0.1) : Colors.white,
+          color: isSelected ? AppColors.primary.withValues(alpha: 0.1) : AppColors.surface,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
             color: isSelected ? AppColors.primary : AppColors.borderPrimary,
@@ -266,7 +255,7 @@ class _LanguageOption extends StatelessWidget {
                     style: GoogleFonts.nunitoSans(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
-                      color: isSelected ? AppColors.primary : Colors.black87,
+                      color: isSelected ? AppColors.primary : AppColors.text,
                     ),
                   ),
                   const SizedBox(height: 4),
@@ -274,7 +263,7 @@ class _LanguageOption extends StatelessWidget {
                     nativeName,
                     style: GoogleFonts.nunitoSans(
                       fontSize: 14,
-                      color: isSelected ? AppColors.primary : Colors.grey[600],
+                      color: isSelected ? AppColors.primary : AppColors.muted,
                     ),
                   ),
                 ],

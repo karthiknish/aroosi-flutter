@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:aroosi_flutter/features/cultural/cultural_controller.dart';
 import 'package:aroosi_flutter/widgets/app_scaffold.dart';
 import 'package:aroosi_flutter/theme/theme_helpers.dart';
+import 'package:aroosi_flutter/widgets/error_states.dart';
+import 'package:aroosi_flutter/widgets/offline_states.dart';
 
 class CulturalCompatibilityScreen extends ConsumerStatefulWidget {
   final String userId1;
@@ -336,41 +338,33 @@ class _CulturalCompatibilityScreenState extends ConsumerState<CulturalCompatibil
   Widget build(BuildContext context) {
     return AppScaffold(
       title: 'Cultural Compatibility',
+      usePadding: false,
       child: _loading
           ? const Center(child: CircularProgressIndicator())
           : _error != null
-              ? Center(
-                  child: Padding(
-                    padding: const EdgeInsets.all(32),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.error_outline,
-                          size: 64,
-                          color: ThemeHelpers.getMaterialTheme(context).colorScheme.error,
-                        ),
-                        const SizedBox(height: 16),
-                        Text(
-                          'Unable to load compatibility',
-                          style: ThemeHelpers.getMaterialTheme(context).textTheme.titleMedium,
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          _error!,
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            color: ThemeHelpers.getMaterialTheme(context).colorScheme.onSurfaceVariant,
-                          ),
-                        ),
-                        const SizedBox(height: 24),
-                        ElevatedButton(
-                          onPressed: _loadCompatibility,
-                          child: const Text('Try Again'),
-                        ),
-                      ],
-                    ),
-                  ),
+              ? Builder(
+                  builder: (context) {
+                    final error = _error!;
+                    final isOfflineError =
+                        error.toLowerCase().contains('network') ||
+                        error.toLowerCase().contains('connection') ||
+                        error.toLowerCase().contains('timeout') ||
+                        error.toLowerCase().contains('offline');
+
+                    return isOfflineError
+                        ? OfflineState(
+                            title: 'Connection Lost',
+                            subtitle: 'Unable to load compatibility',
+                            description: 'Check your internet connection and try again',
+                            onRetry: _loadCompatibility,
+                          )
+                        : ErrorState(
+                            title: 'Failed to Load Compatibility',
+                            subtitle: 'Something went wrong',
+                            errorMessage: error,
+                            onRetryPressed: _loadCompatibility,
+                          );
+                  },
                 )
               : RefreshIndicator(
                   onRefresh: _loadCompatibility,

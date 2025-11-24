@@ -1,41 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:aroosi_flutter/core/responsive.dart';
 import 'package:aroosi_flutter/theme/theme_helpers.dart';
+import 'package:aroosi_flutter/widgets/app_scaffold.dart';
 
 class PrivacyPolicyScreen extends StatelessWidget {
   const PrivacyPolicyScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final theme = ThemeHelpers.getMaterialTheme(context);
-    final colorScheme = theme.colorScheme;
-    final textColor = ThemeHelpers.getTextColor(context);
-
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          'Privacy Policy',
-          style: theme.textTheme.titleLarge?.copyWith(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-            color: textColor,
-          ),
-        ),
-        backgroundColor: ThemeHelpers.getSurfaceColor(context),
-        flexibleSpace: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [
-                colorScheme.primary.withValues(alpha: 0.12),
-                colorScheme.primary.withValues(alpha: 0.05),
-              ],
-            ),
-          ),
-        ),
-      ),
-      body: ResponsiveBuilder(
+    return AppScaffold(
+      title: 'Privacy Policy',
+      usePadding: false,
+      child: ResponsiveBuilder(
         builder: (context, screenType) {
           return CustomScrollView(
             slivers: [

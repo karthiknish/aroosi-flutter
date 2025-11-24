@@ -6,9 +6,9 @@ mixin _EditProfileFormSections on _EditProfileStateBase {
     bool hasError = false,
   }) {
     return BoxDecoration(
-      color: CupertinoTheme.of(context).scaffoldBackgroundColor,
+      color: ThemeHelpers.getSurfaceColor(context),
       border: Border.all(
-        color: hasError ? CupertinoColors.systemRed : AppColors.primary,
+        color: hasError ? AppColors.error : AppColors.primary,
         width: hasError ? 2.0 : 1.0,
       ),
       borderRadius: BorderRadius.circular(10.0),
@@ -23,17 +23,15 @@ mixin _EditProfileFormSections on _EditProfileStateBase {
   }
 
   Widget _buildBasicSection(BuildContext context) {
+    final theme = ThemeHelpers.getMaterialTheme(context);
+    final textStyle = theme.textTheme.bodyLarge;
+    final labelStyle = theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600);
+
     return _sectionCard('Basic', [
       Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            'Full Name',
-            style: CupertinoTheme.of(context).textTheme.textStyle.copyWith(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                ),
-          ),
+          Text('Full Name', style: labelStyle),
           const SizedBox(height: 8),
           Container(
             decoration: cupertinoDecoration(context),
@@ -41,11 +39,8 @@ mixin _EditProfileFormSections on _EditProfileStateBase {
               CupertinoTextField(
                 controller: _nameCtrl,
                 placeholder: 'Enter your full name',
-                placeholderStyle: CupertinoTheme.of(context)
-                    .textTheme
-                    .textStyle
-                    .copyWith(color: CupertinoColors.placeholderText),
-                style: CupertinoTheme.of(context).textTheme.textStyle,
+                placeholderStyle: textStyle?.copyWith(color: AppColors.muted),
+                style: textStyle,
                 decoration: BoxDecoration(
                   color: Colors.transparent,
                   border: Border.all(color: Colors.transparent),
@@ -58,13 +53,7 @@ mixin _EditProfileFormSections on _EditProfileStateBase {
       Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            'Date of Birth',
-            style: CupertinoTheme.of(context).textTheme.textStyle.copyWith(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                ),
-          ),
+          Text('Date of Birth', style: labelStyle),
           const SizedBox(height: 8),
           Container(
             decoration: cupertinoDecoration(context),
@@ -77,14 +66,9 @@ mixin _EditProfileFormSections on _EditProfileStateBase {
                   children: [
                     Text(
                       _dobLabel(),
-                      style: CupertinoTheme.of(context)
-                          .textTheme
-                          .textStyle
-                          .copyWith(
-                            color: _dob == null
-                                ? CupertinoColors.placeholderText
-                                : CupertinoColors.label,
-                          ),
+                      style: textStyle?.copyWith(
+                        color: _dob == null ? AppColors.muted : AppColors.text,
+                      ),
                     ),
                     const Icon(CupertinoIcons.calendar, size: 16),
                   ],
@@ -109,13 +93,7 @@ mixin _EditProfileFormSections on _EditProfileStateBase {
       Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            'About Me',
-            style: CupertinoTheme.of(context).textTheme.textStyle.copyWith(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                ),
-          ),
+          Text('About Me', style: labelStyle),
           const SizedBox(height: 8),
           Container(
             decoration: cupertinoDecoration(context),
@@ -123,11 +101,8 @@ mixin _EditProfileFormSections on _EditProfileStateBase {
               CupertinoTextField(
                 controller: _aboutCtrl,
                 placeholder: 'Tell us about yourself',
-                placeholderStyle: CupertinoTheme.of(context)
-                    .textTheme
-                    .textStyle
-                    .copyWith(color: CupertinoColors.placeholderText),
-                style: CupertinoTheme.of(context).textTheme.textStyle,
+                placeholderStyle: textStyle?.copyWith(color: AppColors.muted),
+                style: textStyle,
                 maxLines: 4,
                 decoration: BoxDecoration(
                   color: Colors.transparent,
@@ -142,17 +117,15 @@ mixin _EditProfileFormSections on _EditProfileStateBase {
   }
 
   Widget _buildLocationSection(BuildContext context) {
+    final theme = ThemeHelpers.getMaterialTheme(context);
+    final textStyle = theme.textTheme.bodyLarge;
+    final labelStyle = theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600);
+
     return _sectionCard('Location', [
       Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            'City',
-            style: CupertinoTheme.of(context).textTheme.textStyle.copyWith(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                ),
-          ),
+          Text('City', style: labelStyle),
           const SizedBox(height: 8),
           Container(
             decoration: cupertinoDecoration(context),
@@ -160,11 +133,8 @@ mixin _EditProfileFormSections on _EditProfileStateBase {
               CupertinoTextField(
                 controller: _cityCtrl,
                 placeholder: 'Enter your city',
-                placeholderStyle: CupertinoTheme.of(context)
-                    .textTheme
-                    .textStyle
-                    .copyWith(color: CupertinoColors.placeholderText),
-                style: CupertinoTheme.of(context).textTheme.textStyle,
+                placeholderStyle: textStyle?.copyWith(color: AppColors.muted),
+                style: textStyle,
                 decoration: BoxDecoration(
                   color: Colors.transparent,
                   border: Border.all(color: Colors.transparent),
@@ -177,13 +147,7 @@ mixin _EditProfileFormSections on _EditProfileStateBase {
       Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            'Country',
-            style: CupertinoTheme.of(context).textTheme.textStyle.copyWith(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                ),
-          ),
+          Text('Country', style: labelStyle),
           const SizedBox(height: 8),
           Container(
             decoration: cupertinoDecoration(context),
@@ -191,11 +155,8 @@ mixin _EditProfileFormSections on _EditProfileStateBase {
               CupertinoTextField(
                 controller: _countryCtrl,
                 placeholder: 'Enter your country',
-                placeholderStyle: CupertinoTheme.of(context)
-                    .textTheme
-                    .textStyle
-                    .copyWith(color: CupertinoColors.placeholderText),
-                style: CupertinoTheme.of(context).textTheme.textStyle,
+                placeholderStyle: textStyle?.copyWith(color: AppColors.muted),
+                style: textStyle,
                 decoration: BoxDecoration(
                   color: Colors.transparent,
                   border: Border.all(color: Colors.transparent),
@@ -209,6 +170,10 @@ mixin _EditProfileFormSections on _EditProfileStateBase {
   }
 
   Widget _buildPhysicalSection(BuildContext context) {
+    final theme = ThemeHelpers.getMaterialTheme(context);
+    final textStyle = theme.textTheme.bodyLarge;
+    final labelStyle = theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600);
+
     return _sectionCard('Physical', [
       Row(
         children: [
@@ -216,13 +181,7 @@ mixin _EditProfileFormSections on _EditProfileStateBase {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  'Height - Feet',
-                  style: CupertinoTheme.of(context).textTheme.textStyle.copyWith(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                      ),
-                ),
+                Text('Height - Feet', style: labelStyle),
                 const SizedBox(height: 8),
                 Container(
                   decoration: cupertinoDecoration(context),
@@ -231,11 +190,8 @@ mixin _EditProfileFormSections on _EditProfileStateBase {
                       controller: _heightFeetCtrl,
                       keyboardType: TextInputType.number,
                       placeholder: 'Feet',
-                      placeholderStyle: CupertinoTheme.of(context)
-                          .textTheme
-                          .textStyle
-                          .copyWith(color: CupertinoColors.placeholderText),
-                      style: CupertinoTheme.of(context).textTheme.textStyle,
+                      placeholderStyle: textStyle?.copyWith(color: AppColors.muted),
+                      style: textStyle,
                       decoration: BoxDecoration(
                         color: Colors.transparent,
                         border: Border.all(color: Colors.transparent),
@@ -251,13 +207,7 @@ mixin _EditProfileFormSections on _EditProfileStateBase {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  'Height - Inches',
-                  style: CupertinoTheme.of(context).textTheme.textStyle.copyWith(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                      ),
-                ),
+                Text('Height - Inches', style: labelStyle),
                 const SizedBox(height: 8),
                 Container(
                   decoration: cupertinoDecoration(context),
@@ -266,11 +216,8 @@ mixin _EditProfileFormSections on _EditProfileStateBase {
                       controller: _heightInchesCtrl,
                       keyboardType: TextInputType.number,
                       placeholder: 'Inches',
-                      placeholderStyle: CupertinoTheme.of(context)
-                          .textTheme
-                          .textStyle
-                          .copyWith(color: CupertinoColors.placeholderText),
-                      style: CupertinoTheme.of(context).textTheme.textStyle,
+                      placeholderStyle: textStyle?.copyWith(color: AppColors.muted),
+                      style: textStyle,
                       decoration: BoxDecoration(
                         color: Colors.transparent,
                         border: Border.all(color: Colors.transparent),
@@ -293,17 +240,15 @@ mixin _EditProfileFormSections on _EditProfileStateBase {
   }
 
   Widget _buildProfessionalSection(BuildContext context) {
+    final theme = ThemeHelpers.getMaterialTheme(context);
+    final textStyle = theme.textTheme.bodyLarge;
+    final labelStyle = theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600);
+
     return _sectionCard('Professional', [
       Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            'Education',
-            style: CupertinoTheme.of(context).textTheme.textStyle.copyWith(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                ),
-          ),
+          Text('Education', style: labelStyle),
           const SizedBox(height: 8),
           Container(
             decoration: cupertinoDecoration(context),
@@ -311,11 +256,8 @@ mixin _EditProfileFormSections on _EditProfileStateBase {
               CupertinoTextField(
                 controller: _educationCtrl,
                 placeholder: 'Education level',
-                placeholderStyle: CupertinoTheme.of(context)
-                    .textTheme
-                    .textStyle
-                    .copyWith(color: CupertinoColors.placeholderText),
-                style: CupertinoTheme.of(context).textTheme.textStyle,
+                placeholderStyle: textStyle?.copyWith(color: AppColors.muted),
+                style: textStyle,
                 decoration: BoxDecoration(
                   color: Colors.transparent,
                   border: Border.all(color: Colors.transparent),
@@ -328,13 +270,7 @@ mixin _EditProfileFormSections on _EditProfileStateBase {
       Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            'Occupation',
-            style: CupertinoTheme.of(context).textTheme.textStyle.copyWith(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                ),
-          ),
+          Text('Occupation', style: labelStyle),
           const SizedBox(height: 8),
           Container(
             decoration: cupertinoDecoration(context),
@@ -342,11 +278,8 @@ mixin _EditProfileFormSections on _EditProfileStateBase {
               CupertinoTextField(
                 controller: _occupationCtrl,
                 placeholder: 'Occupation',
-                placeholderStyle: CupertinoTheme.of(context)
-                    .textTheme
-                    .textStyle
-                    .copyWith(color: CupertinoColors.placeholderText),
-                style: CupertinoTheme.of(context).textTheme.textStyle,
+                placeholderStyle: textStyle?.copyWith(color: AppColors.muted),
+                style: textStyle,
                 decoration: BoxDecoration(
                   color: Colors.transparent,
                   border: Border.all(color: Colors.transparent),
@@ -359,13 +292,7 @@ mixin _EditProfileFormSections on _EditProfileStateBase {
       Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            'Annual Income (optional)',
-            style: CupertinoTheme.of(context).textTheme.textStyle.copyWith(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                ),
-          ),
+          Text('Annual Income (optional)', style: labelStyle),
           const SizedBox(height: 8),
           Container(
             decoration: cupertinoDecoration(context),
@@ -374,11 +301,8 @@ mixin _EditProfileFormSections on _EditProfileStateBase {
                 controller: _annualIncomeCtrl,
                 keyboardType: TextInputType.number,
                 placeholder: 'Income in USD',
-                placeholderStyle: CupertinoTheme.of(context)
-                    .textTheme
-                    .textStyle
-                    .copyWith(color: CupertinoColors.placeholderText),
-                style: CupertinoTheme.of(context).textTheme.textStyle,
+                placeholderStyle: textStyle?.copyWith(color: AppColors.muted),
+                style: textStyle,
                 decoration: BoxDecoration(
                   color: Colors.transparent,
                   border: Border.all(color: Colors.transparent),
@@ -392,17 +316,15 @@ mixin _EditProfileFormSections on _EditProfileStateBase {
   }
 
   Widget _buildCulturalSection(BuildContext context) {
+    final theme = ThemeHelpers.getMaterialTheme(context);
+    final textStyle = theme.textTheme.bodyLarge;
+    final labelStyle = theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600);
+
     return _sectionCard('Cultural', [
       Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            'Religion',
-            style: CupertinoTheme.of(context).textTheme.textStyle.copyWith(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                ),
-          ),
+          Text('Religion', style: labelStyle),
           const SizedBox(height: 8),
           Container(
             decoration: cupertinoDecoration(context),
@@ -410,11 +332,8 @@ mixin _EditProfileFormSections on _EditProfileStateBase {
               CupertinoTextField(
                 controller: _religionCtrl,
                 placeholder: 'Religion',
-                placeholderStyle: CupertinoTheme.of(context)
-                    .textTheme
-                    .textStyle
-                    .copyWith(color: CupertinoColors.placeholderText),
-                style: CupertinoTheme.of(context).textTheme.textStyle,
+                placeholderStyle: textStyle?.copyWith(color: AppColors.muted),
+                style: textStyle,
                 decoration: BoxDecoration(
                   color: Colors.transparent,
                   border: Border.all(color: Colors.transparent),
@@ -427,13 +346,7 @@ mixin _EditProfileFormSections on _EditProfileStateBase {
       Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            'Mother Tongue',
-            style: CupertinoTheme.of(context).textTheme.textStyle.copyWith(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                ),
-          ),
+          Text('Mother Tongue', style: labelStyle),
           const SizedBox(height: 8),
           Container(
             decoration: cupertinoDecoration(context),
@@ -441,11 +354,8 @@ mixin _EditProfileFormSections on _EditProfileStateBase {
               CupertinoTextField(
                 controller: _motherTongueCtrl,
                 placeholder: 'Mother tongue',
-                placeholderStyle: CupertinoTheme.of(context)
-                    .textTheme
-                    .textStyle
-                    .copyWith(color: CupertinoColors.placeholderText),
-                style: CupertinoTheme.of(context).textTheme.textStyle,
+                placeholderStyle: textStyle?.copyWith(color: AppColors.muted),
+                style: textStyle,
                 decoration: BoxDecoration(
                   color: Colors.transparent,
                   border: Border.all(color: Colors.transparent),
@@ -458,13 +368,7 @@ mixin _EditProfileFormSections on _EditProfileStateBase {
       Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            'Ethnicity',
-            style: CupertinoTheme.of(context).textTheme.textStyle.copyWith(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                ),
-          ),
+          Text('Ethnicity', style: labelStyle),
           const SizedBox(height: 8),
           Container(
             decoration: cupertinoDecoration(context),
@@ -472,11 +376,8 @@ mixin _EditProfileFormSections on _EditProfileStateBase {
               CupertinoTextField(
                 controller: _ethnicityCtrl,
                 placeholder: 'Ethnicity',
-                placeholderStyle: CupertinoTheme.of(context)
-                    .textTheme
-                    .textStyle
-                    .copyWith(color: CupertinoColors.placeholderText),
-                style: CupertinoTheme.of(context).textTheme.textStyle,
+                placeholderStyle: textStyle?.copyWith(color: AppColors.muted),
+                style: textStyle,
                 decoration: BoxDecoration(
                   color: Colors.transparent,
                   border: Border.all(color: Colors.transparent),
@@ -508,17 +409,15 @@ mixin _EditProfileFormSections on _EditProfileStateBase {
   }
 
   Widget _buildContactSection(BuildContext context) {
+    final theme = ThemeHelpers.getMaterialTheme(context);
+    final textStyle = theme.textTheme.bodyLarge;
+    final labelStyle = theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600);
+
     return _sectionCard('Contact', [
       Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            'Phone Number',
-            style: CupertinoTheme.of(context).textTheme.textStyle.copyWith(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                ),
-          ),
+          Text('Phone Number', style: labelStyle),
           const SizedBox(height: 8),
           Container(
             decoration: cupertinoDecoration(context),
@@ -527,11 +426,8 @@ mixin _EditProfileFormSections on _EditProfileStateBase {
                 controller: _phoneCtrl,
                 placeholder: 'Phone number',
                 keyboardType: TextInputType.phone,
-                placeholderStyle: CupertinoTheme.of(context)
-                    .textTheme
-                    .textStyle
-                    .copyWith(color: CupertinoColors.placeholderText),
-                style: CupertinoTheme.of(context).textTheme.textStyle,
+                placeholderStyle: textStyle?.copyWith(color: AppColors.muted),
+                style: textStyle,
                 decoration: BoxDecoration(
                   color: Colors.transparent,
                   border: Border.all(color: Colors.transparent),
@@ -545,6 +441,10 @@ mixin _EditProfileFormSections on _EditProfileStateBase {
   }
 
   Widget _buildPartnerPreferencesSection(BuildContext context) {
+    final theme = ThemeHelpers.getMaterialTheme(context);
+    final textStyle = theme.textTheme.bodyLarge;
+    final labelStyle = theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600);
+
     return _sectionCard('Partner Preferences', [
       Row(
         children: [
@@ -552,13 +452,7 @@ mixin _EditProfileFormSections on _EditProfileStateBase {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  'Preferred Age Min',
-                  style: CupertinoTheme.of(context).textTheme.textStyle.copyWith(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                      ),
-                ),
+                Text('Preferred Age Min', style: labelStyle),
                 const SizedBox(height: 8),
                 Container(
                   decoration: cupertinoDecoration(context),
@@ -567,11 +461,8 @@ mixin _EditProfileFormSections on _EditProfileStateBase {
                       controller: _partnerAgeMinCtrl,
                       keyboardType: TextInputType.number,
                       placeholder: 'Min age',
-                      placeholderStyle: CupertinoTheme.of(context)
-                          .textTheme
-                          .textStyle
-                          .copyWith(color: CupertinoColors.placeholderText),
-                      style: CupertinoTheme.of(context).textTheme.textStyle,
+                      placeholderStyle: textStyle?.copyWith(color: AppColors.muted),
+                      style: textStyle,
                       decoration: BoxDecoration(
                         color: Colors.transparent,
                         border: Border.all(color: Colors.transparent),
@@ -587,13 +478,7 @@ mixin _EditProfileFormSections on _EditProfileStateBase {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  'Preferred Age Max',
-                  style: CupertinoTheme.of(context).textTheme.textStyle.copyWith(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                      ),
-                ),
+                Text('Preferred Age Max', style: labelStyle),
                 const SizedBox(height: 8),
                 Container(
                   decoration: cupertinoDecoration(context),
@@ -602,11 +487,8 @@ mixin _EditProfileFormSections on _EditProfileStateBase {
                       controller: _partnerAgeMaxCtrl,
                       keyboardType: TextInputType.number,
                       placeholder: 'Max age',
-                      placeholderStyle: CupertinoTheme.of(context)
-                          .textTheme
-                          .textStyle
-                          .copyWith(color: CupertinoColors.placeholderText),
-                      style: CupertinoTheme.of(context).textTheme.textStyle,
+                      placeholderStyle: textStyle?.copyWith(color: AppColors.muted),
+                      style: textStyle,
                       decoration: BoxDecoration(
                         color: Colors.transparent,
                         border: Border.all(color: Colors.transparent),
@@ -718,16 +600,14 @@ mixin _EditProfileFormSections on _EditProfileStateBase {
     required String? value,
     required void Function(String?) onChanged,
   }) {
+    final theme = ThemeHelpers.getMaterialTheme(context);
+    final textStyle = theme.textTheme.bodyLarge;
+    final labelStyle = theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          label,
-          style: CupertinoTheme.of(context).textTheme.textStyle.copyWith(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-              ),
-        ),
+        Text(label, style: labelStyle),
         const SizedBox(height: 8),
         Container(
           decoration: cupertinoDecoration(context),
@@ -741,12 +621,9 @@ mixin _EditProfileFormSections on _EditProfileStateBase {
                 children: [
                   Text(
                     value ?? 'Select',
-                    style: CupertinoTheme.of(context).textTheme.textStyle
-                        .copyWith(
-                          color: value == null
-                              ? CupertinoColors.placeholderText
-                              : CupertinoColors.label,
-                        ),
+                    style: textStyle?.copyWith(
+                      color: value == null ? AppColors.muted : AppColors.text,
+                    ),
                   ),
                   const Icon(CupertinoIcons.chevron_down, size: 16),
                 ],

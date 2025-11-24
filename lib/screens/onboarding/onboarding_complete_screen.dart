@@ -2,60 +2,67 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:aroosi_flutter/theme/motion.dart';
+import 'package:aroosi_flutter/theme/theme.dart';
 import 'package:aroosi_flutter/theme/theme_helpers.dart';
 import 'package:aroosi_flutter/widgets/animations/motion.dart';
+import 'package:aroosi_flutter/widgets/app_scaffold.dart';
 
 class OnboardingCompleteScreen extends StatelessWidget {
   const OnboardingCompleteScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('All Set!')),
-      body: Padding(
-        padding: const EdgeInsets.all(24),
-        child: FadeThrough(
-          delay: AppMotionDurations.fast,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              const Spacer(),
-              FadeScaleIn(
-                duration: AppMotionDurations.medium,
-                beginScale: 0.8,
-                child: Icon(
-                  Icons.check_circle,
-                  size: 96,
-                  color: ThemeHelpers.getMaterialTheme(context).colorScheme.primary,
-                ),
+    final theme = ThemeHelpers.getMaterialTheme(context);
+    final textTheme = theme.textTheme;
+
+    return AppScaffold(
+      title: 'Welcome',
+      usePadding: false,
+      child: Padding(
+        padding: const EdgeInsets.all(Spacing.xl),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(Spacing.xl),
+              decoration: BoxDecoration(
+                color: theme.colorScheme.primaryContainer.withValues(alpha: 0.3),
+                shape: BoxShape.circle,
               ),
-              const SizedBox(height: 24),
-              FadeIn(
-                delay: AppMotionDurations.fast,
-                child: Text(
-                  'Your profile looks great',
-                  style: ThemeHelpers.getMaterialTheme(context).textTheme.headlineSmall,
-                  textAlign: TextAlign.center,
-                ),
+              child: Icon(
+                Icons.check_circle_outline,
+                size: 80,
+                color: theme.colorScheme.primary,
               ),
-              const SizedBox(height: 12),
-              const FadeIn(
-                delay: Duration(milliseconds: 220),
-                child: Text(
-                  'Jump in to start exploring new connections tailored to your preferences.',
-                  textAlign: TextAlign.center,
-                ),
+            ),
+            const SizedBox(height: Spacing.xxl),
+            Text(
+              'You\'re All Set!',
+              style: textTheme.headlineMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+                color: theme.colorScheme.onSurface,
               ),
-              const Spacer(),
-              FadeScaleIn(
-                delay: AppMotionDurations.fast,
-                child: FilledButton(
-                  onPressed: () => context.go('/dashboard'),
-                  child: const Text('Go to Dashboard'),
-                ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: Spacing.md),
+            Text(
+              'Your profile is now complete. You can start exploring matches and connecting with others.',
+              style: textTheme.bodyLarge?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
               ),
-            ],
-          ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: Spacing.xxl),
+            FilledButton(
+              onPressed: () {
+                // Navigate to home
+              },
+              style: FilledButton.styleFrom(
+                minimumSize: const Size(double.infinity, 50),
+              ),
+              child: const Text('Start Exploring'),
+            ),
+          ],
         ),
       ),
     );

@@ -8,6 +8,7 @@ import 'package:aroosi_flutter/features/auth/auth_controller.dart';
 import 'package:aroosi_flutter/features/support/support_repository.dart';
 import 'package:aroosi_flutter/theme/colors.dart';
 import 'package:aroosi_flutter/theme/theme_helpers.dart';
+import 'package:aroosi_flutter/widgets/app_scaffold.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
 class ContactScreen extends ConsumerStatefulWidget {
@@ -53,7 +54,7 @@ class _ContactScreenState extends ConsumerState<ContactScreen> {
     return BoxDecoration(
       color: CupertinoThemeHelpers.getMaterialTheme(context).scaffoldBackgroundColor,
       border: Border.all(
-        color: hasError ? CupertinoColors.destructiveRed : AppColors.primary,
+        color: hasError ? AppColors.error : AppColors.primary,
         width: 1.5,
       ),
       borderRadius: BorderRadius.circular(10.0),
@@ -230,16 +231,18 @@ class _ContactScreenState extends ConsumerState<ContactScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = ThemeHelpers.getMaterialTheme(context);
-    
+    final textTheme = theme.textTheme;
+
     // Success state
     if (_submitted) {
-      return Scaffold(
-        appBar: AppBar(title: const Text('Contact Support')),
-        body: Center(
+      return AppScaffold(
+        title: 'Contact Support',
+        usePadding: false,
+        child: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(Icons.check_circle, size: 80, color: Colors.green),
+              Icon(Icons.check_circle, size: 80, color: AppColors.success),
               const SizedBox(height: 24),
               Text(
                 'Message Sent!',
@@ -257,9 +260,10 @@ class _ContactScreenState extends ConsumerState<ContactScreen> {
       );
     }
     
-    return Scaffold(
-      appBar: AppBar(title: const Text('Contact Support')),
-      body: Form(
+    return AppScaffold(
+      title: 'Contact Support',
+      usePadding: false,
+      child: Form(
         key: _formKey,
         child: ListView(
           padding: const EdgeInsets.all(24),
@@ -410,18 +414,18 @@ class _ContactScreenState extends ConsumerState<ContactScreen> {
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: Colors.red.shade50,
+                  color: AppColors.error.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: Colors.red.shade200),
+                  border: Border.all(color: AppColors.error.withValues(alpha: 0.3)),
                 ),
                 child: Row(
                   children: [
-                    Icon(Icons.error_outline, color: Colors.red.shade700, size: 20),
+                    Icon(Icons.error_outline, color: AppColors.error, size: 20),
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
                         _submitError!,
-                        style: TextStyle(color: Colors.red.shade900, fontSize: 12),
+                        style: TextStyle(color: AppColors.error, fontSize: 12),
                       ),
                     ),
                   ],

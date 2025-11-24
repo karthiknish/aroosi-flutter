@@ -10,6 +10,8 @@ class AppScaffold extends StatelessWidget {
   final Widget? leading;
   final List<Widget>? actions;
   final Widget? floatingActionButton;
+  final bool usePadding;
+  final bool showNavBar;
 
   const AppScaffold({
     super.key,
@@ -18,6 +20,8 @@ class AppScaffold extends StatelessWidget {
     this.leading,
     this.actions,
     this.floatingActionButton,
+    this.usePadding = true,
+    this.showNavBar = true,
   });
 
   @override
@@ -26,36 +30,47 @@ class AppScaffold extends StatelessWidget {
       enableTexture: true,
       child: CupertinoPageScaffold(
         backgroundColor: AppColors.background,
-        navigationBar: CupertinoNavigationBar(
-          backgroundColor: AppColors.background.withValues(alpha: 0.9),
-          border: null,
-          middle: _CupertinoAppBarTitle(title: title),
-          leading: leading,
-          trailing: actions != null && actions!.isNotEmpty
-              ? Row(mainAxisSize: MainAxisSize.min, children: actions!)
-              : null,
-        ),
-        child: SafeArea(
-          top: false,
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(
-              Spacing.lg,
-              Spacing.lg,
-              Spacing.lg,
-              Spacing.lg + 8,
+        navigationBar: showNavBar
+            ? CupertinoNavigationBar(
+                backgroundColor: AppColors.background.withValues(alpha: 0.9),
+                border: null,
+                middle: _CupertinoAppBarTitle(title: title),
+                leading: leading,
+                trailing: actions != null && actions!.isNotEmpty
+                    ? Row(mainAxisSize: MainAxisSize.min, children: actions!)
+                    : null,
+              )
+            : null,
+        child: Stack(
+          children: [
+            SafeArea(
+              top: false,
+              child: Padding(
+                padding: usePadding
+                    ? const EdgeInsets.fromLTRB(
+                        Spacing.lg,
+                        Spacing.lg,
+                        Spacing.lg,
+                        Spacing.lg + 8,
+                      )
+                    : EdgeInsets.zero,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    if (usePadding) const EmailVerificationBanner(),
+                    if (usePadding) const SizedBox(height: Spacing.lg),
+                    Expanded(child: child),
+                  ],
+                ),
+              ),
             ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                const EmailVerificationBanner(),
-                const SizedBox(height: Spacing.lg),
-                child,
-                if (floatingActionButton != null) ...[
-                  const SizedBox(height: 80),
-                ],
-              ],
-            ),
-          ),
+            if (floatingActionButton != null)
+              Positioned(
+                bottom: 16,
+                right: 16,
+                child: floatingActionButton!,
+              ),
+          ],
         ),
       ),
     );

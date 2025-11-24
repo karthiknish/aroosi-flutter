@@ -3,11 +3,17 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../theme/colors.dart';
+import '../../core/toast_service.dart';
+import '../../widgets/empty_states.dart';
 import '../../features/islamic_education/models.dart';
 import '../../features/islamic_education/services.dart';
 import '../../features/auth/auth_controller.dart';
+import '../../widgets/app_scaffold.dart';
+import 'package:aroosi_flutter/theme/theme.dart';
+import 'package:aroosi_flutter/theme/theme_helpers.dart';
 
 class IslamicEducationQuizHubScreen extends ConsumerStatefulWidget {
   const IslamicEducationQuizHubScreen({super.key});
@@ -46,34 +52,17 @@ class _IslamicEducationQuizHubScreenState extends ConsumerState<IslamicEducation
       });
       
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              'Failed to load quiz content: $e',
-              style: GoogleFonts.nunitoSans(),
-            ),
-            backgroundColor: Colors.red,
-          ),
-        );
+        ToastService.instance.error('Failed to load quiz content: $e');
       }
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          'Quiz Hub',
-          style: GoogleFonts.nunitoSans(
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        backgroundColor: AppColors.surfaceSecondary,
-        elevation: 0,
-      ),
-      body: _isLoading
+    return AppScaffold(
+      title: 'Quiz Hub',
+      usePadding: false,
+      child: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : _quizContent.isEmpty
               ? _buildEmptyState()
@@ -82,34 +71,11 @@ class _IslamicEducationQuizHubScreenState extends ConsumerState<IslamicEducation
   }
 
   Widget _buildEmptyState() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            Icons.quiz_outlined,
-            size: 64,
-            color: Colors.grey[400],
-          ),
-          const SizedBox(height: 16),
-          Text(
-            'No Quizzes Available',
-            style: GoogleFonts.nunitoSans(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-              color: Colors.grey[600],
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'Check back soon for new quizzes!',
-            style: GoogleFonts.nunitoSans(
-              fontSize: 14,
-              color: Colors.grey[500],
-            ),
-          ),
-        ],
-      ),
+    return EmptyState(
+      title: 'No Quizzes Available',
+      subtitle: 'Check back soon for new quizzes!',
+      description: 'We are constantly adding new educational content.',
+      icon: Icon(Icons.quiz_outlined, size: 64, color: AppColors.muted),
     );
   }
 
@@ -130,14 +96,7 @@ class _IslamicEducationQuizHubScreenState extends ConsumerState<IslamicEducation
   void _navigateToQuiz(IslamicEducationalContent content) {
     final userId = ref.read(authControllerProvider).profile?.id;
     if (userId == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'Please sign in to take quizzes and track progress.',
-            style: GoogleFonts.nunitoSans(),
-          ),
-        ),
-      );
+      ToastService.instance.warning('Please sign in to take quizzes and track progress.');
       return;
     }
 
@@ -179,13 +138,13 @@ class _QuizCard extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: Colors.green.withValues(alpha: 0.1),
+                  color: AppColors.success.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: const Icon(
+                child: Icon(
                   Icons.quiz,
                   size: 24,
-                  color: Colors.green,
+                  color: AppColors.success,
                 ),
               ),
               const SizedBox(width: 16),
@@ -207,7 +166,7 @@ class _QuizCard extends StatelessWidget {
                       '${content.quiz!.questions.length} questions • ${content.estimatedReadTime} min',
                       style: GoogleFonts.nunitoSans(
                         fontSize: 12,
-                        color: Colors.grey[600],
+                        color: AppColors.muted,
                       ),
                     ),
                   ],
@@ -216,7 +175,7 @@ class _QuizCard extends StatelessWidget {
               Icon(
                 Icons.arrow_forward_ios,
                 size: 16,
-                color: Colors.grey[400],
+                color: AppColors.muted,
               ),
             ],
           ),
@@ -274,162 +233,157 @@ class _IslamicEducationQuizScreenState extends State<IslamicEducationQuizScreen>
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Quiz: ${widget.contentTitle}'),
-        backgroundColor: AppColors.surfaceSecondary,
-        elevation: 0,
-      ),
-      body: _results != null
-          ? _buildResultsScreen()
-          : _buildQuestionScreen(),
-    );
-  }
-
-  Widget _buildQuestionScreen() {
-    if (_currentQuestionIndex >= widget.quiz.questions.length) {
-      return _buildCompletionScreen();
-    }
-
+    final theme = ThemeHelpers.getMaterialTheme(context);
+    final textTheme = theme.textTheme;
     final currentQuestion = widget.quiz.questions[_currentQuestionIndex];
-    
-    final total = widget.quiz.questions.length;
-    final selected = _answers[currentQuestion.id];
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        if (_remainingSeconds != null)
-          _QuizTimerBanner(
-            remainingSeconds: _remainingSeconds!,
-            totalSeconds: widget.quiz.timeLimit! * 60,
-          ),
-        Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              LinearProgressIndicator(
-                value: (_currentQuestionIndex + 1) / total,
-                backgroundColor: Colors.grey[300],
-                valueColor: const AlwaysStoppedAnimation<Color>(Colors.green),
+    return AppScaffold(
+      title: 'Islamic Knowledge Quiz',
+      usePadding: false,
+      child: Padding(
+        padding: const EdgeInsets.all(Spacing.lg),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if (_remainingSeconds != null)
+              _QuizTimerBanner(
+                remainingSeconds: _remainingSeconds!,
+                totalSeconds: widget.quiz.timeLimit! * 60,
               ),
-              const SizedBox(height: 16),
-              Text(
-                'Question ${_currentQuestionIndex + 1} of $total',
-                style: GoogleFonts.nunitoSans(
-                  fontSize: 14,
-                  color: Colors.grey[600],
-                ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                currentQuestion.question,
-                style: GoogleFonts.nunitoSans(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ],
-          ),
-        ),
-        Expanded(
-          child: ListView.builder(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            itemCount: currentQuestion.options.length,
-            itemBuilder: (context, index) {
-              final option = currentQuestion.options[index];
-              final isSelected = selected == option;
-
-              return Padding(
-                padding: const EdgeInsets.only(bottom: 12),
-                child: InkWell(
-                  onTap: () => _selectAnswer(currentQuestion.id, option),
-                  borderRadius: BorderRadius.circular(12),
-                  child: Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      border: Border.all(
-                        color: isSelected ? Colors.green : Colors.grey[300]!,
-                        width: isSelected ? 2 : 1,
-                      ),
-                      borderRadius: BorderRadius.circular(12),
-                      color: isSelected
-                          ? Colors.green.withValues(alpha: 0.1)
-                          : Colors.white,
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  LinearProgressIndicator(
+                    value: (_currentQuestionIndex + 1) / widget.quiz.questions.length,
+                    backgroundColor: AppColors.borderPrimary,
+                    valueColor: AlwaysStoppedAnimation<Color>(AppColors.success),
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    'Question ${_currentQuestionIndex + 1} of ${widget.quiz.questions.length}',
+                    style: GoogleFonts.nunitoSans(
+                      fontSize: 14,
+                      color: AppColors.muted,
                     ),
-                    child: Row(
-                      children: [
-                        Icon(
-                          isSelected
-                              ? Icons.radio_button_checked
-                              : Icons.radio_button_unchecked,
-                          color: isSelected ? Colors.green : Colors.grey[600],
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    currentQuestion.question,
+                    style: GoogleFonts.nunitoSans(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Expanded(
+              child: ListView.builder(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                itemCount: currentQuestion.options.length,
+                itemBuilder: (context, index) {
+                  final option = currentQuestion.options[index];
+                  final isSelected = _answers[currentQuestion.id] == option;
+
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 12),
+                    child: InkWell(
+                      onTap: () => _selectAnswer(currentQuestion.id, option),
+                      borderRadius: BorderRadius.circular(12),
+                      child: Container(
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          border: Border.all(
+                            color: isSelected ? AppColors.success : AppColors.borderPrimary,
+                            width: isSelected ? 2 : 1,
+                          ),
+                          borderRadius: BorderRadius.circular(12),
+                          color: isSelected
+                              ? AppColors.success.withValues(alpha: 0.1)
+                              : AppColors.surface,
                         ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Text(
-                            option,
-                            style: GoogleFonts.nunitoSans(
-                              fontSize: 16,
-                              color: isSelected
-                                  ? Colors.green
-                                  : Colors.black87,
-                              fontWeight: isSelected
-                                  ? FontWeight.w600
-                                  : FontWeight.normal,
+                        child: Row(
+                          children: [
+                            Icon(
+                              isSelected
+                                  ? Icons.radio_button_checked
+                                  : Icons.radio_button_unchecked,
+                              color: isSelected ? AppColors.success : AppColors.muted,
                             ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Text(
+                                option,
+                                style: GoogleFonts.nunitoSans(
+                                  fontSize: 16,
+                                  color: isSelected
+                                      ? AppColors.success
+                                      : AppColors.text,
+                                  fontWeight: isSelected
+                                      ? FontWeight.w600
+                                      : FontWeight.normal,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+            SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Row(
+                  children: [
+                    if (_currentQuestionIndex > 0)
+                      Expanded(
+                        child: OutlinedButton(
+                          onPressed: _previousQuestion,
+                          style: OutlinedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                          ),
+                          child: Text(
+                            'Previous',
+                            style:
+                                GoogleFonts.nunitoSans(fontWeight: FontWeight.bold),
                           ),
                         ),
-                      ],
+                      ),
+                    if (_currentQuestionIndex > 0) const SizedBox(width: 12),
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: () {
+                          if (_currentQuestionIndex == widget.quiz.questions.length - 1) {
+                            _submitQuiz();
+                          } else {
+                            _nextQuestion();
+                          }
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.success,
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                        ),
+                        child: Text(
+                          _currentQuestionIndex == widget.quiz.questions.length - 1 ? 'Submit' : 'Next',
+                          style: GoogleFonts.nunitoSans(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
                     ),
-                  ),
+                  ],
                 ),
-              );
-            },
-          ),
-        ),
-        SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Row(
-              children: [
-                if (_currentQuestionIndex > 0)
-                  Expanded(
-                    child: OutlinedButton(
-                      onPressed: _previousQuestion,
-                      style: OutlinedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                      ),
-                      child: Text(
-                        'Previous',
-                        style:
-                            GoogleFonts.nunitoSans(fontWeight: FontWeight.bold),
-                      ),
-                    ),
-                  ),
-                if (_currentQuestionIndex > 0) const SizedBox(width: 12),
-                Expanded(
-                  child: ElevatedButton(
-                    onPressed: selected != null ? _nextQuestion : null,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.green,
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                    ),
-                    child: Text(
-                      _currentQuestionIndex == total - 1 ? 'Submit' : 'Next',
-                      style: GoogleFonts.nunitoSans(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
+              ),
             ),
-          ),
+          ],
         ),
-      ],
+      ),
     );
   }
 
@@ -446,7 +400,7 @@ class _IslamicEducationQuizScreenState extends State<IslamicEducationQuizScreen>
               'Calculating your results...',
               style: GoogleFonts.nunitoSans(
                 fontSize: 16,
-                color: Colors.grey[600],
+                color: AppColors.muted,
               ),
             ),
           ],
@@ -470,10 +424,10 @@ class _IslamicEducationQuizScreenState extends State<IslamicEducationQuizScreen>
             width: double.infinity,
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
-              color: passed ? Colors.green.withValues(alpha: 0.1) : Colors.red.withValues(alpha: 0.1),
+              color: passed ? AppColors.success.withValues(alpha: 0.1) : AppColors.error.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
-                color: passed ? Colors.green : Colors.red,
+                color: passed ? AppColors.success : AppColors.error,
                 width: 2,
               ),
             ),
@@ -482,7 +436,7 @@ class _IslamicEducationQuizScreenState extends State<IslamicEducationQuizScreen>
                 Icon(
                   passed ? Icons.check_circle : Icons.cancel,
                   size: 64,
-                  color: passed ? Colors.green : Colors.red,
+                  color: passed ? AppColors.success : AppColors.error,
                 ),
                 const SizedBox(height: 16),
                 Text(
@@ -490,7 +444,7 @@ class _IslamicEducationQuizScreenState extends State<IslamicEducationQuizScreen>
                   style: GoogleFonts.nunitoSans(
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
-                    color: passed ? Colors.green : Colors.red,
+                    color: passed ? AppColors.success : AppColors.error,
                   ),
                 ),
                 const SizedBox(height: 8),
@@ -498,7 +452,7 @@ class _IslamicEducationQuizScreenState extends State<IslamicEducationQuizScreen>
                   'Your Score: $percentage%',
                   style: GoogleFonts.nunitoSans(
                     fontSize: 18,
-                    color: Colors.grey[700],
+                    color: AppColors.text,
                   ),
                 ),
                 if (timeSpent != null)
@@ -508,7 +462,7 @@ class _IslamicEducationQuizScreenState extends State<IslamicEducationQuizScreen>
                       'Time spent: ${_formatDuration(timeSpent)}',
                       style: GoogleFonts.nunitoSans(
                         fontSize: 14,
-                        color: Colors.grey[600],
+                        color: AppColors.muted,
                       ),
                     ),
                   ),
@@ -519,7 +473,7 @@ class _IslamicEducationQuizScreenState extends State<IslamicEducationQuizScreen>
                       'Time expired — quiz submitted automatically.',
                       style: GoogleFonts.nunitoSans(
                         fontSize: 13,
-                        color: Colors.red[700],
+                        color: AppColors.error,
                       ),
                       textAlign: TextAlign.center,
                     ),
@@ -610,14 +564,7 @@ class _IslamicEducationQuizScreenState extends State<IslamicEducationQuizScreen>
           timeSpent: timeSpent,
         );
       } else if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              'Quiz completed locally. Sign in to save your progress.',
-              style: GoogleFonts.nunitoSans(),
-            ),
-          ),
-        );
+        ToastService.instance.info('Quiz completed locally. Sign in to save your progress.');
       }
       
       setState(() {
@@ -631,15 +578,7 @@ class _IslamicEducationQuizScreenState extends State<IslamicEducationQuizScreen>
       });
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              'Error submitting quiz: $e',
-              style: GoogleFonts.nunitoSans(),
-            ),
-            backgroundColor: Colors.red,
-          ),
-        );
+        ToastService.instance.error('Error submitting quiz: $e');
       }
     }
     _isSubmitting = false;
@@ -678,12 +617,12 @@ class _QuizTimerBanner extends StatelessWidget {
   Widget build(BuildContext context) {
     final ratio = totalSeconds == 0 ? 0.0 : remainingSeconds / totalSeconds;
     final isCritical = ratio <= 0.2;
-    final color = isCritical ? Colors.red : AppColors.primary;
+    final color = isCritical ? AppColors.error : AppColors.primary;
 
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-      color: isCritical ? Colors.red.withValues(alpha: 0.08) : AppColors.surfaceSecondary,
+      color: isCritical ? AppColors.error.withValues(alpha: 0.08) : AppColors.surfaceSecondary,
       child: Row(
         children: [
           Icon(Icons.timer, color: color),

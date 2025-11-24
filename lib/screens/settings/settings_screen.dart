@@ -3,24 +3,24 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:aroosi_flutter/features/auth/auth_controller.dart';
+import 'package:aroosi_flutter/theme/theme.dart';
+import 'package:aroosi_flutter/theme/theme_helpers.dart';
+import 'package:aroosi_flutter/core/toast_service.dart';
+import 'package:aroosi_flutter/widgets/app_scaffold.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Settings'),
-        centerTitle: true,
-        elevation: 0,
-        backgroundColor: Colors.white,
-        foregroundColor: Colors.black87,
-        surfaceTintColor: Colors.transparent,
-      ),
-      backgroundColor: Colors.grey.shade50,
-      body: ListView(
-        padding: const EdgeInsets.symmetric(vertical: 16),
+    final theme = ThemeHelpers.getMaterialTheme(context);
+    final textTheme = theme.textTheme;
+
+    return AppScaffold(
+      title: 'Settings',
+      usePadding: false,
+      child: ListView(
+        padding: const EdgeInsets.all(Spacing.md),
         children: [
           _buildSection(
             title: 'Account',
@@ -94,16 +94,16 @@ class SettingsScreen extends ConsumerWidget {
               _ListTile(
                 icon: Icons.delete_forever,
                 title: 'Delete Account',
-                textColor: Colors.red,
-                iconColor: Colors.red,
+                textColor: AppColors.error,
+                iconColor: AppColors.error,
                 onTap: () => _showDeleteAccountDialog(context, ref),
               ),
               _ListTile(
                 icon: Icons.logout,
                 title: 'Sign Out',
-                textColor: Colors.red,
-                iconColor: Colors.red,
-                onTap: () => _showSignOutDialog(context),
+                textColor: AppColors.error,
+                iconColor: AppColors.error,
+                onTap: () => _showSignOutDialog(context, ref),
               ),
             ],
           ),
@@ -127,18 +127,18 @@ class SettingsScreen extends ConsumerWidget {
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w600,
-              color: Colors.grey.shade600,
+              color: AppColors.muted,
             ),
           ),
         ),
         Container(
           margin: const EdgeInsets.symmetric(horizontal: 16),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: AppColors.surface,
             borderRadius: BorderRadius.circular(12),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withValues(alpha: 0.05),
+                color: AppColors.text.withValues(alpha: 0.05),
                 blurRadius: 10,
                 offset: const Offset(0, 2),
               ),
@@ -150,7 +150,7 @@ class SettingsScreen extends ConsumerWidget {
     );
   }
 
-  void _showSignOutDialog(BuildContext context) {
+  void _showSignOutDialog(BuildContext context, WidgetRef ref) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -162,12 +162,16 @@ class SettingsScreen extends ConsumerWidget {
             child: const Text('Cancel'),
           ),
           FilledButton(
-            onPressed: () {
+            onPressed: () async {
               Navigator.of(context).pop();
-              // Handle sign out
-              context.go('/startup');
+              try {
+                await ref.read(authControllerProvider.notifier).logout();
+                // Navigation is handled by the router listening to auth state
+              } catch (e) {
+                ToastService.instance.error('Failed to sign out: ${e.toString()}');
+              }
             },
-            style: FilledButton.styleFrom(backgroundColor: Colors.red),
+            style: FilledButton.styleFrom(backgroundColor: AppColors.error),
             child: const Text('Sign Out'),
           ),
         ],
@@ -187,46 +191,48 @@ class SettingsScreen extends ConsumerWidget {
         builder: (context, setState) => AlertDialog(
           title: const Text(
             'Delete Account',
-            style: TextStyle(color: Colors.red),
+            style: TextStyle(color: AppColors.error),
           ),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                '⚠️ This action cannot be undone!\n\nOnce you delete your account:',
-                style: TextStyle(fontWeight: FontWeight.w500),
-              ),
-              const SizedBox(height: 8),
-              const Text(
-                '• All your profile data will be permanently deleted\n'
-                '• Messages and conversations will be removed\n'
-                '• Matches and connections will be lost\n'
-                '• Photos and personal information will be erased\n'
-                '• You will need to create a new account to return',
-                style: TextStyle(fontSize: 12, color: Colors.grey),
-              ),
-              const SizedBox(height: 16),
-              TextField(
-                controller: passwordController,
-                obscureText: true,
-                decoration: const InputDecoration(
-                  labelText: 'Enter your password to confirm',
-                  border: OutlineInputBorder(),
-                  hintText: 'Password',
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  '⚠️ This action cannot be undone!\n\nOnce you delete your account:',
+                  style: TextStyle(fontWeight: FontWeight.w500),
                 ),
-              ),
-              const SizedBox(height: 12),
-              TextField(
-                controller: reasonController,
-                decoration: const InputDecoration(
-                  labelText: 'Reason for leaving (optional)',
-                  border: OutlineInputBorder(),
-                  hintText: 'Tell us why you\'re leaving',
+                const SizedBox(height: 8),
+                const Text(
+                  '• All your profile data will be permanently deleted\n'
+                  '• Messages and conversations will be removed\n'
+                  '• Matches and connections will be lost\n'
+                  '• Photos and personal information will be erased\n'
+                  '• You will need to create a new account to return',
+                  style: TextStyle(fontSize: 12, color: AppColors.muted),
                 ),
-                maxLines: 3,
-              ),
-            ],
+                const SizedBox(height: 16),
+                TextField(
+                  controller: passwordController,
+                  obscureText: true,
+                  decoration: const InputDecoration(
+                    labelText: 'Enter your password to confirm',
+                    border: OutlineInputBorder(),
+                    hintText: 'Password',
+                  ),
+                ),
+                const SizedBox(height: 12),
+                TextField(
+                  controller: reasonController,
+                  decoration: const InputDecoration(
+                    labelText: 'Reason for leaving (optional)',
+                    border: OutlineInputBorder(),
+                    hintText: 'Tell us why you\'re leaving',
+                  ),
+                  maxLines: 3,
+                ),
+              ],
+            ),
           ),
           actions: [
             TextButton(
@@ -238,12 +244,7 @@ class SettingsScreen extends ConsumerWidget {
                   ? null
                   : () async {
                       if (passwordController.text.isEmpty) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('Please enter your password'),
-                            backgroundColor: Colors.red,
-                          ),
-                        );
+                        ToastService.instance.error('Please enter your password');
                         return;
                       }
 
@@ -262,26 +263,14 @@ class SettingsScreen extends ConsumerWidget {
 
                         if (context.mounted) {
                           Navigator.of(context).pop();
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text(
-                                'Your account has been deleted successfully',
-                              ),
-                              backgroundColor: Colors.green,
-                              duration: Duration(seconds: 3),
-                            ),
+                          ToastService.instance.success(
+                            'Your account has been deleted successfully',
                           );
                         }
                       } catch (e) {
                         if (context.mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(
-                                'Failed to delete account: ${e.toString()}',
-                              ),
-                              backgroundColor: Colors.red,
-                              duration: const Duration(seconds: 5),
-                            ),
+                          ToastService.instance.error(
+                            'Failed to delete account: ${e.toString()}',
                           );
                         }
                       } finally {
@@ -290,7 +279,7 @@ class SettingsScreen extends ConsumerWidget {
                         }
                       }
                     },
-              style: FilledButton.styleFrom(backgroundColor: Colors.red),
+              style: FilledButton.styleFrom(backgroundColor: AppColors.error),
               child: isLoading
                   ? const SizedBox(
                       height: 16,
@@ -326,8 +315,8 @@ class _ListTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final effectiveTextColor = textColor ?? Colors.black87;
-    final effectiveIconColor = iconColor ?? Colors.grey.shade600;
+    final effectiveTextColor = textColor ?? AppColors.text;
+    final effectiveIconColor = iconColor ?? AppColors.muted;
 
     return CupertinoButton(
       padding: EdgeInsets.zero,
@@ -362,7 +351,7 @@ class _ListTile extends StatelessWidget {
             Icon(
               CupertinoIcons.chevron_right,
               size: 16,
-              color: Colors.grey.shade400,
+              color: AppColors.borderPrimary,
             ),
           ],
         ),

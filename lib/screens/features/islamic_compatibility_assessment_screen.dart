@@ -11,6 +11,7 @@ import '../../features/auth/auth_controller.dart';
 import '../../features/profiles/selection.dart';
 import '../../utils/debug_logger.dart';
 import '../../features/compatibility/compatibility_service.dart';
+import '../../widgets/app_scaffold.dart';
 
 class IslamicCompatibilityAssessmentScreen extends ConsumerStatefulWidget {
   const IslamicCompatibilityAssessmentScreen({super.key});
@@ -41,23 +42,14 @@ class _IslamicCompatibilityAssessmentScreenState extends ConsumerState<IslamicCo
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          'Islamic Compatibility Assessment',
-          style: GoogleFonts.nunitoSans(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        backgroundColor: AppColors.surfaceSecondary,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.close),
-          onPressed: () => _showExitConfirmationDialog(),
-        ),
+    return AppScaffold(
+      title: 'Islamic Compatibility',
+      usePadding: false,
+      leading: IconButton(
+        icon: const Icon(Icons.close),
+        onPressed: () => _showExitConfirmationDialog(),
       ),
-      body: Column(
+      child: Column(
         children: [
           // Progress Indicator
           _buildProgressIndicator(),

@@ -54,6 +54,7 @@ import 'package:aroosi_flutter/screens/settings/language_settings_screen.dart';
 import 'package:aroosi_flutter/utils/debug_logger.dart';
 import 'features/auth/auth_state.dart';
 import 'core/privacy_manager.dart';
+import 'package:aroosi_flutter/widgets/app_scaffold.dart';
 
 /// ChangeNotifier that listens to auth state and notifies GoRouter without
 /// forcing a full router reconstruction (prevents losing navigation actions
@@ -116,7 +117,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/reset',
         name: 'reset',
-        builder: (context, state) => const ResetPasswordScreen(),
+        builder: (context, state) {
+          final code = state.uri.queryParameters['oobCode'] ?? '';
+          return ResetPasswordScreen(oobCode: code);
+        },
       ),
       GoRoute(
         path: '/onboarding',
@@ -479,9 +483,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       );
       return null;
     },
-    errorBuilder: (context, state) => Scaffold(
-      appBar: AppBar(title: const Text('Not found')),
-      body: Center(child: Text('No route defined for ${state.uri}')),
+    errorBuilder: (context, state) => AppScaffold(
+      title: 'Not found',
+      usePadding: false,
+      child: Center(child: Text('No route defined for ${state.uri}')),
     ),
   );
   ref.onDispose(router.dispose);

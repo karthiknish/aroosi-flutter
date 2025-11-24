@@ -11,6 +11,7 @@ import 'package:aroosi_flutter/features/icebreakers/icebreaker_repository.dart';
 import 'package:aroosi_flutter/widgets/error_states.dart';
 import 'package:aroosi_flutter/widgets/empty_states.dart';
 import 'package:aroosi_flutter/widgets/offline_states.dart';
+import 'package:aroosi_flutter/theme/colors.dart';
 import 'package:aroosi_flutter/theme/theme_helpers.dart';
 
 class QuickPicksScreen extends ConsumerStatefulWidget {
@@ -53,6 +54,7 @@ class _QuickPicksScreenState extends ConsumerState<QuickPicksScreen> {
 
     return AppScaffold(
       title: 'Match Concierge',
+      usePadding: false,
       actions: [
         IconButton(
           onPressed: () async {
@@ -117,7 +119,7 @@ class _QuickPicksScreenState extends ConsumerState<QuickPicksScreen> {
         title: 'All caught up!',
         subtitle: 'Check back tomorrow for more matches',
         description: 'You\'ve seen all available quick picks for today',
-        icon: Icon(Icons.check_circle_outline, size: 64, color: Colors.grey[400]),
+        icon: Icon(Icons.check_circle_outline, size: 64, color: AppColors.muted),
       );
     }
 
@@ -142,13 +144,13 @@ class _QuickPicksScreenState extends ConsumerState<QuickPicksScreen> {
                     ),
                     decoration: BoxDecoration(
                       color: state.canLike
-                          ? Colors.green.shade50
-                          : Colors.grey.shade200,
+                          ? AppColors.success.withValues(alpha: 0.1)
+                          : AppColors.surfaceSecondary,
                       borderRadius: BorderRadius.circular(16),
                       border: Border.all(
                         color: state.canLike
-                            ? Colors.green.shade300
-                            : Colors.grey.shade400,
+                            ? AppColors.success.withValues(alpha: 0.5)
+                            : AppColors.borderPrimary,
                       ),
                     ),
                     child: Text(
@@ -157,8 +159,8 @@ class _QuickPicksScreenState extends ConsumerState<QuickPicksScreen> {
                         fontSize: 12,
                         fontWeight: FontWeight.w600,
                         color: state.canLike
-                            ? Colors.green.shade700
-                            : Colors.grey.shade600,
+                            ? AppColors.success
+                            : AppColors.muted,
                       ),
                     ),
                   ),
@@ -170,7 +172,7 @@ class _QuickPicksScreenState extends ConsumerState<QuickPicksScreen> {
                   Expanded(
                     child: LinearProgressIndicator(
                       value: (state.currentIndex + 1) / state.profiles.length,
-                      backgroundColor: Colors.grey.shade300,
+                      backgroundColor: AppColors.borderPrimary,
                       valueColor: AlwaysStoppedAnimation<Color>(
                         ThemeHelpers.getMaterialTheme(context).primaryColor,
                       ),

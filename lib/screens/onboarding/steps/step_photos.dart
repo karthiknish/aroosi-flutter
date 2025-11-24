@@ -10,6 +10,7 @@ import 'package:firebase_auth/firebase_auth.dart' as fb;
 import 'package:aroosi_flutter/features/auth/auth_controller.dart';
 import 'base_step.dart';
 import 'step_constants.dart';
+import 'package:aroosi_flutter/theme/colors.dart';
 import 'package:aroosi_flutter/theme/theme_helpers.dart';
 
 /// Photos step widget
@@ -137,7 +138,7 @@ class _StepPhotosState extends ConsumerState<StepPhotos> {
       builder: (context) => AlertDialog(
         title: Row(
           children: [
-            Icon(Icons.photo_library_outlined, color: Colors.pink, size: 24),
+            Icon(Icons.photo_library_outlined, color: AppColors.primary, size: 24),
             const SizedBox(width: 8),
             const Text('Photo Privacy'),
           ],
@@ -181,13 +182,13 @@ class _StepPhotosState extends ConsumerState<StepPhotos> {
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: Colors.blue.withValues(alpha: 0.1),
+                  color: AppColors.info.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: Colors.blue.withValues(alpha: 0.3)),
+                  border: Border.all(color: AppColors.info.withValues(alpha: 0.3)),
                 ),
                 child: Row(
                   children: [
-                    Icon(Icons.info_outline, color: Colors.blue, size: 20),
+                    Icon(Icons.info_outline, color: AppColors.info, size: 20),
                     const SizedBox(width: 8),
                     const Expanded(
                       child: Text(
@@ -219,10 +220,10 @@ class _StepPhotosState extends ConsumerState<StepPhotos> {
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: Colors.pink.withValues(alpha: 0.1),
+              color: AppColors.primary.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(6),
             ),
-            child: Icon(icon, color: Colors.pink, size: 16),
+            child: Icon(icon, color: AppColors.primary, size: 16),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -239,7 +240,7 @@ class _StepPhotosState extends ConsumerState<StepPhotos> {
                 const SizedBox(height: 2),
                 Text(
                   description,
-                  style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+                  style: TextStyle(fontSize: 12, color: AppColors.muted),
                 ),
               ],
             ),
@@ -382,7 +383,7 @@ class _StepPhotosState extends ConsumerState<StepPhotos> {
               icon: Icon(Icons.privacy_tip_outlined, size: 18),
               label: Text(
                 'How we protect your photo privacy',
-                style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+                style: TextStyle(fontSize: 12, color: AppColors.muted),
               ),
               onPressed: _showPhotoPickerInfo,
               style: TextButton.styleFrom(

@@ -6,6 +6,7 @@ import 'package:package_info_plus/package_info_plus.dart';
 
 import 'package:aroosi_flutter/theme/theme.dart';
 import 'package:aroosi_flutter/theme/theme_helpers.dart';
+import 'package:aroosi_flutter/widgets/app_scaffold.dart';
 
 const String _releaseChannel = String.fromEnvironment(
   'AROOSI_RELEASE_CHANNEL',
@@ -31,123 +32,115 @@ const _AboutData _fallbackAboutData = _AboutData(
   updateId: _updateId,
 );
 
-class AboutScreen extends StatefulWidget {
+class AboutScreen extends StatelessWidget {
   const AboutScreen({super.key});
-
-  @override
-  State<AboutScreen> createState() => _AboutScreenState();
-}
-
-class _AboutScreenState extends State<AboutScreen> {
-  late final Future<_AboutData> _aboutFuture;
-
-  @override
-  void initState() {
-    super.initState();
-    _aboutFuture = _loadAboutData();
-  }
-
-  Future<_AboutData> _loadAboutData() async {
-    try {
-      final info = await PackageInfo.fromPlatform();
-      final platformLabel = _resolvePlatformLabel();
-
-      return _AboutData(
-        appName: info.appName.isNotEmpty
-            ? info.appName
-            : _fallbackAboutData.appName,
-        version: info.version.isNotEmpty
-            ? info.version
-            : _fallbackAboutData.version,
-        buildNumber: info.buildNumber.isNotEmpty
-            ? info.buildNumber
-            : _fallbackAboutData.buildNumber,
-        packageName: info.packageName.isNotEmpty
-            ? info.packageName
-            : _fallbackAboutData.packageName,
-        platform: platformLabel,
-        channel: _releaseChannel,
-        runtimeVersion: _runtimeVersion,
-        updateId: _updateId,
-      );
-    } catch (_) {
-      return _fallbackAboutData;
-    }
-  }
-
-  String _resolvePlatformLabel() {
-    if (kIsWeb) {
-      return 'Web';
-    }
-    switch (defaultTargetPlatform) {
-      case TargetPlatform.iOS:
-        return 'iOS';
-      case TargetPlatform.android:
-        return 'Android';
-      case TargetPlatform.macOS:
-        return 'macOS';
-      case TargetPlatform.windows:
-        return 'Windows';
-      case TargetPlatform.linux:
-        return 'Linux';
-      case TargetPlatform.fuchsia:
-        return 'Fuchsia';
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
     final theme = ThemeHelpers.getMaterialTheme(context);
+    final textTheme = theme.textTheme;
 
-    return Scaffold(
-      appBar: AppBar(title: const Text('About')),
-      body: FutureBuilder<_AboutData>(
-        future: _aboutFuture,
-        builder: (context, snapshot) {
-          final about = snapshot.data ?? _fallbackAboutData;
-          final isLoading = snapshot.connectionState == ConnectionState.waiting;
-
-          return ListView(
-            physics: const BouncingScrollPhysics(),
-            padding: const EdgeInsets.symmetric(
-              horizontal: Spacing.lg,
-              vertical: Spacing.lg,
+    return AppScaffold(
+      title: 'About Aroosi',
+      usePadding: false,
+      child: ListView(
+        padding: const EdgeInsets.all(Spacing.lg),
+        children: [
+          const SizedBox(height: Spacing.xl),
+          Center(
+            child: Container(
+              width: 100,
+              height: 100,
+              decoration: BoxDecoration(
+                color: theme.colorScheme.primaryContainer,
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                Icons.favorite,
+                size: 50,
+                color: theme.colorScheme.primary,
+              ),
             ),
-            children: [
-              _InfoCard(data: about, isLoading: isLoading),
-              const SizedBox(height: Spacing.xl),
-              Text(
-                'Legal & Support',
-                style: theme.textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.w700,
-                ),
+          ),
+          const SizedBox(height: Spacing.lg),
+          Text(
+            'Aroosi',
+            style: textTheme.headlineMedium?.copyWith(
+              fontWeight: FontWeight.bold,
+              color: theme.colorScheme.primary,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: Spacing.xs),
+          Text(
+            'Version 1.0.0',
+            style: textTheme.bodyMedium?.copyWith(
+              color: theme.colorScheme.onSurfaceVariant,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: Spacing.xxl),
+          Text(
+            'About Us',
+            style: textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: Spacing.md),
+          Text(
+            'Aroosi is the premier matrimonial app designed specifically for the Afghan community. Our mission is to help Afghans worldwide find their perfect life partner while respecting cultural traditions and Islamic values.',
+            style: textTheme.bodyLarge,
+          ),
+          const SizedBox(height: Spacing.lg),
+          Text(
+            'Our Mission',
+            style: textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: Spacing.md),
+          Text(
+            'We strive to create a safe, respectful, and effective platform for meaningful connections. By combining modern technology with traditional values, we make the search for a spouse easier and more dignified.',
+            style: textTheme.bodyLarge,
+          ),
+          const SizedBox(height: Spacing.xxl),
+          ListTile(
+            contentPadding: EdgeInsets.zero,
+            title: const Text('Terms of Service'),
+            trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+            onTap: () {
+              // Navigate to Terms
+            },
+          ),
+          const Divider(),
+          ListTile(
+            contentPadding: EdgeInsets.zero,
+            title: const Text('Privacy Policy'),
+            trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+            onTap: () {
+              // Navigate to Privacy Policy
+            },
+          ),
+          const Divider(),
+          ListTile(
+            contentPadding: EdgeInsets.zero,
+            title: const Text('Community Guidelines'),
+            trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+            onTap: () {
+              // Navigate to Guidelines
+            },
+          ),
+          const SizedBox(height: Spacing.xxl),
+          Center(
+            child: Text(
+              '© 2024 Aroosi. All rights reserved.',
+              style: textTheme.bodySmall?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
               ),
-              const SizedBox(height: Spacing.sm),
-              _LinkGroup(
-                items: [
-                  _LinkItem(
-                    label: 'Terms of Service',
-                    onTap: () => context.push('/settings/terms-of-service'),
-                  ),
-                  _LinkItem(
-                    label: 'Privacy Policy',
-                    onTap: () => context.push('/settings/privacy-policy'),
-                  ),
-                  _LinkItem(
-                    label: 'Contact Support',
-                    onTap: () => context.push('/support'),
-                  ),
-                ],
-              ),
-              const SizedBox(height: Spacing.xl),
-              const _Footer(),
-            ],
-          );
-        },
+            ),
+          ),
+        ],
       ),
     );
   }
 }
+
 
 class _InfoCard extends StatelessWidget {
   final _AboutData data;

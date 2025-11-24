@@ -7,6 +7,7 @@ import 'package:aroosi_flutter/platform/adaptive_dialogs.dart';
 import 'package:aroosi_flutter/widgets/app_scaffold.dart';
 import 'package:aroosi_flutter/widgets/primary_button.dart';
 import 'package:aroosi_flutter/widgets/retryable_network_image.dart';
+import 'package:aroosi_flutter/theme/colors.dart';
 import 'package:aroosi_flutter/theme/theme_helpers.dart';
 
 // Simplified feature access - all features are free
@@ -89,6 +90,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
 
     return AppScaffold(
       title: 'Profile',
+      usePadding: false,
       child: RefreshIndicator(
         key: UniqueKey(),
         onRefresh: () async {
@@ -187,10 +189,10 @@ class _ProfileHeader extends StatelessWidget {
                   url: avatarUrl!,
                   fit: BoxFit.cover,
                   errorWidget: Container(
-                    color: Colors.grey[200],
-                    child: const Icon(
+                    color: AppColors.surfaceSecondary,
+                    child: Icon(
                       Icons.person,
-                      color: Colors.grey,
+                      color: AppColors.muted,
                       size: 40,
                     ),
                   ),

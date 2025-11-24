@@ -1,4 +1,5 @@
 import 'package:aroosi_flutter/core/firebase_service.dart';
+import 'package:aroosi_flutter/utils/debug_logger.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 import 'chat_models.dart';
@@ -29,6 +30,7 @@ class ChatRepository {
       mapped.sort((a, b) => a.createdAt.compareTo(b.createdAt));
       return mapped;
     } catch (e) {
+      logDebug('Error getting messages', error: e);
       return [];
     }
   }
@@ -141,6 +143,7 @@ class ChatRepository {
 
       return summaries;
     } catch (e) {
+      logDebug('Error getting conversations', error: e);
       return [];
     }
   }

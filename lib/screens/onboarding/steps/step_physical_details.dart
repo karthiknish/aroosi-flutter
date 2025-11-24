@@ -90,7 +90,7 @@ class _StepPhysicalDetailsState extends State<StepPhysicalDetails> {
           margin: EdgeInsets.only(
             bottom: MediaQuery.of(context).viewInsets.bottom,
           ),
-          color: CupertinoColors.systemBackground.resolveFrom(context),
+          color: AppColors.surface,
           child: SafeArea(
             top: false,
             child: Column(
@@ -158,7 +158,7 @@ class _StepPhysicalDetailsState extends State<StepPhysicalDetails> {
           margin: EdgeInsets.only(
             bottom: MediaQuery.of(context).viewInsets.bottom,
           ),
-          color: CupertinoColors.systemBackground.resolveFrom(context),
+          color: AppColors.surface,
           child: SafeArea(
             top: false,
             child: Column(
@@ -214,9 +214,9 @@ class _StepPhysicalDetailsState extends State<StepPhysicalDetails> {
     bool hasError = false,
   }) {
     return BoxDecoration(
-      color: CupertinoThemeHelpers.getMaterialTheme(context).scaffoldBackgroundColor,
+      color: AppColors.surface,
       border: Border.all(
-        color: hasError ? CupertinoColors.systemRed : AppColors.primary,
+        color: hasError ? AppColors.error : AppColors.primary,
         width: hasError ? 2.0 : 1.0,
       ),
       borderRadius: BorderRadius.circular(10.0),
@@ -278,7 +278,7 @@ class _StepPhysicalDetailsState extends State<StepPhysicalDetails> {
                     placeholder:
                         '${StepConstants.minimumHeight} - ${StepConstants.maximumHeight}',
                     placeholderStyle: textStyle.copyWith(
-                      color: CupertinoColors.placeholderText,
+                      color: AppColors.muted,
                     ),
                     style: textStyle,
                     keyboardType: TextInputType.number,
@@ -300,7 +300,7 @@ class _StepPhysicalDetailsState extends State<StepPhysicalDetails> {
                   child: Text(
                     _validateHeight(_heightCtrl.text)!,
                     style: textStyle.copyWith(
-                      color: CupertinoColors.systemRed,
+                      color: AppColors.error,
                       fontSize: 12,
                     ),
                   ),
@@ -311,7 +311,7 @@ class _StepPhysicalDetailsState extends State<StepPhysicalDetails> {
                   child: Text(
                     'Also ${_convertHeightToFeetInches(_heightCtrl.text)}',
                     style: textStyle.copyWith(
-                      color: CupertinoColors.secondaryLabel,
+                      color: AppColors.muted,
                       fontSize: 14,
                     ),
                   ),
@@ -360,8 +360,8 @@ class _StepPhysicalDetailsState extends State<StepPhysicalDetails> {
                                 widget.initialData[StepConstants
                                         .maritalStatus] ==
                                     null
-                                ? CupertinoColors.placeholderText
-                                : CupertinoColors.label,
+                                ? AppColors.muted
+                                : AppColors.text,
                           ),
                         ),
                         const Icon(CupertinoIcons.chevron_down, size: 16),
@@ -402,7 +402,7 @@ class _StepPhysicalDetailsState extends State<StepPhysicalDetails> {
                                 StepConstants.defaultPhysicalStatus,
                           ),
                           style: textStyle.copyWith(
-                            color: CupertinoColors.label,
+                            color: AppColors.text,
                           ),
                         ),
                         const Icon(CupertinoIcons.chevron_down, size: 16),
@@ -419,10 +419,10 @@ class _StepPhysicalDetailsState extends State<StepPhysicalDetails> {
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: CupertinoColors.systemBlue.withValues(alpha: 0.1),
+              color: AppColors.info.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
-                color: CupertinoColors.systemBlue.withValues(alpha: 0.2),
+                color: AppColors.info.withValues(alpha: 0.2),
                 width: 1,
               ),
             ),
@@ -434,13 +434,13 @@ class _StepPhysicalDetailsState extends State<StepPhysicalDetails> {
                     Icon(
                       CupertinoIcons.info_circle,
                       size: 20,
-                      color: CupertinoColors.secondaryLabel,
+                      color: AppColors.muted,
                     ),
                     const SizedBox(width: 8),
                     Text(
                       'About your physical information',
                       style: textStyle.copyWith(
-                        color: CupertinoColors.secondaryLabel,
+                        color: AppColors.muted,
                         fontWeight: FontWeight.w600,
                         fontSize: 14,
                       ),
@@ -451,7 +451,7 @@ class _StepPhysicalDetailsState extends State<StepPhysicalDetails> {
                 Text(
                   'This information helps us find compatible matches. Height and physical status are visible to other users.',
                   style: textStyle.copyWith(
-                    color: CupertinoColors.secondaryLabel,
+                    color: AppColors.muted,
                     fontSize: 12,
                   ),
                 ),

@@ -233,6 +233,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
 
     return AppScaffold(
       title: 'Search',
+      usePadding: false,
       child: AdaptiveRefresh(
         onRefresh: _refresh,
         controller: _scrollController,

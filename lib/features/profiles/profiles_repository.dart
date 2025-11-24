@@ -24,7 +24,14 @@ class ProfilesRepository {
     try {
       final matches = await _firebase.getMatches(limit: pageSize);
 
-      final items = matches.map((match) => MatchEntry.fromJson(match)).toList();
+      final items = <MatchEntry>[];
+      for (final match in matches) {
+        try {
+          items.add(MatchEntry.fromJson(match));
+        } catch (e) {
+          logDebug('Error parsing match entry', error: e, data: match);
+        }
+      }
 
       return PagedResponse(
         items: items,
@@ -49,9 +56,14 @@ class ProfilesRepository {
         limit: pageSize,
       );
 
-      final items = profiles
-          .map((profile) => ProfileSummary.fromJson(profile))
-          .toList();
+      final items = <ProfileSummary>[];
+      for (final profile in profiles) {
+        try {
+          items.add(ProfileSummary.fromJson(profile));
+        } catch (e) {
+          logDebug('Error parsing profile summary', error: e, data: profile);
+        }
+      }
 
       final compatibilityScores = await _fetchCompatibilityScores(
         items.map((profile) => profile.id).where((id) => id.isNotEmpty).toList(),
@@ -123,9 +135,14 @@ class ProfilesRepository {
     try {
       final shortlist = await _firebase.getShortlist(limit: pageSize);
 
-      final items = shortlist
-          .map((profile) => ProfileSummary.fromJson(profile))
-          .toList();
+      final items = <ProfileSummary>[];
+      for (final profile in shortlist) {
+        try {
+          items.add(ProfileSummary.fromJson(profile));
+        } catch (e) {
+          logDebug('Error parsing shortlist profile', error: e, data: profile);
+        }
+      }
 
       return PagedResponse(
         items: items,
@@ -146,9 +163,14 @@ class ProfilesRepository {
     try {
       final shortlist = await _firebase.getShortlist(limit: pageSize);
 
-      final items = shortlist
-          .map((profile) => ShortlistEntry.fromJson(profile))
-          .toList();
+      final items = <ShortlistEntry>[];
+      for (final profile in shortlist) {
+        try {
+          items.add(ShortlistEntry.fromJson(profile));
+        } catch (e) {
+          logDebug('Error parsing shortlist entry', error: e, data: profile);
+        }
+      }
 
       return PagedResponse(
         items: items,

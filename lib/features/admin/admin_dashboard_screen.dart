@@ -5,6 +5,7 @@ import 'package:aroosi_flutter/features/admin/admin_service.dart';
 import 'package:aroosi_flutter/core/performance_service.dart';
 import 'package:aroosi_flutter/core/error_handler.dart';
 import 'package:aroosi_flutter/theme/theme_helpers.dart';
+import 'package:aroosi_flutter/widgets/app_scaffold.dart';
 
 /// Admin dashboard screen for monitoring app performance and data
 /// 
@@ -200,84 +201,89 @@ class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen>
   @override
   Widget build(BuildContext context) {
     if (_isLoading) {
-      return const Scaffold(
-        body: Center(child: CircularProgressIndicator()),
+      return const AppScaffold(
+        title: 'Admin Dashboard',
+        child: Center(child: CircularProgressIndicator()),
       );
     }
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Admin Dashboard'),
-        backgroundColor: Colors.red.shade700,
-        foregroundColor: Colors.white,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh),
-            onPressed: () {
-              _loadDashboardData();
-              _loadPerformanceRecommendations();
-              if (_tabController.index == 1) { // Users tab
-                _loadUsersList();
-              }
-            },
-          ),
-          PopupMenuButton<String>(
-            onSelected: _handleMenuAction,
-            itemBuilder: (context) => [
+    return AppScaffold(
+      title: 'Admin Dashboard',
+      usePadding: false,
+      actions: [
+        IconButton(
+          icon: const Icon(Icons.refresh),
+          onPressed: () {
+            _loadDashboardData();
+            _loadPerformanceRecommendations();
+            if (_tabController.index == 1) { // Users tab
+              _loadUsersList();
+            }
+          },
+        ),
+        PopupMenuButton<String>(
+          onSelected: _handleMenuAction,
+          itemBuilder: (context) => [
+            const PopupMenuItem(
+              value: 'export_data',
+              child: ListTile(
+                leading: Icon(Icons.download),
+                title: Text('Export Data'),
+              ),
+            ),
+            const PopupMenuItem(
+              value: 'performance_optimization',
+              child: ListTile(
+                leading: Icon(Icons.speed),
+                title: Text('Performance Optimization'),
+              ),
+            ),
+            if (_userRole == AdminRole.superAdmin)
               const PopupMenuItem(
-                value: 'export_data',
+                value: 'manage_admins',
                 child: ListTile(
-                  leading: Icon(Icons.download),
-                  title: Text('Export Data'),
+                  leading: Icon(Icons.admin_panel_settings),
+                  title: Text('Manage Admins'),
                 ),
               ),
-              const PopupMenuItem(
-                value: 'performance_optimization',
-                child: ListTile(
-                  leading: Icon(Icons.speed),
-                  title: Text('Performance Optimization'),
-                ),
+            const PopupMenuItem(
+              value: 'logout',
+              child: ListTile(
+                leading: Icon(Icons.logout),
+                title: Text('Logout'),
               ),
-              if (_userRole == AdminRole.superAdmin)
-                const PopupMenuItem(
-                  value: 'manage_admins',
-                  child: ListTile(
-                    leading: Icon(Icons.admin_panel_settings),
-                    title: Text('Manage Admins'),
-                  ),
-                ),
-              const PopupMenuItem(
-                value: 'logout',
-                child: ListTile(
-                  leading: Icon(Icons.logout),
-                  title: Text('Logout'),
-                ),
-              ),
-            ],
-          ),
-        ],
-        bottom: TabBar(
-          controller: _tabController,
-          indicatorColor: Colors.white,
-          labelColor: Colors.white,
-          unselectedLabelColor: Colors.white70,
-          tabs: const [
-            Tab(icon: Icon(Icons.dashboard), text: 'Overview'),
-            Tab(icon: Icon(Icons.people), text: 'Users'),
-            Tab(icon: Icon(Icons.speed), text: 'Performance'),
-            Tab(icon: Icon(Icons.security), text: 'Safety'),
-            Tab(icon: Icon(Icons.trending_up), text: 'Optimization'),
+            ),
           ],
         ),
-      ),
-      body: TabBarView(
-        controller: _tabController,
+      ],
+      child: Column(
         children: [
-          _buildOverviewTab(),
-          _buildUsersTab(),
-          _buildPerformanceTab(),
-          _buildSafetyTab(),
-          _buildOptimizationTab(),
+          Container(
+            color: ThemeHelpers.getMaterialTheme(context).colorScheme.surface,
+            child: TabBar(
+              controller: _tabController,
+              isScrollable: true,
+              tabs: const [
+                Tab(icon: Icon(Icons.dashboard), text: 'Overview'),
+                Tab(icon: Icon(Icons.people), text: 'Users'),
+                Tab(icon: Icon(Icons.speed), text: 'Performance'),
+                Tab(icon: Icon(Icons.security), text: 'Safety'),
+                Tab(icon: Icon(Icons.trending_up), text: 'Optimization'),
+              ],
+            ),
+          ),
+          Expanded(
+            child: TabBarView(
+              controller: _tabController,
+              children: [
+                _buildOverviewTab(),
+                _buildUsersTab(),
+                _buildPerformanceTab(),
+                _buildSafetyTab(),
+                _buildOptimizationTab(),
+              ],
+            ),
+          ),
         ],
       ),
     );

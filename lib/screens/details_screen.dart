@@ -5,6 +5,7 @@ import 'package:aroosi_flutter/features/profiles/detail_controller.dart';
 import 'package:aroosi_flutter/widgets/app_scaffold.dart';
 import 'package:aroosi_flutter/theme/motion.dart';
 import 'package:aroosi_flutter/theme/theme_helpers.dart';
+import 'package:aroosi_flutter/theme/colors.dart';
 import 'package:aroosi_flutter/widgets/animations/motion.dart';
 import 'package:aroosi_flutter/features/safety/safety_controller.dart';
 import 'package:aroosi_flutter/core/toast_service.dart';
@@ -52,8 +53,9 @@ class _DetailsScreenState extends ConsumerState<DetailsScreen> {
     if (_blocked) {
       return AppScaffold(
         title: 'Profile',
+        usePadding: false,
         child: Center(
-          child: Padding(
+          child: SingleChildScrollView(
             padding: const EdgeInsets.all(24),
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -61,7 +63,7 @@ class _DetailsScreenState extends ConsumerState<DetailsScreen> {
                 Icon(
                   Icons.lock_outline,
                   size: 48,
-                  color: ThemeHelpers.getMaterialTheme(context).colorScheme.primary,
+                  color: AppColors.primary,
                 ),
                 const SizedBox(height: 16),
                 Text(
@@ -69,6 +71,7 @@ class _DetailsScreenState extends ConsumerState<DetailsScreen> {
                       (_limitReached
                           ? 'You\'ve reached your monthly profile view limit.'
                           : 'This profile is not available.'),
+                  textAlign: TextAlign.center,
                 ),
               ],
             ),
@@ -83,6 +86,7 @@ class _DetailsScreenState extends ConsumerState<DetailsScreen> {
                 data['name']?.toString() ??
                 'Profile')
           : 'Profile',
+      usePadding: false,
       actions: data == null
           ? null
           : [
@@ -179,7 +183,7 @@ class _DetailsScreenState extends ConsumerState<DetailsScreen> {
                 ],
               ),
             ],
-      child: Padding(
+      child: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: FadeThrough(
           delay: AppMotionDurations.fast,
@@ -236,7 +240,7 @@ class _DetailsScreenState extends ConsumerState<DetailsScreen> {
                 width: 64,
                 height: 64,
                 decoration: BoxDecoration(
-                  color: Colors.grey.shade300,
+                  color: AppColors.surfaceSecondary,
                   shape: BoxShape.circle,
                 ),
               ),
@@ -247,31 +251,31 @@ class _DetailsScreenState extends ConsumerState<DetailsScreen> {
                   Container(
                     height: 16,
                     width: 160,
-                    color: Colors.grey.shade300,
+                    color: AppColors.surfaceSecondary,
                   ),
                   const SizedBox(height: 8),
                   Container(
                     height: 14,
                     width: 120,
-                    color: Colors.grey.shade200,
+                    color: AppColors.surfaceSecondary.withValues(alpha: 0.5),
                   ),
                 ],
               ),
             ],
           ),
           const SizedBox(height: 24),
-          Container(height: 16, width: 100, color: Colors.grey.shade300),
+          Container(height: 16, width: 100, color: AppColors.surfaceSecondary),
           const SizedBox(height: 8),
           Container(
             height: 14,
             width: double.infinity,
-            color: Colors.grey.shade200,
+            color: AppColors.surfaceSecondary.withValues(alpha: 0.5),
           ),
           const SizedBox(height: 8),
           Container(
             height: 14,
             width: double.infinity,
-            color: Colors.grey.shade200,
+            color: AppColors.surfaceSecondary.withValues(alpha: 0.5),
           ),
         ],
       ),
@@ -280,6 +284,7 @@ class _DetailsScreenState extends ConsumerState<DetailsScreen> {
 
   Widget _buildContent(BuildContext context, Map<String, dynamic>? data) {
     if (data == null) return const SizedBox();
+    final theme = ThemeHelpers.getMaterialTheme(context);
     final name =
         data['fullName']?.toString() ?? data['name']?.toString() ?? 'Profile';
     final city = data['city']?.toString() ?? '';
@@ -303,25 +308,43 @@ class _DetailsScreenState extends ConsumerState<DetailsScreen> {
                 children: [
                   Text(
                     name,
-                    style: const TextStyle(
-                      fontSize: 18,
+                    style: theme.textTheme.titleLarge?.copyWith(
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  if (city.isNotEmpty) Text(city),
+                  if (city.isNotEmpty)
+                    Text(
+                      city,
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
+                    ),
                 ],
               ),
             ],
           ),
           const SizedBox(height: 24),
           if (about.isNotEmpty) ...[
-            const Text('About'),
+            Text(
+              'About',
+              style: theme.textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.w600,
+              ),
+            ),
             const SizedBox(height: 8),
-            Text(about),
+            Text(
+              about,
+              style: theme.textTheme.bodyMedium,
+            ),
             const SizedBox(height: 24),
           ],
           if (interests.isNotEmpty) ...[
-            const Text('Interests'),
+            Text(
+              'Interests',
+              style: theme.textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.w600,
+              ),
+            ),
             const SizedBox(height: 8),
             Wrap(
               spacing: 12,

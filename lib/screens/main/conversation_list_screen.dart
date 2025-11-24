@@ -23,114 +23,121 @@ class ConversationListScreen extends ConsumerWidget {
 
     return AppScaffold(
       title: 'Conversations',
+      usePadding: false,
       child: AdaptiveRefresh(
         onRefresh: () =>
             ref.read(conversationListControllerProvider.notifier).refresh(),
-        child: Builder(
-          builder: (context) {
-            if (state.loading && state.items.isEmpty) {
-              return Center(
+        slivers: [
+          if (state.loading && state.items.isEmpty)
+            SliverFillRemaining(
+              hasScrollBody: false,
+              child: Center(
                 child: FadeScaleIn(
                   duration: AppMotionDurations.medium,
                   child: const CircularProgressIndicator(),
                 ),
-              );
-            }
-            if (state.error != null) {
-              final error = state.error.toString();
-              final isOfflineError =
-                  error.toLowerCase().contains('network') ||
-                  error.toLowerCase().contains('connection') ||
-                  error.toLowerCase().contains('timeout');
+              ),
+            )
+          else if (state.error != null)
+            SliverFillRemaining(
+              hasScrollBody: false,
+              child: Builder(builder: (context) {
+                final error = state.error.toString();
+                final isOfflineError =
+                    error.toLowerCase().contains('network') ||
+                        error.toLowerCase().contains('connection') ||
+                        error.toLowerCase().contains('timeout');
 
-              return FadeIn(
-                duration: AppMotionDurations.short,
-                child: isOfflineError
-                    ? OfflineState(
-                        title: 'Connection Lost',
-                        subtitle: 'Unable to load conversations',
-                        description:
-                            'Check your internet connection and try again',
-                        onRetry: () => ref
-                            .read(conversationListControllerProvider.notifier)
-                            .refresh(),
-                      )
-                    : ErrorState(
-                        title: 'Failed to Load Conversations',
-                        subtitle: 'Something went wrong',
-                        errorMessage: error,
-                        onRetryPressed: () => ref
-                            .read(conversationListControllerProvider.notifier)
-                            .refresh(),
-                      ),
-              );
-            }
-            if (state.items.isEmpty) {
-              // Trigger initial load
-              WidgetsBinding.instance.addPostFrameCallback((_) {
-                ref.read(conversationListControllerProvider.notifier).load();
-              });
-              return FadeIn(
-                duration: AppMotionDurations.short,
-                child: EmptyChatState(
-                  onExplore: () => context.push('/home/search'),
-                ),
-              );
-            }
-            return ListView.separated(
-                itemCount: state.items.length,
-                shrinkWrap: true,
-                separatorBuilder: (_, __) => const Divider(height: 1),
-                itemBuilder: (context, index) {
-                  final conv = state.items[index];
-                  final title = conv.partnerName;
-                  final subtitle = conv.lastMessageText ?? 'Tap to open chat';
-                  return ListTile(
-                      leading: CircleAvatar(
-                        backgroundImage:
-                            conv.partnerAvatarUrl != null &&
-                                conv.partnerAvatarUrl!.isNotEmpty
-                            ? NetworkImage(conv.partnerAvatarUrl!)
-                            : null,
-                        child:
-                            (conv.partnerAvatarUrl == null ||
-                                conv.partnerAvatarUrl!.isEmpty)
-                            ? Text(
-                                title.isNotEmpty
-                                    ? title
-                                          .trim()
-                                          .split(' ')
-                                          .map((w) => w.isNotEmpty ? w[0] : '')
-                                          .take(2)
-                                          .join()
-                                          .toUpperCase()
-                                    : '?',
-                              )
-                            : null,
-                      ),
-                      title: Text(title),
-                      subtitle: Text(
-                        subtitle,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      trailing: conv.unreadCount > 0
-                          ? CircleAvatar(
-                              radius: 10,
-                              child: Text(
-                                '${conv.unreadCount}',
-                                style: const TextStyle(fontSize: 12),
-                              ),
-                            )
-                          : null,
-                      onTap: () => context.push(
-                        '/main/chat?conversationId=${Uri.encodeComponent(conv.id)}${'&toUserId=${Uri.encodeComponent(conv.partnerId)}'}',
-                      ),
-                    );
-                },
-              );
-          },
-        ),
+                return FadeIn(
+                  duration: AppMotionDurations.short,
+                  child: isOfflineError
+                      ? OfflineState(
+                          title: 'Connection Lost',
+                          subtitle: 'Unable to load conversations',
+                          description:
+                              'Check your internet connection and try again',
+                          onRetry: () => ref
+                              .read(conversationListControllerProvider.notifier)
+                              .refresh(),
+                        )
+                      : ErrorState(
+                          title: 'Failed to Load Conversations',
+                          subtitle: 'Something went wrong',
+                          errorMessage: error,
+                          onRetryPressed: () => ref
+                              .read(conversationListControllerProvider.notifier)
+                              .refresh(),
+                        ),
+                );
+              }),
+            )
+          else if (state.items.isEmpty)
+            SliverFillRemaining(
+              hasScrollBody: false,
+              child: Builder(builder: (context) {
+                // Trigger initial load
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  ref.read(conversationListControllerProvider.notifier).load();
+                });
+                return FadeIn(
+                  duration: AppMotionDurations.short,
+                  child: EmptyChatState(
+                    onExplore: () => context.push('/home/search'),
+                  ),
+                );
+              }),
+            )
+          else
+            SliverList.separated(
+              itemCount: state.items.length,
+              separatorBuilder: (_, __) => const Divider(height: 1),
+              itemBuilder: (context, index) {
+                final conv = state.items[index];
+                final title = conv.partnerName;
+                final subtitle = conv.lastMessageText ?? 'Tap to open chat';
+                return ListTile(
+                  leading: CircleAvatar(
+                    backgroundImage: conv.partnerAvatarUrl != null &&
+                            conv.partnerAvatarUrl!.isNotEmpty
+                        ? NetworkImage(conv.partnerAvatarUrl!)
+                        : null,
+                    child: (conv.partnerAvatarUrl == null ||
+                            conv.partnerAvatarUrl!.isEmpty)
+                        ? Text(
+                            title.isNotEmpty
+                                ? title
+                                    .trim()
+                                    .split(' ')
+                                    .map((w) => w.isNotEmpty ? w[0] : '')
+                                    .take(2)
+                                    .join()
+                                    .toUpperCase()
+                                : '?',
+                          )
+                        : null,
+                  ),
+                  title: Text(title),
+                  subtitle: Text(
+                    subtitle,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  trailing: conv.unreadCount > 0
+                      ? CircleAvatar(
+                          radius: 10,
+                          child: Text(
+                            '${conv.unreadCount}',
+                            style: const TextStyle(fontSize: 12),
+                          ),
+                        )
+                      : null,
+                  onTap: () => context.push(
+                    '/main/chat?conversationId=${Uri.encodeComponent(conv.id)}${'&toUserId=${Uri.encodeComponent(conv.partnerId)}'}',
+                  ),
+                );
+              },
+            ),
+        ],
       ),
     );
   }

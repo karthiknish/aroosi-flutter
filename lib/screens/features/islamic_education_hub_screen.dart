@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../theme/colors.dart';
 import '../../theme/color_helpers.dart';
@@ -12,6 +13,7 @@ import 'afghan_traditions_screen.dart';
 import '../../widgets/error_states.dart';
 import '../../widgets/empty_states.dart';
 import '../../widgets/offline_states.dart';
+import '../../widgets/app_scaffold.dart';
 
 class IslamicEducationHubScreen extends ConsumerStatefulWidget {
   const IslamicEducationHubScreen({super.key});
@@ -60,29 +62,10 @@ class _IslamicEducationHubScreenState extends ConsumerState<IslamicEducationHubS
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          'Islamic Education',
-          style: GoogleFonts.nunitoSans(
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        backgroundColor: AppColors.surfaceSecondary,
-        elevation: 0,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.bookmark),
-            onPressed: () => _navigateToBookmarks(),
-          ),
-          IconButton(
-            icon: const Icon(Icons.history),
-            onPressed: () => _navigateToHistory(),
-          ),
-        ],
-      ),
-      body: _isLoading && _featuredContent.isEmpty && _allContent.isEmpty
+    return AppScaffold(
+      title: 'Islamic Education Hub',
+      usePadding: false,
+      child: _isLoading && _featuredContent.isEmpty && _allContent.isEmpty
           ? const Center(child: CircularProgressIndicator())
           : _error != null && _featuredContent.isEmpty && _allContent.isEmpty
               ? Builder(
@@ -197,7 +180,7 @@ class _IslamicEducationHubScreenState extends ConsumerState<IslamicEducationHubS
         title: 'Quranic Guidance',
         subtitle: 'Verses about marriage & family',
         category: EducationCategory.quranicGuidance,
-        color: Colors.green,
+        color: AppColors.success,
       ),
       _CategoryItem(
         icon: Icons.mosque,
@@ -211,14 +194,14 @@ class _IslamicEducationHubScreenState extends ConsumerState<IslamicEducationHubS
         title: 'Afghan Culture',
         subtitle: 'Wedding traditions & customs',
         category: EducationCategory.afghanCulture,
-        color: Colors.orange,
+        color: AppColors.warning,
       ),
       _CategoryItem(
         icon: Icons.family_restroom,
         title: 'Family Life',
         subtitle: 'Building strong families',
         category: EducationCategory.familyLife,
-        color: Colors.purple,
+        color: AppColors.primaryDark,
       ),
       _CategoryItem(
         icon: Icons.chat,
@@ -526,7 +509,7 @@ class _IslamicEducationHubScreenState extends ConsumerState<IslamicEducationHubS
                   icon: Icons.quiz,
                   label: 'Take Quiz',
                   onTap: () => _navigateToQuizHub(),
-                  color: Colors.green,
+                  color: AppColors.success,
                 ),
               ),
               const SizedBox(width: 12),
@@ -535,7 +518,7 @@ class _IslamicEducationHubScreenState extends ConsumerState<IslamicEducationHubS
                   icon: Icons.diversity_3,
                   label: 'Afghan Traditions',
                   onTap: () => _navigateToAfghanTraditions(),
-                  color: Colors.orange,
+                  color: AppColors.warning,
                 ),
               ),
             ],
@@ -555,7 +538,7 @@ class _IslamicEducationHubScreenState extends ConsumerState<IslamicEducationHubS
             Icon(
               Icons.search_off,
               size: 64,
-              color: Colors.grey[400],
+              color: AppColors.muted,
             ),
             const SizedBox(height: 16),
             Text(
@@ -769,14 +752,14 @@ class _ContentListItem extends StatelessWidget {
                             vertical: 2,
                           ),
                           decoration: BoxDecoration(
-                            color: Colors.grey[200],
+                            color: AppColors.surfaceSecondary,
                             borderRadius: BorderRadius.circular(4),
                           ),
                           child: Text(
                             _getDifficultyLabel(content.difficultyLevel),
                             style: GoogleFonts.nunitoSans(
                               fontSize: 10,
-                              color: Colors.grey[700],
+                              color: AppColors.text,
                             ),
                           ),
                         ),

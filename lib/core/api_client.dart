@@ -214,9 +214,10 @@ class FirebaseAuthTokenProvider implements AuthTokenProvider {
       }
 
       final idToken = await user.getIdToken(forceRefresh);
-        return idToken;
+      return idToken;
     } catch (e) {
-          return null;
+      logDebug('Error getting auth token', error: e);
+      return null;
     }
   }
 
@@ -225,7 +226,8 @@ class FirebaseAuthTokenProvider implements AuthTokenProvider {
     try {
       return _auth.currentUser;
     } catch (e) {
-          return null;
+      logDebug('Error getting current user', error: e);
+      return null;
     }
   }
 }

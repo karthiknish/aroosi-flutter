@@ -3,8 +3,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../theme/colors.dart';
+import '../../core/toast_service.dart';
+import '../../widgets/empty_states.dart';
 import '../../features/islamic_education/models.dart';
 import '../../features/islamic_education/services.dart';
+import '../../widgets/app_scaffold.dart';
 
 class AfghanTraditionsScreen extends ConsumerStatefulWidget {
   const AfghanTraditionsScreen({super.key});
@@ -45,34 +48,17 @@ class _AfghanTraditionsScreenState extends ConsumerState<AfghanTraditionsScreen>
       });
       
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              'Failed to load traditions: $e',
-              style: GoogleFonts.nunitoSans(),
-            ),
-            backgroundColor: Colors.red,
-          ),
-        );
+        ToastService.instance.error('Failed to load traditions: $e');
       }
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          'Afghan Cultural Traditions',
-          style: GoogleFonts.nunitoSans(
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        backgroundColor: AppColors.surfaceSecondary,
-        elevation: 0,
-      ),
-      body: Column(
+    return AppScaffold(
+      title: 'Afghan Cultural Traditions',
+      usePadding: false,
+      child: Column(
         children: [
           // Category filter
           _buildCategoryFilter(),
@@ -132,7 +118,7 @@ class _AfghanTraditionsScreenState extends ConsumerState<AfghanTraditionsScreen>
         label,
         style: GoogleFonts.nunitoSans(
           fontSize: 12,
-          color: isSelected ? Colors.white : Colors.black87,
+          color: isSelected ? Colors.white : AppColors.text,
         ),
       ),
       selected: isSelected,
@@ -142,40 +128,17 @@ class _AfghanTraditionsScreenState extends ConsumerState<AfghanTraditionsScreen>
         });
         _loadTraditions();
       },
-      backgroundColor: Colors.grey[200],
-      selectedColor: Colors.orange,
+      backgroundColor: AppColors.surfaceSecondary,
+      selectedColor: AppColors.primary,
     );
   }
 
   Widget _buildEmptyState() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            Icons.diversity_3_outlined,
-            size: 64,
-            color: Colors.grey[400],
-          ),
-          const SizedBox(height: 16),
-          Text(
-            'No Traditions Found',
-            style: GoogleFonts.nunitoSans(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-              color: Colors.grey[600],
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'Try selecting a different category',
-            style: GoogleFonts.nunitoSans(
-              fontSize: 14,
-              color: Colors.grey[500],
-            ),
-          ),
-        ],
-      ),
+    return EmptyState(
+      title: 'No Traditions Found',
+      subtitle: 'Try selecting a different category',
+      description: 'We are constantly adding new cultural content.',
+      icon: Icon(Icons.diversity_3_outlined, size: 64, color: AppColors.muted),
     );
   }
 
@@ -239,14 +202,14 @@ class _TraditionCard extends StatelessWidget {
                       vertical: 4,
                     ),
                     decoration: BoxDecoration(
-                      color: Colors.orange.withValues(alpha: 0.1),
+                      color: AppColors.warning.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Text(
                       _getCategoryLabel(tradition.category),
                       style: GoogleFonts.nunitoSans(
                         fontSize: 10,
-                        color: Colors.orange,
+                        color: AppColors.warning,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -258,14 +221,14 @@ class _TraditionCard extends StatelessWidget {
                       vertical: 2,
                     ),
                     decoration: BoxDecoration(
-                      color: Colors.grey[200],
+                      color: AppColors.surfaceSecondary,
                       borderRadius: BorderRadius.circular(4),
                     ),
                     child: Text(
                       tradition.region,
                       style: GoogleFonts.nunitoSans(
                         fontSize: 10,
-                        color: Colors.grey[700],
+                        color: AppColors.text,
                       ),
                     ),
                   ),
@@ -284,7 +247,7 @@ class _TraditionCard extends StatelessWidget {
                 tradition.description,
                 style: GoogleFonts.nunitoSans(
                   fontSize: 14,
-                  color: Colors.grey[600],
+                  color: AppColors.muted,
                 ),
                 maxLines: 3,
                 overflow: TextOverflow.ellipsis,
@@ -298,7 +261,7 @@ class _TraditionCard extends StatelessWidget {
                   style: GoogleFonts.nunitoSans(
                     fontSize: 12,
                     fontWeight: FontWeight.bold,
-                    color: Colors.orange,
+                    color: AppColors.warning,
                   ),
                 ),
                 const SizedBox(height: 4),
@@ -314,7 +277,7 @@ class _TraditionCard extends StatelessWidget {
                             practice,
                             style: GoogleFonts.nunitoSans(
                               fontSize: 11,
-                              color: Colors.grey[700],
+                              color: AppColors.text,
                             ),
                           ),
                         ),
@@ -327,7 +290,7 @@ class _TraditionCard extends StatelessWidget {
                     '... and ${tradition.practices.length - 3} more',
                     style: GoogleFonts.nunitoSans(
                       fontSize: 10,
-                      color: Colors.grey[500],
+                      color: AppColors.muted,
                       fontStyle: FontStyle.italic,
                     ),
                   ),
@@ -338,10 +301,10 @@ class _TraditionCard extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: Colors.blue.withValues(alpha: 0.05),
+                  color: AppColors.info.withValues(alpha: 0.05),
                   borderRadius: BorderRadius.circular(8),
                   border: Border.all(
-                    color: Colors.blue.withValues(alpha: 0.2),
+                    color: AppColors.info.withValues(alpha: 0.2),
                     width: 1,
                   ),
                 ),
@@ -350,7 +313,7 @@ class _TraditionCard extends StatelessWidget {
                     Icon(
                       Icons.lightbulb_outline,
                       size: 16,
-                      color: Colors.blue,
+                      color: AppColors.info,
                     ),
                     const SizedBox(width: 8),
                     Expanded(
@@ -358,7 +321,7 @@ class _TraditionCard extends StatelessWidget {
                         'Modern: ${tradition.modernAdaptation}',
                         style: GoogleFonts.nunitoSans(
                           fontSize: 11,
-                          color: Colors.blue[700],
+                          color: AppColors.info,
                         ),
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,

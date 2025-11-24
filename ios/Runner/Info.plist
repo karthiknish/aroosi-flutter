@@ -64,6 +64,16 @@
 			</array>
 		</dict>
 	</array>
+	<key>GIDClientID</key>
+	<string>762041256503-uc9qopr13761ictkgj53ba4gomtkvbha.apps.googleusercontent.com</string>
+	<key>LSApplicationQueriesSchemes</key>
+	<array>
+		<string>https</string>
+		<string>http</string>
+		<string>tel</string>
+		<string>mailto</string>
+		<string>sms</string>
+	</array>
 	<key>NSAppTransportSecurity</key>
 	<dict>
 		<key>NSAllowsArbitraryLoads</key>

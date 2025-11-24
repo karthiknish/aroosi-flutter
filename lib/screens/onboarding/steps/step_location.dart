@@ -1,9 +1,10 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:aroosi_flutter/theme/colors.dart';
+import 'package:aroosi_flutter/theme/theme_helpers.dart';
 import 'base_step.dart';
 import 'step_constants.dart';
-import 'package:aroosi_flutter/theme/theme_helpers.dart';
 
 /// Location step widget
 class StepLocation extends StatefulWidget {
@@ -69,11 +70,11 @@ class _StepLocationState extends State<StepLocation> {
 
   BoxDecoration cupertinoDecoration(BuildContext context, {bool hasError = false}) {
     return BoxDecoration(
-      color: CupertinoThemeHelpers.getMaterialTheme(context).scaffoldBackgroundColor,
+      color: AppColors.surface,
       border: Border.all(
         color: hasError 
-          ? CupertinoColors.systemRed 
-          : CupertinoThemeHelpers.getMaterialTheme(context).primaryContrastingColor.withValues(alpha: 0.18),
+          ? AppColors.error 
+          : AppColors.primary.withValues(alpha: 0.18),
         width: hasError ? 2.0 : 1.0,
       ),
       borderRadius: BorderRadius.circular(10.0),
@@ -122,7 +123,7 @@ class _StepLocationState extends State<StepLocation> {
                           widget.initialData[StepConstants.country] as String? ??
                           StepConstants.defaultCountry,
                           style: textStyle.copyWith(
-                            color: CupertinoColors.label,
+                            color: AppColors.text,
                           ),
                         ),
                         const Icon(CupertinoIcons.chevron_down, size: 16),
@@ -157,7 +158,7 @@ class _StepLocationState extends State<StepLocation> {
                     controller: _cityCtrl,
                     placeholder: 'Enter your city',
                     placeholderStyle: textStyle.copyWith(
-                      color: CupertinoColors.placeholderText,
+                      color: AppColors.muted,
                     ),
                     style: textStyle,
                     decoration: BoxDecoration(
@@ -178,7 +179,7 @@ class _StepLocationState extends State<StepLocation> {
                   child: Text(
                     _validateCity(_cityCtrl.text)!,
                     style: textStyle.copyWith(
-                      color: CupertinoColors.systemRed,
+                      color: AppColors.error,
                       fontSize: 12,
                     ),
                   ),
@@ -191,10 +192,10 @@ class _StepLocationState extends State<StepLocation> {
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: CupertinoColors.systemBlue.withValues(alpha: 0.1),
+              color: AppColors.info.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
-                color: CupertinoColors.systemBlue.withValues(alpha: 0.2),
+                color: AppColors.info.withValues(alpha: 0.2),
                 width: 1,
               ),
             ),
@@ -203,14 +204,14 @@ class _StepLocationState extends State<StepLocation> {
                 Icon(
                   CupertinoIcons.info_circle,
                   size: 20,
-                  color: CupertinoColors.systemBlue,
+                  color: AppColors.info,
                 ),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Text(
                     'Your location helps us find matches near you. This information is kept private and only shown to your matches.',
                     style: textStyle.copyWith(
-                      color: CupertinoColors.secondaryLabel,
+                      color: AppColors.muted,
                       fontSize: 14,
                     ),
                   ),
@@ -237,7 +238,7 @@ class _StepLocationState extends State<StepLocation> {
           margin: EdgeInsets.only(
             bottom: MediaQuery.of(context).viewInsets.bottom,
           ),
-          color: CupertinoColors.systemBackground.resolveFrom(context),
+          color: AppColors.surface,
           child: SafeArea(
             top: false,
             child: Column(

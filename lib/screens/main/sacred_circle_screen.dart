@@ -59,6 +59,7 @@ class _SacredCircleScreenState extends ConsumerState<SacredCircleScreen>
 
     return AppScaffold(
       title: 'Sacred Circle',
+      usePadding: false,
       child: SafeArea(
         child: matchesState.loading
             ? const _SacredCircleLoading()
@@ -245,7 +246,9 @@ class _SacredCircleContentState extends State<_SacredCircleContent> {
                       angle: widget.rotationAnimation.value,
                       child: CustomPaint(
                         size: Size(size, size),
-                        painter: _CulturalRingPainter(),
+                        painter: _CulturalRingPainter(
+                          color: ThemeHelpers.getMaterialTheme(context).colorScheme.outline.withValues(alpha: 0.3),
+                        ),
                       ),
                     );
                   },
@@ -611,6 +614,10 @@ class _ProfileCircle extends StatelessWidget {
 }
 
 class _CulturalRingPainter extends CustomPainter {
+  final Color color;
+
+  _CulturalRingPainter({required this.color});
+
   @override
   void paint(Canvas canvas, Size size) {
     final center = Offset(size.width / 2, size.height / 2);
@@ -640,7 +647,7 @@ class _CulturalRingPainter extends CustomPainter {
 
     // Draw subtle ring
     final ringPaint = Paint()
-      ..color = Colors.white.withValues(alpha: 0.2)
+      ..color = color
       ..style = PaintingStyle.stroke
       ..strokeWidth = 1;
 

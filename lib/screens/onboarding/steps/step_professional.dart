@@ -121,9 +121,9 @@ class _StepProfessionalState extends State<StepProfessional> {
     bool hasError = false,
   }) {
     return BoxDecoration(
-      color: CupertinoThemeHelpers.getMaterialTheme(context).scaffoldBackgroundColor,
+      color: AppColors.surface,
       border: Border.all(
-        color: hasError ? CupertinoColors.systemRed : AppColors.primary,
+        color: hasError ? AppColors.error : AppColors.primary,
         width: hasError ? 2.0 : 1.0,
       ),
       borderRadius: BorderRadius.circular(10.0),
@@ -185,7 +185,7 @@ class _StepProfessionalState extends State<StepProfessional> {
                     controller: _educationCtrl,
                     placeholder: 'Enter your education',
                     placeholderStyle: textStyle.copyWith(
-                      color: CupertinoColors.placeholderText,
+                      color: AppColors.muted,
                     ),
                     style: textStyle,
                     decoration: BoxDecoration(
@@ -203,7 +203,7 @@ class _StepProfessionalState extends State<StepProfessional> {
                   child: Text(
                     _validateEducation(_educationCtrl.text)!,
                     style: textStyle.copyWith(
-                      color: CupertinoColors.systemRed,
+                      color: AppColors.error,
                       fontSize: 12,
                     ),
                   ),
@@ -234,7 +234,7 @@ class _StepProfessionalState extends State<StepProfessional> {
                     controller: _occupationCtrl,
                     placeholder: 'Enter your occupation',
                     placeholderStyle: textStyle.copyWith(
-                      color: CupertinoColors.placeholderText,
+                      color: AppColors.muted,
                     ),
                     style: textStyle,
                     decoration: BoxDecoration(
@@ -252,7 +252,7 @@ class _StepProfessionalState extends State<StepProfessional> {
                   child: Text(
                     _validateOccupation(_occupationCtrl.text)!,
                     style: textStyle.copyWith(
-                      color: CupertinoColors.systemRed,
+                      color: AppColors.error,
                       fontSize: 12,
                     ),
                   ),
@@ -284,7 +284,7 @@ class _StepProfessionalState extends State<StepProfessional> {
                     controller: _annualIncomeCtrl,
                     placeholder: 'e.g., 50000',
                     placeholderStyle: textStyle.copyWith(
-                      color: CupertinoColors.placeholderText,
+                      color: AppColors.muted,
                     ),
                     style: textStyle,
                     keyboardType: TextInputType.number,
@@ -303,7 +303,7 @@ class _StepProfessionalState extends State<StepProfessional> {
                   child: Text(
                     _validateAnnualIncome(_annualIncomeCtrl.text)!,
                     style: textStyle.copyWith(
-                      color: CupertinoColors.systemRed,
+                      color: AppColors.error,
                       fontSize: 12,
                     ),
                   ),
@@ -316,10 +316,10 @@ class _StepProfessionalState extends State<StepProfessional> {
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: CupertinoColors.systemBlue.withValues(alpha: 0.1),
+              color: AppColors.info.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
-                color: CupertinoColors.systemBlue.withValues(alpha: 0.2),
+                color: AppColors.info.withValues(alpha: 0.2),
                 width: 1,
               ),
             ),
@@ -331,13 +331,13 @@ class _StepProfessionalState extends State<StepProfessional> {
                     Icon(
                       CupertinoIcons.briefcase,
                       size: 20,
-                      color: CupertinoColors.secondaryLabel,
+                      color: AppColors.muted,
                     ),
                     const SizedBox(width: 8),
                     Text(
                       'About your professional information',
                       style: textStyle.copyWith(
-                        color: CupertinoColors.secondaryLabel,
+                        color: AppColors.muted,
                         fontWeight: FontWeight.w600,
                         fontSize: 14,
                       ),
@@ -348,7 +348,7 @@ class _StepProfessionalState extends State<StepProfessional> {
                 Text(
                   'Your education and occupation help others understand your background. Income is kept private and only used for compatibility matching.',
                   style: textStyle.copyWith(
-                    color: CupertinoColors.secondaryLabel,
+                    color: AppColors.muted,
                     fontSize: 12,
                   ),
                 ),

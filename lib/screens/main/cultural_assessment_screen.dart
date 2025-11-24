@@ -4,9 +4,12 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:dio/dio.dart';
 import 'package:firebase_auth/firebase_auth.dart' as fb;
 
+import 'package:aroosi_flutter/core/toast_service.dart';
 import 'package:aroosi_flutter/core/api_client.dart';
 import 'package:aroosi_flutter/core/api_error_handler.dart';
 import 'package:aroosi_flutter/theme/colors.dart';
+
+import 'package:aroosi_flutter/widgets/app_scaffold.dart';
 
 class CulturalAssessmentScreen extends ConsumerStatefulWidget {
   const CulturalAssessmentScreen({super.key});
@@ -200,23 +203,16 @@ class _CulturalAssessmentScreenState extends ConsumerState<CulturalAssessmentScr
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          'Cultural Assessment',
-          style: GoogleFonts.nunitoSans(
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        backgroundColor: AppColors.surfaceSecondary,
-        elevation: 0,
-        leading: IconButton(
+    return AppScaffold(
+      title: 'Cultural Assessment',
+      usePadding: false,
+      actions: [
+        IconButton(
           icon: const Icon(Icons.close),
           onPressed: () => _showExitDialog(),
         ),
-      ),
-      body: Column(
+      ],
+      child: Column(
         children: [
           // Progress indicator
           _buildProgressIndicator(),
@@ -306,7 +302,7 @@ class _CulturalAssessmentScreenState extends ConsumerState<CulturalAssessmentScr
                 Icon(
                   step.icon,
                   size: 32,
-                  color: Colors.white,
+                  color: AppColors.onPrimary,
                 ),
                 const SizedBox(width: 16),
                 Expanded(
@@ -315,7 +311,7 @@ class _CulturalAssessmentScreenState extends ConsumerState<CulturalAssessmentScr
                     style: GoogleFonts.nunitoSans(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
-                      color: Colors.white,
+                      color: AppColors.onPrimary,
                     ),
                   ),
                 ),
@@ -340,7 +336,7 @@ class _CulturalAssessmentScreenState extends ConsumerState<CulturalAssessmentScr
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
           color: AppColors.borderPrimary,
@@ -376,7 +372,7 @@ class _CulturalAssessmentScreenState extends ConsumerState<CulturalAssessmentScr
                 selected
                     ? Icons.radio_button_checked
                     : Icons.radio_button_off,
-                color: selected ? AppColors.primary : Colors.grey,
+                color: selected ? AppColors.primary : AppColors.muted,
               ),
               title: Text(
                 option,
@@ -435,7 +431,7 @@ class _CulturalAssessmentScreenState extends ConsumerState<CulturalAssessmentScr
                   '${entry.key}: ${entry.value}',
                   style: GoogleFonts.nunitoSans(
                     fontSize: 12,
-                    color: Colors.grey[600],
+                    color: AppColors.muted,
                   ),
                 ),
               ).toList(),
@@ -498,7 +494,7 @@ class _CulturalAssessmentScreenState extends ConsumerState<CulturalAssessmentScr
                       width: 20,
                       child: CircularProgressIndicator(
                         strokeWidth: 2,
-                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                        valueColor: AlwaysStoppedAnimation<Color>(AppColors.onPrimary),
                       ),
                     )
                   : Text(
@@ -506,7 +502,7 @@ class _CulturalAssessmentScreenState extends ConsumerState<CulturalAssessmentScr
                       style: GoogleFonts.nunitoSans(
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
-                        color: Colors.white,
+                        color: AppColors.onPrimary,
                       ),
                     ),
             ),
@@ -562,32 +558,17 @@ class _CulturalAssessmentScreenState extends ConsumerState<CulturalAssessmentScr
         }
       } else {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Failed to save assessment (${response.statusCode})'),
-              backgroundColor: AppColors.error,
-            ),
-          );
+          ToastService.instance.error('Failed to save assessment (${response.statusCode})');
         }
       }
     } on DioException catch (e) {
       if (mounted) {
         ApiErrorHandler.logError(e, 'Submit cultural assessment');
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(ApiErrorHandler.getErrorMessage(e)),
-            backgroundColor: AppColors.error,
-          ),
-        );
+        ToastService.instance.error(ApiErrorHandler.getErrorMessage(e));
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Unexpected error: $e'),
-            backgroundColor: AppColors.error,
-          ),
-        );
+        ToastService.instance.error('Unexpected error: $e');
       }
     } finally {
       if (mounted) {
@@ -618,7 +599,7 @@ class _CulturalAssessmentScreenState extends ConsumerState<CulturalAssessmentScr
             onPressed: () => Navigator.pop(context),
             child: Text(
               'Cancel',
-              style: GoogleFonts.nunitoSans(color: Colors.grey[600]),
+              style: GoogleFonts.nunitoSans(color: AppColors.muted),
             ),
           ),
           ElevatedButton(
@@ -629,7 +610,7 @@ class _CulturalAssessmentScreenState extends ConsumerState<CulturalAssessmentScr
             style: ElevatedButton.styleFrom(backgroundColor: AppColors.error),
             child: Text(
               'Exit',
-              style: GoogleFonts.nunitoSans(color: Colors.white),
+              style: GoogleFonts.nunitoSans(color: AppColors.onPrimary),
             ),
           ),
         ],
@@ -661,7 +642,7 @@ class _CulturalAssessmentScreenState extends ConsumerState<CulturalAssessmentScr
             style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary),
             child: Text(
               'Great!',
-              style: GoogleFonts.nunitoSans(color: Colors.white),
+              style: GoogleFonts.nunitoSans(color: AppColors.onPrimary),
             ),
           ),
         ],

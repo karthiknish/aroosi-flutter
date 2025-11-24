@@ -138,7 +138,7 @@ class _InterestsManagementScreenState
         const SliverToBoxAdapter(child: SizedBox(height: 8)),
         SliverToBoxAdapter(
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
             child: DecoratedBox(
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(24),
@@ -249,28 +249,31 @@ class _InterestsManagementScreenState
       ],
     );
 
-    return AppScaffold(title: 'Interests', child: content);
+    return AppScaffold(title: 'Interests', usePadding: false, child: content);
   }
 
   Widget _buildListSliver(InterestsState state) {
-    return SliverList(
-      delegate: SliverChildBuilderDelegate(
-        (context, index) {
-          if (index >= state.items.length) {
-            return PagedListFooter(
-              hasMore: state.hasMore,
-              isLoading: state.loading,
+    return SliverPadding(
+      padding: const EdgeInsets.symmetric(horizontal: 24),
+      sliver: SliverList(
+        delegate: SliverChildBuilderDelegate(
+          (context, index) {
+            if (index >= state.items.length) {
+              return PagedListFooter(
+                hasMore: state.hasMore,
+                isLoading: state.loading,
+              );
+            }
+            final interest = state.items[index];
+            return InterestCard(
+              interest: interest,
+              mode: _currentMode,
+              viewMode: _viewMode,
+              showCompatibilityScore: _showCompatibilityScore,
             );
-          }
-          final interest = state.items[index];
-          return InterestCard(
-            interest: interest,
-            mode: _currentMode,
-            viewMode: _viewMode,
-            showCompatibilityScore: _showCompatibilityScore,
-          );
-        },
-        childCount: state.items.length + (state.hasMore ? 1 : 0),
+          },
+          childCount: state.items.length + (state.hasMore ? 1 : 0),
+        ),
       ),
     );
   }

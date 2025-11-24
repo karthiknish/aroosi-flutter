@@ -13,8 +13,6 @@ class DefaultFirebaseOptions {
       );
     }
     switch (defaultTargetPlatform) {
-      case TargetPlatform.android:
-        return android;
       case TargetPlatform.iOS:
         return ios;
       case TargetPlatform.macOS:
@@ -23,6 +21,7 @@ class DefaultFirebaseOptions {
           'DefaultFirebaseOptions have not been configured for macOS. '
           'Add a macOS Firebase app and update this file.',
         );
+      case TargetPlatform.android:
       case TargetPlatform.windows:
       case TargetPlatform.linux:
         throw UnsupportedError(
@@ -34,15 +33,6 @@ class DefaultFirebaseOptions {
         );
     }
   }
-
-  static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyDCJme2CQ949nHabcdj50-sjLM1vXDjoR0',
-    appId: '1:762041256503:android:5105c4c27e9e1939ac8db2',
-    messagingSenderId: '762041256503',
-    projectId: 'aroosi-project',
-    storageBucket: 'aroosi-project.firebasestorage.app',
-    measurementId: 'G-LW4V9JBD39',
-  );
 
   static const FirebaseOptions ios = FirebaseOptions(
     apiKey: 'AIzaSyDBO0qloVCqP7su4WnBL72yUkH7KooGyzY',

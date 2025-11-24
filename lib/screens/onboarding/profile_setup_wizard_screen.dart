@@ -6,10 +6,12 @@ import 'package:go_router/go_router.dart';
 import 'package:aroosi_flutter/core/toast_service.dart';
 import 'package:aroosi_flutter/features/auth/auth_controller.dart';
 import 'package:aroosi_flutter/features/profiles/profiles_repository.dart';
+import 'package:aroosi_flutter/theme/colors.dart';
 import 'package:aroosi_flutter/theme/motion.dart';
 import 'package:aroosi_flutter/theme/theme_helpers.dart';
 import 'package:aroosi_flutter/widgets/animations/motion.dart';
 import 'package:aroosi_flutter/l10n/app_localizations.dart';
+import 'package:aroosi_flutter/widgets/app_scaffold.dart';
 
 import 'steps/steps.dart';
 
@@ -132,6 +134,7 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
 
     if (form != null && !form.validate()) {
       debugPrint('Form validation failed for step $_currentStepIndex');
+      ToastService.instance.error('Please fill in all required fields correctly');
       return false;
     }
 
@@ -421,7 +424,7 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
             AppLocalizations.of(context)!.profileCreateProfile,
             style: theme.textTheme.navTitleTextStyle.copyWith(
               fontWeight: FontWeight.w800,
-              color: CupertinoColors.label,
+              color: AppColors.text,
               letterSpacing: -0.5,
             ),
             textAlign: TextAlign.center,
@@ -443,7 +446,7 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
                 child: Text(
                   _getStepTitle(_currentStepIndex),
                   style: theme.textTheme.textStyle.copyWith(
-                    color: CupertinoColors.secondaryLabel,
+                    color: AppColors.muted,
                     fontWeight: FontWeight.w600,
                     fontSize: 16,
                   ),
@@ -469,12 +472,12 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
               ),
               borderRadius: BorderRadius.circular(20),
               border: Border.all(
-                color: CupertinoColors.separator.withValues(alpha: 0.1),
+                color: AppColors.borderPrimary.withValues(alpha: 0.1),
                 width: 1,
               ),
               boxShadow: [
                 BoxShadow(
-                  color: CupertinoColors.black.withValues(alpha: 0.08),
+                  color: Colors.black.withValues(alpha: 0.08),
                   blurRadius: 12,
                   offset: const Offset(0, 4),
                 ),
@@ -519,7 +522,7 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
                             ? theme.primaryColor
                             : isCurrent
                             ? theme.primaryColor.withValues(alpha: 0.8)
-                            : CupertinoColors.separator.withValues(alpha: 0.3),
+                            : AppColors.borderPrimary.withValues(alpha: 0.3),
                         borderRadius: BorderRadius.circular(4),
                       ),
                     );
@@ -535,7 +538,7 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
                     Text(
                       'Profile Setup',
                       style: theme.textTheme.textStyle.copyWith(
-                        color: CupertinoColors.secondaryLabel,
+                        color: AppColors.muted,
                         fontWeight: FontWeight.w600,
                         fontSize: 12,
                       ),
@@ -586,8 +589,8 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
               'Back',
               style: TextStyle(
                 color: _currentStepIndex == 0 || _submitting
-                    ? CupertinoColors.systemGrey
-                    : CupertinoColors.systemPink,
+                    ? AppColors.muted
+                    : AppColors.primary,
               ),
             ),
           ),
@@ -601,13 +604,16 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
                 ? _submit
                 : _onNext,
             padding: const EdgeInsets.symmetric(vertical: 16),
-            color: CupertinoColors.systemPink,
+            color: AppColors.primary,
             child: _submitting
                 ? const CupertinoActivityIndicator(
-                    color: CupertinoColors.white,
+                    color: AppColors.onPrimary,
                     radius: 10,
                   )
-                : Text(isLastStep ? 'Create Profile' : l10n.profileNext),
+                : Text(
+                    isLastStep ? 'Create Profile' : l10n.profileNext,
+                    style: const TextStyle(color: AppColors.onPrimary),
+                  ),
           ),
         ),
       ],
@@ -631,23 +637,26 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
           }
         }
       },
-      child: CupertinoPageScaffold(
-        navigationBar: CupertinoNavigationBar(
-          leading: _currentStepIndex > 0
-              ? CupertinoNavigationBarBackButton(onPressed: _onBack)
-              : null,
-          middle: Text(
-            'Profile Setup',
-            style: theme.textTheme.navTitleTextStyle,
-          ),
-          trailing: Text(
-            '${_currentStepIndex + 1}/${StepInfo.allSteps.length}',
-            style: theme.textTheme.textStyle.copyWith(
-              fontSize: 16,
-              fontWeight: FontWeight.w500,
+      child: AppScaffold(
+        title: 'Profile Setup',
+        usePadding: false,
+        leading: _currentStepIndex > 0
+            ? CupertinoNavigationBarBackButton(onPressed: _onBack)
+            : null,
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: 16),
+            child: Center(
+              child: Text(
+                '${_currentStepIndex + 1}/${StepInfo.allSteps.length}',
+                style: theme.textTheme.navTitleTextStyle.copyWith(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
             ),
           ),
-        ),
+        ],
         child: SafeArea(
           child: Column(
             children: [
@@ -668,12 +677,12 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
                               Container(
                                 padding: const EdgeInsets.all(12),
                                 decoration: BoxDecoration(
-                                  color: CupertinoColors.systemRed.withValues(
+                                  color: AppColors.error.withValues(
                                     alpha: 0.1,
                                   ),
                                   borderRadius: BorderRadius.circular(12),
                                   border: Border.all(
-                                    color: CupertinoColors.systemRed.withValues(
+                                    color: AppColors.error.withValues(
                                       alpha: 0.3,
                                     ),
                                   ),
@@ -681,7 +690,7 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
                                 child: Text(
                                   _error ?? '',
                                   style: theme.textTheme.textStyle.copyWith(
-                                    color: CupertinoColors.systemRed,
+                                    color: AppColors.error,
                                     fontSize: 16,
                                   ),
                                 ),

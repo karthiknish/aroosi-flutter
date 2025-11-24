@@ -116,9 +116,9 @@ class _StepBasicInfoState extends State<StepBasicInfo> {
     bool hasError = false,
   }) {
     return BoxDecoration(
-      color: CupertinoThemeHelpers.getMaterialTheme(context).scaffoldBackgroundColor,
+      color: AppColors.surface,
       border: Border.all(
-        color: hasError ? CupertinoColors.systemRed : AppColors.primary,
+        color: hasError ? AppColors.error : AppColors.primary,
         width: hasError ? 2.0 : 1.0,
       ),
       borderRadius: BorderRadius.circular(10.0),
@@ -155,36 +155,52 @@ class _StepBasicInfoState extends State<StepBasicInfo> {
                 ),
               ),
               const SizedBox(height: 8),
-              Container(
-                decoration: cupertinoDecoration(context),
-                child: cupertinoFieldPadding(
-                  CupertinoTextField(
-                    controller: _fullNameCtrl,
-                    placeholder: 'Enter your full name',
-                    style: textStyle,
-                    placeholderStyle: textStyle.copyWith(
-                      color: CupertinoColors.placeholderText,
-                    ),
-                    decoration: BoxDecoration(
-                      color: Colors.transparent,
-                      border: Border.all(color: Colors.transparent),
-                    ),
-                    onChanged: (value) =>
-                        _updateField(StepConstants.fullName, value.trim()),
-                  ),
-                ),
+              FormField<String>(
+                validator: _validateFullName,
+                initialValue: _fullNameCtrl.text,
+                builder: (FormFieldState<String> state) {
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Container(
+                        decoration: cupertinoDecoration(
+                          context,
+                          hasError: state.hasError,
+                        ),
+                        child: cupertinoFieldPadding(
+                          CupertinoTextField(
+                            controller: _fullNameCtrl,
+                            placeholder: 'Enter your full name',
+                            style: textStyle,
+                            placeholderStyle: textStyle.copyWith(
+                              color: AppColors.muted,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Colors.transparent,
+                              border: Border.all(color: Colors.transparent),
+                            ),
+                            onChanged: (value) {
+                              state.didChange(value);
+                              _updateField(StepConstants.fullName, value.trim());
+                            },
+                          ),
+                        ),
+                      ),
+                      if (state.hasError)
+                        Padding(
+                          padding: const EdgeInsets.only(top: 4),
+                          child: Text(
+                            state.errorText!,
+                            style: textStyle.copyWith(
+                              color: AppColors.error,
+                              fontSize: 12,
+                            ),
+                          ),
+                        ),
+                    ],
+                  );
+                },
               ),
-              if (_validateFullName(_fullNameCtrl.text) != null)
-                Padding(
-                  padding: const EdgeInsets.only(top: 4),
-                  child: Text(
-                    _validateFullName(_fullNameCtrl.text)!,
-                    style: textStyle.copyWith(
-                      color: CupertinoColors.systemRed,
-                      fontSize: 12,
-                    ),
-                  ),
-                ),
             ],
           ),
           const SizedBox(height: 16),
@@ -193,96 +209,137 @@ class _StepBasicInfoState extends State<StepBasicInfo> {
           Row(
             children: [
               Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Gender',
-                      style: textStyle.copyWith(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Container(
-                      decoration: cupertinoDecoration(context),
-                      child: cupertinoFieldPadding(
-                        CupertinoButton(
-                          padding: EdgeInsets.zero,
-                          onPressed: () => _showGenderPicker(context, 'gender'),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                capitalize(
-                                  widget.initialData[StepConstants.gender]
-                                          as String? ??
-                                      'Select',
-                                ),
-                                style: textStyle.copyWith(
-                                  color:
-                                      widget.initialData[StepConstants
-                                              .gender] ==
-                                          null
-                                      ? CupertinoColors.placeholderText
-                                      : CupertinoColors.label,
-                                ),
-                              ),
-                              const Icon(CupertinoIcons.chevron_down, size: 16),
-                            ],
+                child: FormField<String>(
+                  validator: (value) => validateDropdown(
+                    widget.initialData[StepConstants.gender] as String?,
+                    'Gender',
+                  ),
+                  builder: (FormFieldState<String> state) {
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Gender',
+                          style: textStyle.copyWith(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
                           ),
                         ),
-                      ),
-                    ),
-                  ],
+                        const SizedBox(height: 8),
+                        Container(
+                          decoration: cupertinoDecoration(
+                            context,
+                            hasError: state.hasError,
+                          ),
+                          child: cupertinoFieldPadding(
+                            CupertinoButton(
+                              padding: EdgeInsets.zero,
+                              onPressed: () {
+                                _showGenderPicker(context, 'gender');
+                                // We can't easily trigger validation update here without callback from picker
+                                // But Form.validate() will catch it on submit
+                              },
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    capitalize(
+                                      widget.initialData[StepConstants.gender]
+                                              as String? ??
+                                          'Select',
+                                    ),
+                                    style: textStyle.copyWith(
+                                      color: widget.initialData[StepConstants.gender] == null
+                                          ? AppColors.muted
+                                          : AppColors.text,
+                                    ),
+                                  ),
+                                  const Icon(CupertinoIcons.chevron_down, size: 16),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                        if (state.hasError)
+                          Padding(
+                            padding: const EdgeInsets.only(top: 4),
+                            child: Text(
+                              state.errorText!,
+                              style: textStyle.copyWith(
+                                color: AppColors.error,
+                                fontSize: 12,
+                              ),
+                            ),
+                          ),
+                      ],
+                    );
+                  },
                 ),
               ),
               const SizedBox(width: 16),
               Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Looking for',
-                      style: textStyle.copyWith(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Container(
-                      decoration: cupertinoDecoration(context),
-                      child: cupertinoFieldPadding(
-                        CupertinoButton(
-                          padding: EdgeInsets.zero,
-                          onPressed: () =>
-                              _showGenderPicker(context, 'preferredGender'),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                capitalize(
-                                  widget.initialData[StepConstants
-                                              .preferredGender]
-                                          as String? ??
-                                      'Select',
-                                ),
-                                style: textStyle.copyWith(
-                                  color:
-                                      widget.initialData[StepConstants
-                                              .preferredGender] ==
-                                          null
-                                      ? CupertinoColors.placeholderText
-                                      : CupertinoColors.label,
-                                ),
-                              ),
-                              const Icon(CupertinoIcons.chevron_down, size: 16),
-                            ],
+                child: FormField<String>(
+                  validator: (value) => validateDropdown(
+                    widget.initialData[StepConstants.preferredGender] as String?,
+                    'Preference',
+                  ),
+                  builder: (FormFieldState<String> state) {
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Looking for',
+                          style: textStyle.copyWith(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
                           ),
                         ),
-                      ),
-                    ),
-                  ],
+                        const SizedBox(height: 8),
+                        Container(
+                          decoration: cupertinoDecoration(
+                            context,
+                            hasError: state.hasError,
+                          ),
+                          child: cupertinoFieldPadding(
+                            CupertinoButton(
+                              padding: EdgeInsets.zero,
+                              onPressed: () =>
+                                  _showGenderPicker(context, 'preferredGender'),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    capitalize(
+                                      widget.initialData[StepConstants.preferredGender]
+                                              as String? ??
+                                          'Select',
+                                    ),
+                                    style: textStyle.copyWith(
+                                      color: widget.initialData[StepConstants.preferredGender] == null
+                                          ? AppColors.muted
+                                          : AppColors.text,
+                                    ),
+                                  ),
+                                  const Icon(CupertinoIcons.chevron_down, size: 16),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                        if (state.hasError)
+                          Padding(
+                            padding: const EdgeInsets.only(top: 4),
+                            child: Text(
+                              state.errorText!,
+                              style: textStyle.copyWith(
+                                color: AppColors.error,
+                                fontSize: 12,
+                              ),
+                            ),
+                          ),
+                      ],
+                    );
+                  },
                 ),
               ),
             ],
@@ -290,68 +347,77 @@ class _StepBasicInfoState extends State<StepBasicInfo> {
           const SizedBox(height: 16),
 
           // Date of Birth
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Date of birth',
-                style: textStyle.copyWith(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Container(
-                decoration: cupertinoDecoration(
-                  context,
-                  hasError: _validateDateOfBirth(_dateOfBirth) != null,
-                ),
-                child: cupertinoFieldPadding(
-                  CupertinoButton(
-                    padding: EdgeInsets.zero,
-                    onPressed: () => _showDatePicker(context),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          formatDob(_dateOfBirth).isEmpty
-                              ? 'Select date'
-                              : formatDob(_dateOfBirth),
-                          style: textStyle.copyWith(
-                            color: _dateOfBirth == null
-                                ? CupertinoColors.placeholderText
-                                : CupertinoColors.label,
-                          ),
+          FormField<DateTime>(
+            validator: _validateDateOfBirth,
+            initialValue: _dateOfBirth,
+            builder: (FormFieldState<DateTime> state) {
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Date of birth',
+                    style: textStyle.copyWith(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Container(
+                    decoration: cupertinoDecoration(
+                      context,
+                      hasError: state.hasError,
+                    ),
+                    child: cupertinoFieldPadding(
+                      CupertinoButton(
+                        padding: EdgeInsets.zero,
+                        onPressed: () async {
+                          await _showDatePicker(context);
+                          state.didChange(_dateOfBirth);
+                        },
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              formatDob(_dateOfBirth).isEmpty
+                                  ? 'Select date'
+                                  : formatDob(_dateOfBirth),
+                              style: textStyle.copyWith(
+                                color: _dateOfBirth == null
+                                    ? AppColors.muted
+                                    : AppColors.text,
+                              ),
+                            ),
+                            const Icon(CupertinoIcons.calendar, size: 16),
+                          ],
                         ),
-                        const Icon(CupertinoIcons.calendar, size: 16),
-                      ],
+                      ),
                     ),
                   ),
-                ),
-              ),
-              if (_validateDateOfBirth(_dateOfBirth) != null)
-                Padding(
-                  padding: const EdgeInsets.only(top: 4),
-                  child: Text(
-                    _validateDateOfBirth(_dateOfBirth)!,
-                    style: textStyle.copyWith(
-                      color: CupertinoColors.systemRed,
-                      fontSize: 12,
+                  if (state.hasError)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 4),
+                      child: Text(
+                        state.errorText!,
+                        style: textStyle.copyWith(
+                          color: AppColors.error,
+                          fontSize: 12,
+                        ),
+                      ),
                     ),
-                  ),
-                ),
-              if (age != null)
-                Padding(
-                  padding: const EdgeInsets.only(top: 8),
-                  child: Text(
-                    'Age: $age',
-                    style: textStyle.copyWith(
-                      color: CupertinoColors.secondaryLabel,
-                      fontSize: 14,
+                  if (age != null)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 8),
+                      child: Text(
+                        'Age: $age',
+                        style: textStyle.copyWith(
+                          color: AppColors.muted,
+                          fontSize: 14,
+                        ),
+                      ),
                     ),
-                  ),
-                ),
-            ],
+                ],
+              );
+            },
           ),
           const SizedBox(height: 16),
 
@@ -383,7 +449,7 @@ class _StepBasicInfoState extends State<StepBasicInfo> {
                                 StepConstants.defaultProfileFor,
                           ),
                           style: textStyle.copyWith(
-                            color: CupertinoColors.label,
+                            color: AppColors.text,
                           ),
                         ),
                         const Icon(CupertinoIcons.chevron_down, size: 16),
@@ -414,7 +480,7 @@ class _StepBasicInfoState extends State<StepBasicInfo> {
           margin: EdgeInsets.only(
             bottom: MediaQuery.of(context).viewInsets.bottom,
           ),
-          color: CupertinoColors.systemBackground.resolveFrom(context),
+          color: AppColors.surface,
           child: SafeArea(
             top: false,
             child: Column(
@@ -486,7 +552,7 @@ class _StepBasicInfoState extends State<StepBasicInfo> {
           margin: EdgeInsets.only(
             bottom: MediaQuery.of(context).viewInsets.bottom,
           ),
-          color: CupertinoColors.systemBackground.resolveFrom(context),
+          color: AppColors.surface,
           child: SafeArea(
             top: false,
             child: Column(
@@ -544,7 +610,7 @@ class _StepBasicInfoState extends State<StepBasicInfo> {
     );
   }
 
-  void _showDatePicker(BuildContext context) async {
+  Future<void> _showDatePicker(BuildContext context) async {
     final now = DateTime.now();
     final first = DateTime(
       now.year - StepConstants.maximumAge,
@@ -566,7 +632,7 @@ class _StepBasicInfoState extends State<StepBasicInfo> {
           margin: EdgeInsets.only(
             bottom: MediaQuery.of(context).viewInsets.bottom,
           ),
-          color: CupertinoColors.systemBackground.resolveFrom(context),
+          color: AppColors.surface,
           child: SafeArea(
             top: false,
             child: Column(

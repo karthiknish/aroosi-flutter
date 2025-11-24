@@ -40,9 +40,7 @@ class ChatMessage extends Equatable {
       toUserId: json['toUserId']?.toString(),
       text: json['text']?.toString() ?? '',
       type: json['type']?.toString() ?? 'text',
-      createdAt: DateTime.parse(
-        json['createdAt']?.toString() ?? DateTime.now().toIso8601String(),
-      ),
+      createdAt: DateTime.tryParse(json['createdAt']?.toString() ?? '') ?? DateTime.now(),
       isMine: json['isMine'] == true,
       isRead: json['isRead'] == true,
       reactions:

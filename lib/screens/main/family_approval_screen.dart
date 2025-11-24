@@ -4,10 +4,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:dio/dio.dart';
 
+import 'package:aroosi_flutter/core/toast_service.dart';
 import 'package:aroosi_flutter/core/api_client.dart';
 import 'package:aroosi_flutter/core/api_error_handler.dart';
 import 'package:aroosi_flutter/theme/colors.dart';
 import 'package:aroosi_flutter/theme/theme_helpers.dart';
+
+import 'package:aroosi_flutter/widgets/app_scaffold.dart';
 
 class FamilyApprovalScreen extends ConsumerStatefulWidget {
   const FamilyApprovalScreen({super.key});
@@ -65,49 +68,30 @@ class _FamilyApprovalScreenState extends ConsumerState<FamilyApprovalScreen> {
           _isLoading = false;
         });
         ApiErrorHandler.logError(e, 'Load family approval requests');
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(ApiErrorHandler.getErrorMessage(e)),
-            backgroundColor: AppColors.error,
-          ),
-        );
+        ToastService.instance.error(ApiErrorHandler.getErrorMessage(e));
       }
     } catch (e) {
       if (mounted) {
         setState(() {
           _isLoading = false;
         });
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Unexpected error: $e'),
-            backgroundColor: AppColors.error,
-          ),
-        );
+        ToastService.instance.error('Unexpected error: $e');
       }
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          'Family Approval',
-          style: GoogleFonts.nunitoSans(
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
-          ),
+    return AppScaffold(
+      title: 'Family Approval',
+      usePadding: false,
+      actions: [
+        IconButton(
+          icon: const Icon(Icons.add),
+          onPressed: _showCreateRequestDialog,
         ),
-        backgroundColor: AppColors.surfaceSecondary,
-        elevation: 0,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.add),
-            onPressed: _showCreateRequestDialog,
-          ),
-        ],
-      ),
-      body: _isLoading
+      ],
+      child: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : DefaultTabController(
               length: 2,
@@ -182,14 +166,14 @@ class _FamilyApprovalScreenState extends ConsumerState<FamilyApprovalScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(icon, size: 64, color: Colors.grey[400]),
+          Icon(icon, size: 64, color: AppColors.muted),
           const SizedBox(height: 16),
           Text(
             title,
             style: GoogleFonts.nunitoSans(
               fontSize: 18,
               fontWeight: FontWeight.bold,
-              color: Colors.grey[600],
+              color: AppColors.muted,
             ),
           ),
           const SizedBox(height: 8),
@@ -197,7 +181,7 @@ class _FamilyApprovalScreenState extends ConsumerState<FamilyApprovalScreen> {
             subtitle,
             style: GoogleFonts.nunitoSans(
               fontSize: 14,
-              color: Colors.grey[500],
+              color: AppColors.muted,
             ),
             textAlign: TextAlign.center,
           ),
@@ -237,23 +221,13 @@ class _FamilyApprovalScreenState extends ConsumerState<FamilyApprovalScreen> {
       if (!mounted) return;
 
       if (response.statusCode == 200) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Response submitted successfully'),
-            backgroundColor: AppColors.success,
-          ),
-        );
+        ToastService.instance.success('Response submitted successfully');
         _loadRequests(); // Refresh the list
       }
     } catch (e) {
       if (!mounted) return;
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Error submitting response: $e'),
-          backgroundColor: AppColors.error,
-        ),
-      );
+      ToastService.instance.error('Error submitting response: $e');
     }
   }
 }
@@ -315,7 +289,7 @@ class _FamilyRequestCard extends StatelessWidget {
                         'Relationship: ${request.relationship}',
                         style: GoogleFonts.nunitoSans(
                           fontSize: 14,
-                          color: Colors.grey[600],
+                          color: AppColors.muted,
                         ),
                       ),
                     ],
@@ -331,7 +305,7 @@ class _FamilyRequestCard extends StatelessWidget {
               'Sent ${_formatDate(request.createdAt)}',
               style: GoogleFonts.nunitoSans(
                 fontSize: 12,
-                color: Colors.grey[500],
+                color: AppColors.muted,
               ),
             ),
             if (isReceived && request.status == 'pending') ...[
@@ -347,7 +321,7 @@ class _FamilyRequestCard extends StatelessWidget {
                       child: Text(
                         'Approve',
                         style: GoogleFonts.nunitoSans(
-                          color: Colors.white,
+                          color: AppColors.onPrimary,
                           fontWeight: FontWeight.w600,
                         ),
                       ),
@@ -419,7 +393,7 @@ class _StatusBadge extends StatelessWidget {
         text = 'Pending';
         break;
       default:
-        color = Colors.grey;
+        color = AppColors.muted;
         text = status;
     }
 
@@ -472,7 +446,7 @@ class _CreateFamilyApprovalDialogState
     return BoxDecoration(
       color: CupertinoThemeHelpers.getMaterialTheme(context).scaffoldBackgroundColor,
       border: Border.all(
-        color: hasError ? CupertinoColors.destructiveRed : AppColors.primary,
+        color: hasError ? AppColors.error : AppColors.primary,
         width: 1.5,
       ),
       borderRadius: BorderRadius.circular(10.0),
@@ -509,7 +483,7 @@ class _CreateFamilyApprovalDialogState
               'Send a request to a family member for their approval of your potential match.',
               style: GoogleFonts.nunitoSans(
                 fontSize: 14,
-                color: Colors.grey[600],
+                color: AppColors.muted,
               ),
             ),
             const SizedBox(height: 24),
@@ -597,7 +571,7 @@ class _CreateFamilyApprovalDialogState
                         : Text(
                             'Send Request',
                             style: GoogleFonts.nunitoSans(
-                              color: Colors.white,
+                              color: AppColors.onPrimary,
                               fontWeight: FontWeight.w600,
                             ),
                           ),
@@ -615,25 +589,19 @@ class _CreateFamilyApprovalDialogState
     // Manual validation
     final familyMember = _familyMemberController.text.trim();
     if (familyMember.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please enter family member ID or email')),
-      );
+      ToastService.instance.error('Please enter family member ID or email');
       return;
     }
 
     final relationship = _relationshipController.text.trim();
     if (relationship.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please enter relationship')),
-      );
+      ToastService.instance.error('Please enter relationship');
       return;
     }
 
     final message = _messageController.text.trim();
     if (message.isEmpty) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Please enter a message')));
+      ToastService.instance.error('Please enter a message');
       return;
     }
 
@@ -656,32 +624,17 @@ class _CreateFamilyApprovalDialogState
       if (response.statusCode == 201) {
         Navigator.pop(context);
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Family approval request sent successfully'),
-              backgroundColor: AppColors.success,
-            ),
-          );
+          ToastService.instance.success('Family approval request sent successfully');
         }
       }
     } on DioException catch (e) {
       if (mounted) {
         ApiErrorHandler.logError(e, 'Submit family approval request');
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(ApiErrorHandler.getErrorMessage(e)),
-            backgroundColor: AppColors.error,
-          ),
-        );
+        ToastService.instance.error(ApiErrorHandler.getErrorMessage(e));
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Unexpected error: $e'),
-            backgroundColor: AppColors.error,
-          ),
-        );
+        ToastService.instance.error('Unexpected error: $e');
       }
     } finally {
       if (mounted) {

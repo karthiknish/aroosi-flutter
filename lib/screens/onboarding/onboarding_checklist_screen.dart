@@ -1,10 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
-
-import 'package:aroosi_flutter/theme/motion.dart';
-import 'package:aroosi_flutter/theme/colors.dart';
-import 'package:aroosi_flutter/widgets/animations/motion.dart';
+import 'package:aroosi_flutter/theme/theme.dart';
+import 'package:aroosi_flutter/theme/theme_helpers.dart';
+import 'package:aroosi_flutter/widgets/app_scaffold.dart';
 
 class OnboardingChecklistScreen extends StatefulWidget {
   const OnboardingChecklistScreen({super.key});
@@ -15,208 +12,169 @@ class OnboardingChecklistScreen extends StatefulWidget {
 }
 
 class _OnboardingChecklistScreenState extends State<OnboardingChecklistScreen> {
-  final _items = <_ChecklistItem>[
-    _ChecklistItem('Upload a profile photo'),
-    _ChecklistItem('Share a short bio'),
-    _ChecklistItem('Select your interests'),
-    _ChecklistItem('Complete cultural assessment'),
+  final _steps = [
+    {
+      'title': 'Upload a profile photo',
+      'description': 'This will help others recognize you.',
+      'icon': Icons.photo,
+      'isCompleted': false,
+    },
+    {
+      'title': 'Share a short bio',
+      'description': 'Tell us about yourself in a few words.',
+      'icon': Icons.info,
+      'isCompleted': false,
+    },
+    {
+      'title': 'Select your interests',
+      'description': 'Choose topics you are interested in.',
+      'icon': Icons.interests,
+      'isCompleted': false,
+    },
+    {
+      'title': 'Complete cultural assessment',
+      'description': 'Help us understand your cultural preferences.',
+      'icon': Icons.language,
+      'isCompleted': false,
+    },
   ];
 
   @override
   Widget build(BuildContext context) {
-    final isComplete = _items.every((item) => item.completed);
+    final theme = ThemeHelpers.getMaterialTheme(context);
+    final textTheme = theme.textTheme;
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          'Complete Your Profile',
-          style: GoogleFonts.nunitoSans(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        backgroundColor: AppColors.surfaceSecondary,
-        elevation: 0,
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(24),
-        child: FadeThrough(
-          delay: AppMotionDurations.fast,
-          child: Column(
-            children: [
-              // Welcome message
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(20),
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [
-                      AppColors.primary,
-                      AppColors.primaryDark,
+    return AppScaffold(
+      title: 'Getting Started',
+      usePadding: false,
+      child: Column(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(24),
+            color: theme.colorScheme.primaryContainer.withValues(alpha: 0.3),
+            child: Row(
+              children: [
+                CircularProgressIndicator(
+                  value: 0.5,
+                  backgroundColor: theme.colorScheme.surface,
+                  color: theme.colorScheme.primary,
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        '50% Complete',
+                        style: textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: theme.colorScheme.primary,
+                        ),
+                      ),
+                      Text(
+                        'Complete your profile to get better matches',
+                        style: textTheme.bodyMedium?.copyWith(
+                          color: theme.colorScheme.onSurfaceVariant,
+                        ),
+                      ),
                     ],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: Column(
-                  children: [
-                    Icon(
-                      Icons.diversity_3,
-                      size: 48,
-                      color: Colors.white,
-                    ),
-                    const SizedBox(height: 12),
-                    Text(
-                      'Welcome to Aroosi!',
-                      style: GoogleFonts.nunitoSans(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      'Complete these steps to find culturally compatible matches',
-                      style: GoogleFonts.nunitoSans(
-                        fontSize: 14,
-                        color: Colors.white.withValues(alpha: 0.9),
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 24),
-
-              Expanded(
-                child: ListView.separated(
-                  itemCount: _items.length,
-                  separatorBuilder: (_, __) => const SizedBox(height: 12),
-                  itemBuilder: (context, index) {
-                    final item = _items[index];
-                    return FadeSlideIn(
-                      delay: Duration(milliseconds: 80 * index),
-                      beginOffset: const Offset(0, 0.05),
-                      child: _ChecklistTile(
-                        title: item.title,
-                        completed: item.completed,
-                        onTap: () => _handleItemTap(item, index),
-                      ),
-                    );
-                  },
-                ),
-              ),
-              FadeScaleIn(
-                delay: AppMotionDurations.fast,
-                child: FilledButton(
-                  onPressed: isComplete
-                      ? () => context.push('/onboarding/complete')
-                      : null,
-                  style: FilledButton.styleFrom(
-                    backgroundColor: AppColors.primary,
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                  ),
-                  child: Text(
-                    isComplete ? 'Continue to Dashboard' : 'Complete All Steps',
-                    style: GoogleFonts.nunitoSans(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                    ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
-        ),
-      ),
-    );
-  }
+          Expanded(
+            child: ListView.separated(
+              padding: const EdgeInsets.all(24),
+              itemCount: _steps.length,
+              separatorBuilder: (context, index) =>
+                  const SizedBox(height: 16),
+              itemBuilder: (context, index) {
+                final step = _steps[index];
+                final isCompleted = step['isCompleted'] as bool;
 
-  void _handleItemTap(_ChecklistItem item, int index) {
-    if (item.title == 'Complete cultural assessment') {
-      context.push('/main/cultural-assessment');
-    } else {
-      setState(() {
-        item.completed = !item.completed;
-      });
-    }
-  }
-}
-
-class _ChecklistItem {
-  _ChecklistItem(this.title);
-
-  final String title;
-  bool completed = false;
-}
-
-class _ChecklistTile extends StatelessWidget {
-  final String title;
-  final bool completed;
-  final VoidCallback onTap;
-
-  const _ChecklistTile({
-    required this.title,
-    required this.completed,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: completed ? AppColors.primary : AppColors.borderPrimary,
-          width: completed ? 2 : 1,
-        ),
-      ),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
-        child: Row(
-          children: [
-            Container(
-              width: 24,
-              height: 24,
-              decoration: BoxDecoration(
-                color: completed ? AppColors.primary : Colors.transparent,
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(
-                  color: completed ? AppColors.primary : AppColors.borderPrimary,
-                  width: 2,
-                ),
-              ),
-              child: completed
-                  ? Icon(
-                      Icons.check,
-                      size: 16,
-                      color: Colors.white,
-                    )
-                  : null,
+                return Card(
+                  elevation: 0,
+                  color: isCompleted
+                      ? theme.colorScheme.surfaceContainerHighest.withValues(
+                          alpha: 0.3,
+                        )
+                      : theme.colorScheme.surface,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    side: BorderSide(
+                      color: isCompleted
+                          ? Colors.transparent
+                          : theme.colorScheme.outlineVariant,
+                    ),
+                  ),
+                  child: ListTile(
+                    contentPadding: const EdgeInsets.all(16),
+                    leading: Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: isCompleted
+                            ? theme.colorScheme.primary.withValues(alpha: 0.1)
+                            : theme.colorScheme.surfaceContainerHighest,
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        step['icon'] as IconData,
+                        color: isCompleted
+                            ? theme.colorScheme.primary
+                            : theme.colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                    title: Text(
+                      step['title'] as String,
+                      style: textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        decoration:
+                            isCompleted ? TextDecoration.lineThrough : null,
+                        color: isCompleted
+                            ? theme.colorScheme.onSurface.withValues(alpha: 0.6)
+                            : theme.colorScheme.onSurface,
+                      ),
+                    ),
+                    subtitle: Text(
+                      step['description'] as String,
+                      style: textTheme.bodyMedium?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                    trailing: isCompleted
+                        ? Icon(
+                            Icons.check_circle,
+                            color: theme.colorScheme.primary,
+                          )
+                        : Icon(
+                            Icons.arrow_forward_ios,
+                            size: 16,
+                            color: theme.colorScheme.onSurfaceVariant,
+                          ),
+                    onTap: () {
+                      if (!isCompleted) {
+                        // Navigate to step
+                      }
+                    },
+                  ),
+                );
+              },
             ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Text(
-                title,
-                style: GoogleFonts.nunitoSans(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                  color: completed ? AppColors.primary : Colors.black87,
-                ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(24),
+            child: FilledButton(
+              onPressed: () {
+                // Continue to next incomplete step
+              },
+              style: FilledButton.styleFrom(
+                minimumSize: const Size(double.infinity, 50),
               ),
+              child: const Text('Continue Setup'),
             ),
-            if (title == 'Complete cultural assessment')
-              Icon(
-                Icons.arrow_forward_ios,
-                size: 16,
-                color: AppColors.primary,
-              ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

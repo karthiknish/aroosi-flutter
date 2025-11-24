@@ -45,6 +45,7 @@ class _CompatibilityDetailsScreenState
 
     return AppScaffold(
       title: l10n.compatibilityTitle,
+      usePadding: false,
       child: SafeArea(
         child: compatibilityState.loading
             ? _CompatibilityLoading(l10n: l10n)

@@ -1,5 +1,6 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:aroosi_flutter/utils/debug_logger.dart';
 import 'package:aroosi_flutter/features/auth/auth_controller.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'chat_models.dart';
 import 'chat_repository.dart';
@@ -102,6 +103,7 @@ class ChatController extends Notifier<ChatState> {
         hasMore: more.length >= 20,
       );
     } catch (e) {
+      logDebug('Error loading more messages', error: e);
       state = state.copyWith(loading: false);
     }
   }
@@ -113,7 +115,9 @@ class ChatController extends Notifier<ChatState> {
       final msgs = await _repo.getMessages(conversationId: conv, limit: 20);
       state = state.copyWith(messages: msgs, hasMore: msgs.length >= 20);
       await _repo.markAsRead(conv);
-    } catch (_) {}
+    } catch (e) {
+      logDebug('Error refreshing messages', error: e);
+    }
   }
 
   Future<void> send(String text, {String? toUserId}) async {
@@ -186,7 +190,9 @@ class ChatController extends Notifier<ChatState> {
         return m.copyWith(reactions: map);
       }).toList();
       state = state.copyWith(messages: updated);
-    } catch (_) {}
+    } catch (e) {
+      logDebug('Error reacting to message', error: e);
+    }
   }
 
   Future<void> removeReaction({
@@ -215,7 +221,9 @@ class ChatController extends Notifier<ChatState> {
         return m.copyWith(reactions: map);
       }).toList();
       state = state.copyWith(messages: updated);
-    } catch (_) {}
+    } catch (e) {
+      logDebug('Error removing reaction', error: e);
+    }
   }
 
   Future<void> deleteMessage(String messageId) async {
@@ -225,7 +233,9 @@ class ChatController extends Notifier<ChatState> {
       await _repo.deleteMessage(conversationId: conv, messageId: messageId);
       final updated = state.messages.where((m) => m.id != messageId).toList();
       state = state.copyWith(messages: updated);
-    } catch (_) {}
+    } catch (e) {
+      logDebug('Error deleting message', error: e);
+    }
   }
 
   // Called by realtime layer to append a new message

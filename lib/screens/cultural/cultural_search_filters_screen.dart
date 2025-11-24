@@ -5,6 +5,7 @@ import 'package:aroosi_flutter/features/cultural/cultural_constants.dart';
 import 'package:aroosi_flutter/widgets/app_scaffold.dart';
 import 'package:aroosi_flutter/widgets/primary_button.dart';
 import 'package:aroosi_flutter/theme/theme_helpers.dart';
+import 'package:aroosi_flutter/theme/theme.dart';
 
 class CulturalSearchFiltersScreen extends ConsumerStatefulWidget {
   final SearchFilters currentFilters;
@@ -84,36 +85,6 @@ class _CulturalSearchFiltersScreenState extends ConsumerState<CulturalSearchFilt
       _minCultureImportance = null;
       _maxCultureImportance = null;
     });
-  }
-
-  Widget _buildSection({
-    required String title,
-    required String subtitle,
-    required List<Widget> children,
-  }) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          title,
-          style: ThemeHelpers.getMaterialTheme(context).textTheme.titleLarge?.copyWith(
-            fontWeight: FontWeight.w600,
-            color: ThemeHelpers.getMaterialTheme(context).colorScheme.primary,
-          ),
-        ),
-        const SizedBox(height: 4),
-        Text(
-          subtitle,
-          style: TextStyle(
-            color: ThemeHelpers.getMaterialTheme(context).colorScheme.onSurfaceVariant,
-            fontSize: 14,
-          ),
-        ),
-        const SizedBox(height: 16),
-        ...children,
-        const SizedBox(height: 24),
-      ],
-    );
   }
 
   Widget _buildDropdownFilter({
@@ -300,156 +271,113 @@ class _CulturalSearchFiltersScreenState extends ConsumerState<CulturalSearchFilt
 
   @override
   Widget build(BuildContext context) {
+    final theme = ThemeHelpers.getMaterialTheme(context);
+
     return AppScaffold(
       title: 'Cultural Filters',
-      child: SingleChildScrollView(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Find culturally compatible matches',
-              style: ThemeHelpers.getMaterialTheme(context).textTheme.headlineSmall?.copyWith(
-                fontWeight: FontWeight.bold,
-                color: ThemeHelpers.getMaterialTheme(context).colorScheme.primary,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Filter by religious background, cultural values, and family traditions.',
-              style: TextStyle(
-                color: ThemeHelpers.getMaterialTheme(context).colorScheme.onSurfaceVariant,
-              ),
-            ),
-            const SizedBox(height: 32),
-
-            // Religious Background
-            _buildSection(
-              title: 'Religious Background',
-              subtitle: 'Find matches with compatible religious values',
+      usePadding: false,
+      actions: [
+        TextButton(
+          onPressed: _clearFilters,
+          child: const Text('Clear'),
+        ),
+      ],
+      child: Column(
+        children: [
+          Expanded(
+            child: ListView(
+              padding: const EdgeInsets.all(Spacing.lg),
               children: [
                 _buildDropdownFilter(
                   label: 'Religion',
                   value: _religion,
                   options: religionOptions,
-                  onChanged: (value) => setState(() => _religion = value),
+                  onChanged: (val) => setState(() => _religion = val),
                   displayName: getReligionDisplayName,
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: Spacing.lg),
                 _buildDropdownFilter(
                   label: 'Religious Practice',
                   value: _religiousPractice,
                   options: religiousPracticeOptions,
-                  onChanged: (value) => setState(() => _religiousPractice = value),
+                  onChanged: (val) => setState(() => _religiousPractice = val),
                   displayName: getReligiousPracticeDisplayName,
                 ),
-                const SizedBox(height: 16),
-                _buildImportanceRangeFilter(
-                  label: 'Religion Importance (1-10)',
-                  minValue: _minReligionImportance,
-                  maxValue: _maxReligionImportance,
-                  onMinChanged: (value) => setState(() => _minReligionImportance = value),
-                  onMaxChanged: (value) => setState(() => _maxReligionImportance = value),
+                const SizedBox(height: Spacing.lg),
+                _buildDropdownFilter(
+                  label: 'Ethnicity',
+                  value: _ethnicity,
+                  options: ethnicityOptions,
+                  onChanged: (val) => setState(() => _ethnicity = val),
+                  displayName: (val) => val.replaceAll('_', ' ').toUpperCase(),
                 ),
-              ],
-            ),
-
-            // Language & Communication
-            _buildSection(
-              title: 'Language & Communication',
-              subtitle: 'Connect with people who speak your language',
-              children: [
+                const SizedBox(height: Spacing.lg),
                 _buildDropdownFilter(
                   label: 'Mother Tongue',
                   value: _motherTongue,
                   options: motherTongueOptions,
-                  onChanged: (value) => setState(() => _motherTongue = value),
-                  displayName: (value) => value.replaceAll('_', ' ').toUpperCase(),
+                  onChanged: (val) => setState(() => _motherTongue = val),
+                  displayName: (val) => val.replaceAll('_', ' ').toUpperCase(),
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: Spacing.lg),
                 _buildMultiSelectFilter(
                   label: 'Languages Spoken',
                   selectedValues: _languages,
                   options: languagesSpokenOptions,
                 ),
-              ],
-            ),
-
-            // Cultural Values & Family
-            _buildSection(
-              title: 'Cultural Values & Family',
-              subtitle: 'Find matches with similar family values and traditions',
-              children: [
+                const SizedBox(height: Spacing.lg),
                 _buildDropdownFilter(
                   label: 'Family Values',
                   value: _familyValues,
                   options: familyValuesOptions,
-                  onChanged: (value) => setState(() => _familyValues = value),
+                  onChanged: (val) => setState(() => _familyValues = val),
                   displayName: getFamilyValuesDisplayName,
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: Spacing.lg),
                 _buildDropdownFilter(
                   label: 'Marriage Views',
                   value: _marriageViews,
                   options: marriageViewsOptions,
-                  onChanged: (value) => setState(() => _marriageViews = value),
+                  onChanged: (val) => setState(() => _marriageViews = val),
                   displayName: getMarriageViewsDisplayName,
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: Spacing.lg),
+                _buildImportanceRangeFilter(
+                  label: 'Religion Importance (1-10)',
+                  minValue: _minReligionImportance,
+                  maxValue: _maxReligionImportance,
+                  onMinChanged: (val) => setState(() => _minReligionImportance = val),
+                  onMaxChanged: (val) => setState(() => _maxReligionImportance = val),
+                ),
+                const SizedBox(height: Spacing.lg),
                 _buildImportanceRangeFilter(
                   label: 'Culture Importance (1-10)',
                   minValue: _minCultureImportance,
                   maxValue: _maxCultureImportance,
-                  onMinChanged: (value) => setState(() => _minCultureImportance = value),
-                  onMaxChanged: (value) => setState(() => _maxCultureImportance = value),
-                ),
-                const SizedBox(height: 16),
-                _buildDropdownFilter(
-                  label: 'Ethnicity',
-                  value: _ethnicity,
-                  options: ethnicityOptions,
-                  onChanged: (value) => setState(() => _ethnicity = value),
-                  displayName: (value) => value.replaceAll('_', ' ').toUpperCase(),
+                  onMinChanged: (val) => setState(() => _minCultureImportance = val),
+                  onMaxChanged: (val) => setState(() => _maxCultureImportance = val),
                 ),
               ],
             ),
-
-            // Action Buttons
-            const SizedBox(height: 32),
-            Row(
-              children: [
-                Expanded(
-                  child: OutlinedButton(
-                    onPressed: _clearFilters,
-                    style: OutlinedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                    ),
-                    child: const Text('Clear All'),
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: PrimaryButton(
-                    label: 'Apply Filters',
-                    onPressed: _applyFilters,
-                  ),
+          ),
+          Container(
+            padding: const EdgeInsets.all(Spacing.lg),
+            decoration: BoxDecoration(
+              color: theme.colorScheme.surface,
+              boxShadow: [
+                BoxShadow(
+                  color: theme.shadowColor.withValues(alpha: 0.1),
+                  blurRadius: 10,
+                  offset: const Offset(0, -2),
                 ),
               ],
             ),
-
-            const SizedBox(height: 16),
-            Center(
-              child: Text(
-                'These filters help find culturally compatible matches for meaningful relationships.',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 12,
-                  color: ThemeHelpers.getMaterialTheme(context).colorScheme.onSurfaceVariant,
-                ),
-              ),
+            child: PrimaryButton(
+              onPressed: _applyFilters,
+              label: 'Apply Filters',
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

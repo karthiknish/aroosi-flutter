@@ -4,7 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:aroosi_flutter/features/profiles/list_controller.dart';
 import 'package:aroosi_flutter/core/toast_service.dart';
 import 'package:aroosi_flutter/widgets/app_scaffold.dart';
-import 'package:aroosi_flutter/theme/theme_helpers.dart';
+import 'package:aroosi_flutter/widgets/error_states.dart';
+
 
 class InterestsScreen extends ConsumerStatefulWidget {
   const InterestsScreen({super.key});
@@ -28,6 +29,7 @@ class _InterestsScreenState extends ConsumerState<InterestsScreen> {
 
     return AppScaffold(
       title: 'Select Interests',
+      usePadding: false,
       actions: [
         IconButton(
           onPressed: s.selected.isEmpty || s.loading
@@ -47,19 +49,17 @@ class _InterestsScreenState extends ConsumerState<InterestsScreen> {
           icon: const Icon(Icons.check),
         ),
       ],
-      child: Padding(
+      child: SingleChildScrollView(
         padding: const EdgeInsets.all(24),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             if (s.loading) const Center(child: CircularProgressIndicator()),
             if (s.error != null && !s.loading)
-              Padding(
-                padding: const EdgeInsets.only(bottom: 12),
-                child: Text(
-                  s.error!,
-                  style: TextStyle(color: ThemeHelpers.getMaterialTheme(context).colorScheme.error),
-                ),
+              ErrorState(
+                title: 'Error',
+                errorMessage: s.error,
+                onRetryPressed: () => ref.read(userInterestsControllerProvider.notifier).load(),
               ),
             Wrap(
               spacing: 12,

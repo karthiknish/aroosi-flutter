@@ -52,8 +52,9 @@ class _MatchesScreenState extends ConsumerState<MatchesScreen> {
     final user = ref.watch(authControllerProvider);
 
     if (user.profile == null) {
-      return const Scaffold(
-        body: Center(child: CircularProgressIndicator()),
+      return const AppScaffold(
+        title: 'Matches',
+        child: Center(child: CircularProgressIndicator()),
       );
     }
 

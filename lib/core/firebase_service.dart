@@ -159,7 +159,10 @@ class FirebaseService {
           query = query.where('gender', isEqualTo: filters['gender']);
         }
         if (filters['location'] != null) {
-          // Geopoint filtering would need additional implementation
+          // Basic city filtering
+          if (filters['location'] is String && filters['location'].isNotEmpty) {
+            query = query.where('city', isEqualTo: filters['location']);
+          }
         }
       }
       

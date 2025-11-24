@@ -64,7 +64,7 @@ class _StepCulturalState extends State<StepCultural> {
     return BoxDecoration(
       color: CupertinoThemeHelpers.getMaterialTheme(context).scaffoldBackgroundColor,
       border: Border.all(
-        color: hasError ? CupertinoColors.systemRed : AppColors.primary,
+        color: hasError ? AppColors.error : AppColors.primary,
         width: hasError ? 2.0 : 1.0,
       ),
       borderRadius: BorderRadius.circular(10.0),
@@ -125,7 +125,7 @@ class _StepCulturalState extends State<StepCultural> {
                                             '',
                                       ),
                                 style: textStyle.copyWith(
-                                  color: CupertinoColors.label,
+                                  color: AppColors.text,
                                 ),
                               ),
                               const Icon(CupertinoIcons.chevron_down, size: 16),
@@ -172,7 +172,7 @@ class _StepCulturalState extends State<StepCultural> {
                                             '',
                                       ),
                                 style: textStyle.copyWith(
-                                  color: CupertinoColors.label,
+                                  color: AppColors.text,
                                 ),
                               ),
                               const Icon(CupertinoIcons.chevron_down, size: 16),
@@ -210,7 +210,7 @@ class _StepCulturalState extends State<StepCultural> {
                     controller: _ethnicityCtrl,
                     placeholder: 'e.g., British Afghan',
                     placeholderStyle: textStyle.copyWith(
-                      color: CupertinoColors.placeholderText,
+                      color: AppColors.muted,
                     ),
                     style: textStyle,
                     decoration: BoxDecoration(
@@ -234,7 +234,7 @@ class _StepCulturalState extends State<StepCultural> {
                   child: Text(
                     _validateEthnicity(_ethnicityCtrl.text)!,
                     style: textStyle.copyWith(
-                      color: CupertinoColors.systemRed,
+                      color: AppColors.error,
                       fontSize: 12,
                     ),
                   ),
@@ -249,15 +249,15 @@ class _StepCulturalState extends State<StepCultural> {
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 colors: [
-                  CupertinoColors.systemBlue.withValues(alpha: 0.05),
-                  CupertinoColors.systemPurple.withValues(alpha: 0.03),
+                  AppColors.primary.withValues(alpha: 0.05),
+                  AppColors.secondary.withValues(alpha: 0.03),
                 ],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
-                color: CupertinoColors.systemBlue.withValues(alpha: 0.1),
+                color: AppColors.primary.withValues(alpha: 0.1),
                 width: 1,
               ),
             ),
@@ -269,13 +269,13 @@ class _StepCulturalState extends State<StepCultural> {
                     Icon(
                       CupertinoIcons.person_3,
                       size: 20,
-                      color: CupertinoColors.systemBlue,
+                      color: AppColors.primary,
                     ),
                     const SizedBox(width: 8),
                     Text(
                       'About your cultural background',
                       style: textStyle.copyWith(
-                        color: CupertinoColors.systemBlue,
+                        color: AppColors.primary,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -285,7 +285,7 @@ class _StepCulturalState extends State<StepCultural> {
                 Text(
                   'Your cultural background helps us find matches who share similar values and traditions. All fields in this section are optional.',
                   style: textStyle.copyWith(
-                    color: CupertinoColors.secondaryLabel,
+                    color: AppColors.muted,
                     fontSize: 14,
                   ),
                 ),
@@ -311,13 +311,13 @@ class _StepCulturalState extends State<StepCultural> {
                   Icon(
                     CupertinoIcons.forward,
                     size: 18,
-                    color: CupertinoColors.secondaryLabel,
+                    color: AppColors.muted,
                   ),
                   const SizedBox(width: 8),
                   Text(
                     'Skip this section',
                     style: textStyle.copyWith(
-                      color: CupertinoColors.secondaryLabel,
+                      color: AppColors.muted,
                       fontSize: 14,
                     ),
                   ),
@@ -344,7 +344,7 @@ class _StepCulturalState extends State<StepCultural> {
           margin: EdgeInsets.only(
             bottom: MediaQuery.of(context).viewInsets.bottom,
           ),
-          color: CupertinoColors.systemBackground.resolveFrom(context),
+          color: AppColors.background,
           child: SafeArea(
             top: false,
             child: Column(
@@ -392,7 +392,9 @@ class _StepCulturalState extends State<StepCultural> {
                           options[index].isEmpty
                               ? 'Prefer not to say'
                               : capitalize(options[index]),
-                          style: CupertinoThemeHelpers.getMaterialTheme(context).textTheme.textStyle,
+                          style: CupertinoThemeHelpers.getMaterialTheme(context).textTheme.textStyle.copyWith(
+                            color: AppColors.text,
+                          ),
                         ),
                       );
                     }),
@@ -420,7 +422,7 @@ class _StepCulturalState extends State<StepCultural> {
           margin: EdgeInsets.only(
             bottom: MediaQuery.of(context).viewInsets.bottom,
           ),
-          color: CupertinoColors.systemBackground.resolveFrom(context),
+          color: AppColors.background,
           child: SafeArea(
             top: false,
             child: Column(
@@ -468,7 +470,9 @@ class _StepCulturalState extends State<StepCultural> {
                           options[index].isEmpty
                               ? 'Prefer not to say'
                               : capitalize(options[index]),
-                          style: CupertinoThemeHelpers.getMaterialTheme(context).textTheme.textStyle,
+                          style: CupertinoThemeHelpers.getMaterialTheme(context).textTheme.textStyle.copyWith(
+                            color: AppColors.text,
+                          ),
                         ),
                       );
                     }),

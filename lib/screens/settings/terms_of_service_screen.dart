@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:aroosi_flutter/theme/theme.dart';
 import 'package:aroosi_flutter/theme/theme_helpers.dart';
+import 'package:aroosi_flutter/widgets/app_scaffold.dart';
 
 class TermsOfServiceScreen extends StatelessWidget {
   const TermsOfServiceScreen({super.key});
@@ -10,9 +11,10 @@ class TermsOfServiceScreen extends StatelessWidget {
     final theme = ThemeHelpers.getMaterialTheme(context);
     final textTheme = theme.textTheme;
 
-    return Scaffold(
-      appBar: AppBar(title: const Text('Terms of Service')),
-      body: ListView(
+    return AppScaffold(
+      title: 'Terms of Service',
+      usePadding: false,
+      child: ListView(
         padding: const EdgeInsets.all(Spacing.lg),
         children: [
           Text(

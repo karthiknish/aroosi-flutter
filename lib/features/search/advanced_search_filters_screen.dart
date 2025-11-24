@@ -68,6 +68,7 @@ class _AdvancedSearchFiltersScreenState extends ConsumerState<AdvancedSearchFilt
   Widget build(BuildContext context) {
     return AppScaffold(
       title: 'Advanced Search',
+      usePadding: false,
       child: Column(
         children: [
           _buildTabBar(),

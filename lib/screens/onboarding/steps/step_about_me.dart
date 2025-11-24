@@ -170,7 +170,7 @@ class _StepAboutMeState extends State<StepAboutMe> {
     return BoxDecoration(
       color: CupertinoThemeHelpers.getMaterialTheme(context).scaffoldBackgroundColor,
       border: Border.all(
-        color: hasError ? CupertinoColors.systemRed : AppColors.primary,
+        color: hasError ? AppColors.error : AppColors.primary,
         width: hasError ? 2.0 : 1.0,
       ),
       borderRadius: BorderRadius.circular(10.0),
@@ -221,7 +221,7 @@ class _StepAboutMeState extends State<StepAboutMe> {
                     placeholder:
                         'Share your story (min ${StepConstants.minimumAboutMeWords} words)',
                     placeholderStyle: textStyle.copyWith(
-                      color: CupertinoColors.placeholderText,
+                      color: AppColors.muted,
                     ),
                     maxLines: 6,
                     minLines: 4,
@@ -243,7 +243,7 @@ class _StepAboutMeState extends State<StepAboutMe> {
                   child: Text(
                     _validateAboutMe(_aboutMeCtrl.text)!,
                     style: textStyle.copyWith(
-                      color: CupertinoColors.systemRed,
+                      color: AppColors.error,
                       fontSize: 12,
                     ),
                   ),
@@ -258,7 +258,7 @@ class _StepAboutMeState extends State<StepAboutMe> {
                     Text(
                       '${_getWordCount()} words / ${_getCharacterCount()} chars',
                       style: textStyle.copyWith(
-                        color: CupertinoColors.secondaryLabel,
+                        color: AppColors.muted,
                         fontSize: 12,
                       ),
                     ),
@@ -266,7 +266,7 @@ class _StepAboutMeState extends State<StepAboutMe> {
                     Container(
                       height: 2,
                       decoration: BoxDecoration(
-                        color: CupertinoColors.systemGrey5,
+                        color: AppColors.muted.withValues(alpha: 0.2),
                         borderRadius: BorderRadius.circular(1),
                       ),
                       child: FractionallySizedBox(
@@ -280,8 +280,8 @@ class _StepAboutMeState extends State<StepAboutMe> {
                             color:
                                 _getWordCount() >=
                                     StepConstants.minimumAboutMeWords
-                                ? CupertinoColors.systemBlue
-                                : CupertinoColors.systemOrange,
+                                ? AppColors.primary
+                                : AppColors.warning,
                             borderRadius: BorderRadius.circular(1),
                           ),
                         ),
@@ -333,8 +333,8 @@ class _StepAboutMeState extends State<StepAboutMe> {
                                     : 'Select',
                                 style: textStyle.copyWith(
                                   color: _selectedDialCode == null
-                                      ? CupertinoColors.placeholderText
-                                      : CupertinoColors.label,
+                                      ? AppColors.muted
+                                      : AppColors.text,
                                 ),
                               ),
                               const Icon(CupertinoIcons.chevron_down, size: 16),
@@ -370,7 +370,7 @@ class _StepAboutMeState extends State<StepAboutMe> {
                           controller: _phoneCtrl,
                           placeholder: 'National number',
                           placeholderStyle: textStyle.copyWith(
-                            color: CupertinoColors.placeholderText,
+                            color: AppColors.muted,
                           ),
                           keyboardType: TextInputType.phone,
                           inputFormatters: phoneFormatter,
@@ -391,7 +391,7 @@ class _StepAboutMeState extends State<StepAboutMe> {
                         child: Text(
                           _validatePhone(_phoneCtrl.text)!,
                           style: textStyle.copyWith(
-                            color: CupertinoColors.systemRed,
+                            color: AppColors.error,
                             fontSize: 12,
                           ),
                         ),
@@ -407,10 +407,10 @@ class _StepAboutMeState extends State<StepAboutMe> {
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: CupertinoColors.systemBlue.withValues(alpha: 0.1),
+              color: AppColors.info.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
-                color: CupertinoColors.systemBlue.withValues(alpha: 0.2),
+                color: AppColors.info.withValues(alpha: 0.2),
                 width: 1,
               ),
             ),
@@ -422,13 +422,13 @@ class _StepAboutMeState extends State<StepAboutMe> {
                     Icon(
                       CupertinoIcons.lock_shield,
                       size: 20,
-                      color: CupertinoColors.systemBlue,
+                      color: AppColors.info,
                     ),
                     const SizedBox(width: 8),
                     Text(
                       'Privacy & Security',
                       style: textStyle.copyWith(
-                        color: CupertinoColors.systemBlue,
+                        color: AppColors.info,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -438,7 +438,7 @@ class _StepAboutMeState extends State<StepAboutMe> {
                 Text(
                   'Your phone number is kept private and only used for account verification and important notifications. It will not be visible to other users.',
                   style: textStyle.copyWith(
-                    color: CupertinoColors.secondaryLabel,
+                    color: AppColors.muted,
                     fontSize: 14,
                   ),
                 ),
@@ -464,7 +464,7 @@ class _StepAboutMeState extends State<StepAboutMe> {
           margin: EdgeInsets.only(
             bottom: MediaQuery.of(context).viewInsets.bottom,
           ),
-          color: CupertinoColors.systemBackground.resolveFrom(context),
+          color: AppColors.background,
           child: SafeArea(
             top: false,
             child: Column(
@@ -508,7 +508,9 @@ class _StepAboutMeState extends State<StepAboutMe> {
                       return Center(
                         child: Text(
                           '${country.flag}  ${country.dialCode}',
-                          style: CupertinoThemeHelpers.getMaterialTheme(context).textTheme.textStyle,
+                          style: CupertinoThemeHelpers.getMaterialTheme(context).textTheme.textStyle.copyWith(
+                            color: AppColors.text,
+                          ),
                         ),
                       );
                     }),

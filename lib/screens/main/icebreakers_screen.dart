@@ -8,7 +8,9 @@ import 'package:aroosi_flutter/core/toast_service.dart';
 import 'package:aroosi_flutter/widgets/error_states.dart';
 import 'package:aroosi_flutter/widgets/empty_states.dart';
 import 'package:aroosi_flutter/widgets/offline_states.dart';
+import 'package:aroosi_flutter/theme/colors.dart';
 import 'package:aroosi_flutter/theme/theme_helpers.dart';
+import 'package:aroosi_flutter/widgets/app_scaffold.dart';
 
 class IcebreakersScreen extends ConsumerStatefulWidget {
   const IcebreakersScreen({super.key});
@@ -83,22 +85,21 @@ class _IcebreakersScreenState extends ConsumerState<IcebreakersScreen> {
       );
     }
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Today\'s Icebreakers'),
-        actions: [
-          if (icebreakersAsync.isLoading)
-            const SizedBox.shrink()
-          else if (icebreakersAsync.error != null)
-            IconButton(
-              icon: const Icon(Icons.error),
-              onPressed: () => controller.fetchDailyIcebreakers(),
-            )
-          else if (progressWidget != null)
-            progressWidget,
-        ],
-      ),
-      body: icebreakersAsync.isLoading
+    return AppScaffold(
+      title: 'Today\'s Icebreakers',
+      usePadding: false,
+      actions: [
+        if (icebreakersAsync.isLoading)
+          const SizedBox.shrink()
+        else if (icebreakersAsync.error != null)
+          IconButton(
+            icon: const Icon(Icons.error),
+            onPressed: () => controller.fetchDailyIcebreakers(),
+          )
+        else if (progressWidget != null)
+          progressWidget,
+      ],
+      child: icebreakersAsync.isLoading
           ? const Center(child: CircularProgressIndicator())
           : icebreakersAsync.error != null
           ? Builder(
@@ -130,7 +131,7 @@ class _IcebreakersScreenState extends ConsumerState<IcebreakersScreen> {
               title: 'No icebreakers available',
               subtitle: 'Check back later for new icebreakers',
               description: 'New icebreakers are added daily',
-              icon: Icon(Icons.chat_bubble_outline, size: 64, color: Colors.grey[400]),
+              icon: Icon(Icons.chat_bubble_outline, size: 64, color: AppColors.muted),
             )
           : RefreshIndicator(
               onRefresh: () async {

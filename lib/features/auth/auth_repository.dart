@@ -214,8 +214,19 @@ class AuthRepository {
   /// Delete user account and all associated data
   Future<void> deleteAccount({required String password, String? reason}) async {
     try {
-      // Note: Firebase Auth requires recent authentication for account deletion
-      // Password re-authentication might be needed before deletion
+      final user = _firebase.currentUser;
+      if (user == null) throw Exception('No authenticated user');
+
+      // Re-authenticate before deletion to ensure fresh credentials
+      // This is required by Firebase for sensitive operations like account deletion
+      if (user.email != null) {
+        final credential = fb.EmailAuthProvider.credential(
+          email: user.email!,
+          password: password,
+        );
+        await user.reauthenticateWithCredential(credential);
+      }
+
       await _firebase.deleteAccount();
     } catch (e) {
       throw Exception('Failed to delete account: ${e.toString()}');

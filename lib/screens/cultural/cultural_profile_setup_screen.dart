@@ -1,5 +1,4 @@
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:aroosi_flutter/features/auth/auth_controller.dart';
@@ -12,6 +11,7 @@ import 'package:aroosi_flutter/theme/theme_helpers.dart';
 import 'package:aroosi_flutter/widgets/app_scaffold.dart';
 import 'package:aroosi_flutter/widgets/input_field.dart';
 import 'package:aroosi_flutter/widgets/primary_button.dart';
+import 'package:aroosi_flutter/core/toast_service.dart';
 
 class CulturalProfileSetupScreen extends ConsumerStatefulWidget {
   const CulturalProfileSetupScreen({super.key});
@@ -91,9 +91,9 @@ class _CulturalProfileSetupScreenState
     bool hasError = false,
   }) {
     return BoxDecoration(
-      color: CupertinoTheme.of(context).scaffoldBackgroundColor,
+      color: AppColors.surface,
       border: Border.all(
-        color: hasError ? CupertinoColors.destructiveRed : AppColors.primary,
+        color: hasError ? AppColors.error : AppColors.primary,
         width: 1.5,
       ),
       borderRadius: BorderRadius.circular(10.0),
@@ -121,7 +121,7 @@ class _CulturalProfileSetupScreenState
       context: context,
       builder: (BuildContext context) => Container(
         height: 250,
-        color: CupertinoColors.systemBackground,
+        color: AppColors.surface,
         child: Column(
           children: [
             Container(
@@ -218,14 +218,14 @@ class _CulturalProfileSetupScreenState
                       : displayName(value),
                   style: TextStyle(
                     color: value == null || value.isEmpty
-                        ? CupertinoColors.placeholderText
-                        : CupertinoTheme.of(context).textTheme.textStyle.color,
+                        ? AppColors.muted
+                        : AppColors.text,
                   ),
                 ),
                 Icon(
                   CupertinoIcons.chevron_down,
                   size: 16,
-                  color: CupertinoColors.systemGrey,
+                  color: AppColors.muted,
                 ),
               ],
             ),
@@ -276,7 +276,7 @@ class _CulturalProfileSetupScreenState
                 decoration: BoxDecoration(
                   color: isSelected
                       ? AppColors.primary
-                      : CupertinoTheme.of(context).scaffoldBackgroundColor,
+                      : AppColors.surface,
                   border: Border.all(color: AppColors.primary, width: 1.5),
                   borderRadius: BorderRadius.circular(16),
                 ),
@@ -284,7 +284,7 @@ class _CulturalProfileSetupScreenState
                   option.replaceAll('_', ' ').toUpperCase(),
                   style: TextStyle(
                     color: isSelected
-                        ? CupertinoColors.white
+                        ? AppColors.onPrimary
                         : AppColors.primary,
                     fontSize: 12,
                     fontWeight: FontWeight.w600,
@@ -384,9 +384,7 @@ class _CulturalProfileSetupScreenState
 
     if (success) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Cultural profile saved successfully!')),
-        );
+        ToastService.instance.success('Cultural profile saved successfully!');
         context.pop();
       }
     }
@@ -398,6 +396,7 @@ class _CulturalProfileSetupScreenState
 
     return AppScaffold(
       title: 'Cultural Profile',
+      usePadding: false,
       child: Form(
         key: _formKey,
         child: SingleChildScrollView(

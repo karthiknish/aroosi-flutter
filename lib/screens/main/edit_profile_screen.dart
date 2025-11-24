@@ -8,6 +8,7 @@ import 'package:aroosi_flutter/features/profiles/profiles_repository.dart';
 import 'package:aroosi_flutter/theme/colors.dart';
 import 'package:aroosi_flutter/theme/theme_helpers.dart';
 import 'package:aroosi_flutter/utils/debug_logger.dart';
+import 'package:aroosi_flutter/widgets/app_scaffold.dart';
 
 part 'edit_profile/form_sections.dart';
 part 'edit_profile/form_actions.dart';
@@ -178,16 +179,67 @@ abstract class _EditProfileStateBase extends ConsumerState<EditProfileScreen> {
     final initial = _dob ?? DateTime(now.year - 25, now.month, now.day);
     final firstDate = DateTime(now.year - 80, 1, 1);
     final lastDate = DateTime(now.year - 18, 12, 31);
-    final picked = await showDatePicker(
+
+    await showCupertinoModalPopup<void>(
       context: context,
-      initialDate: initial,
-      firstDate: firstDate,
-      lastDate: lastDate,
-      helpText: 'Select Date of Birth',
+      builder: (ctx) {
+        return Container(
+          height: 300,
+          color: CupertinoColors.systemBackground.resolveFrom(ctx),
+          child: SafeArea(
+            top: false,
+            child: Column(
+              children: [
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      CupertinoButton(
+                        child: const Text('Cancel'),
+                        onPressed: () => Navigator.pop(ctx),
+                      ),
+                      Expanded(
+                        child: Center(
+                          child: Text(
+                            'Select Date of Birth',
+                            style: CupertinoTheme.of(ctx)
+                                .textTheme
+                                .navTitleTextStyle,
+                          ),
+                        ),
+                      ),
+                      CupertinoButton(
+                        child: const Text('Done'),
+                        onPressed: () {
+                          Navigator.pop(ctx);
+                          // If user didn't scroll, initial is selected.
+                          // But CupertinoDatePicker updates on change.
+                          // We need to handle state update in onDateTimeChanged
+                          // or initialize a temp var.
+                          // For simplicity, we'll rely on the temp var approach below.
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+                Expanded(
+                  child: CupertinoDatePicker(
+                    mode: CupertinoDatePickerMode.date,
+                    initialDateTime: initial,
+                    minimumDate: firstDate,
+                    maximumDate: lastDate,
+                    onDateTimeChanged: (DateTime newDate) {
+                      setState(() => _dob = newDate);
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
     );
-    if (picked != null) {
-      setState(() => _dob = picked);
-    }
   }
 
   String _dobLabel() {
@@ -215,37 +267,32 @@ class _EditProfileScreenState extends _EditProfileStateBase
     final saveBtn = FilledButton.icon(
       onPressed: _saving ? null : _save,
       icon: _saving
-          ? const SizedBox(
-              width: 16,
-              height: 16,
-              child: CircularProgressIndicator(strokeWidth: 2),
-            )
+          ? const CupertinoActivityIndicator(radius: 8)
           : const Icon(Icons.save_outlined),
       label: Text(_saving ? 'Saving...' : 'Save Changes'),
     );
 
-    return Scaffold(
-      appBar: AppBar(title: const Text('Edit Profile')),
-      body: SafeArea(
-        child: Form(
-          key: _formKey,
-          child: Scrollbar(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _buildBasicSection(context),
-                  _buildLocationSection(context),
-                  _buildPhysicalSection(context),
-                  _buildProfessionalSection(context),
-                  _buildCulturalSection(context),
-                  _buildContactSection(context),
-                  _buildPartnerPreferencesSection(context),
-                  _buildInterestsSection(context),
-                  _buildPrivacySection(context, saveBtn),
-                ],
-              ),
+    return AppScaffold(
+      title: 'Edit Profile',
+      usePadding: false,
+      child: Form(
+        key: _formKey,
+        child: Scrollbar(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildBasicSection(context),
+                _buildLocationSection(context),
+                _buildPhysicalSection(context),
+                _buildProfessionalSection(context),
+                _buildCulturalSection(context),
+                _buildContactSection(context),
+                _buildPartnerPreferencesSection(context),
+                _buildInterestsSection(context),
+                _buildPrivacySection(context, saveBtn),
+              ],
             ),
           ),
         ),

@@ -3,25 +3,17 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import 'package:aroosi_flutter/theme/colors.dart';
+import 'package:aroosi_flutter/widgets/app_scaffold.dart';
 
 class CulturalCompatibilityScreen extends ConsumerWidget {
   const CulturalCompatibilityScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          'Cultural Compatibility',
-          style: GoogleFonts.nunitoSans(
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        backgroundColor: AppColors.surfaceSecondary,
-        elevation: 0,
-      ),
-      body: SingleChildScrollView(
+    return AppScaffold(
+      title: 'Cultural Compatibility',
+      usePadding: false,
+      child: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,

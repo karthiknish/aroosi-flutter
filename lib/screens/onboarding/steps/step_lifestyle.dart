@@ -174,7 +174,7 @@ class _StepLifestyleState extends State<StepLifestyle> {
     return BoxDecoration(
       color: CupertinoThemeHelpers.getMaterialTheme(context).scaffoldBackgroundColor,
       border: Border.all(
-        color: hasError ? CupertinoColors.systemRed : AppColors.primary,
+        color: hasError ? AppColors.error : AppColors.primary,
         width: hasError ? 2.0 : 1.0,
       ),
       borderRadius: BorderRadius.circular(10.0),
@@ -242,8 +242,8 @@ class _StepLifestyleState extends State<StepLifestyle> {
                                   color:
                                       widget.initialData[StepConstants.diet] ==
                                           null
-                                      ? CupertinoColors.placeholderText
-                                      : CupertinoColors.label,
+                                      ? AppColors.muted
+                                      : AppColors.text,
                                 ),
                               ),
                               const Icon(CupertinoIcons.chevron_down, size: 16),
@@ -289,8 +289,8 @@ class _StepLifestyleState extends State<StepLifestyle> {
                                       widget.initialData[StepConstants
                                               .physicalStatus] ==
                                           null
-                                      ? CupertinoColors.placeholderText
-                                      : CupertinoColors.label,
+                                      ? AppColors.muted
+                                      : AppColors.text,
                                 ),
                               ),
                               const Icon(CupertinoIcons.chevron_down, size: 16),
@@ -337,8 +337,8 @@ class _StepLifestyleState extends State<StepLifestyle> {
                             color:
                                 widget.initialData[StepConstants.smoking] ==
                                     null
-                                ? CupertinoColors.placeholderText
-                                : CupertinoColors.label,
+                                ? AppColors.muted
+                                : AppColors.text,
                           ),
                         ),
                         const Icon(CupertinoIcons.chevron_down, size: 16),
@@ -382,8 +382,8 @@ class _StepLifestyleState extends State<StepLifestyle> {
                             color:
                                 widget.initialData[StepConstants.drinking] ==
                                     null
-                                ? CupertinoColors.placeholderText
-                                : CupertinoColors.label,
+                                ? AppColors.muted
+                                : AppColors.text,
                           ),
                         ),
                         const Icon(CupertinoIcons.chevron_down, size: 16),
@@ -410,7 +410,7 @@ class _StepLifestyleState extends State<StepLifestyle> {
           Text(
             'Preferred age range',
             style: textStyle.copyWith(
-              color: CupertinoColors.secondaryLabel,
+              color: AppColors.muted,
               fontSize: 14,
             ),
           ),
@@ -440,7 +440,7 @@ class _StepLifestyleState extends State<StepLifestyle> {
                           controller: _partnerMinAgeCtrl,
                           placeholder: '${StepConstants.minimumAge}',
                           placeholderStyle: textStyle.copyWith(
-                            color: CupertinoColors.placeholderText,
+                            color: AppColors.muted,
                           ),
                           keyboardType: TextInputType.number,
                           inputFormatters: [
@@ -461,7 +461,7 @@ class _StepLifestyleState extends State<StepLifestyle> {
                         child: Text(
                           _validateMinAge(_partnerMinAgeCtrl.text)!,
                           style: textStyle.copyWith(
-                            color: CupertinoColors.systemRed,
+                            color: AppColors.error,
                             fontSize: 12,
                           ),
                         ),
@@ -493,7 +493,7 @@ class _StepLifestyleState extends State<StepLifestyle> {
                           controller: _partnerMaxAgeCtrl,
                           placeholder: '${StepConstants.maximumAge}',
                           placeholderStyle: textStyle.copyWith(
-                            color: CupertinoColors.placeholderText,
+                            color: AppColors.muted,
                           ),
                           keyboardType: TextInputType.number,
                           inputFormatters: [
@@ -514,7 +514,7 @@ class _StepLifestyleState extends State<StepLifestyle> {
                         child: Text(
                           _validateMaxAge(_partnerMaxAgeCtrl.text)!,
                           style: textStyle.copyWith(
-                            color: CupertinoColors.systemRed,
+                            color: AppColors.error,
                             fontSize: 12,
                           ),
                         ),
@@ -545,7 +545,7 @@ class _StepLifestyleState extends State<StepLifestyle> {
                     controller: _partnerCityCtrl,
                     placeholder: 'e.g., London, Manchester, Birmingham',
                     placeholderStyle: textStyle.copyWith(
-                      color: CupertinoColors.placeholderText,
+                      color: AppColors.muted,
                     ),
                     style: textStyle,
                     decoration: BoxDecoration(
@@ -564,7 +564,7 @@ class _StepLifestyleState extends State<StepLifestyle> {
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: CupertinoColors.systemGrey6,
+              color: AppColors.info.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Column(
@@ -575,13 +575,13 @@ class _StepLifestyleState extends State<StepLifestyle> {
                     Icon(
                       CupertinoIcons.heart,
                       size: 20,
-                      color: CupertinoColors.secondaryLabel,
+                      color: AppColors.muted,
                     ),
                     const SizedBox(width: 8),
                     Text(
                       'About your preferences',
                       style: textStyle.copyWith(
-                        color: CupertinoColors.secondaryLabel,
+                        color: AppColors.muted,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -591,7 +591,7 @@ class _StepLifestyleState extends State<StepLifestyle> {
                 Text(
                   'Your lifestyle and partner preferences help us find compatible matches. All fields in this section are optional - you can skip them if you prefer.',
                   style: textStyle.copyWith(
-                    color: CupertinoColors.secondaryLabel,
+                    color: AppColors.muted,
                     fontSize: 14,
                   ),
                 ),
@@ -623,13 +623,13 @@ class _StepLifestyleState extends State<StepLifestyle> {
                   Icon(
                     CupertinoIcons.forward,
                     size: 18,
-                    color: CupertinoColors.secondaryLabel,
+                    color: AppColors.muted,
                   ),
                   const SizedBox(width: 8),
                   Text(
                     'Skip this section',
                     style: textStyle.copyWith(
-                      color: CupertinoColors.secondaryLabel,
+                      color: AppColors.muted,
                       fontSize: 14,
                     ),
                   ),
@@ -655,7 +655,7 @@ class _StepLifestyleState extends State<StepLifestyle> {
           margin: EdgeInsets.only(
             bottom: MediaQuery.of(context).viewInsets.bottom,
           ),
-          color: CupertinoColors.systemBackground.resolveFrom(context),
+          color: AppColors.background,
           child: SafeArea(
             top: false,
             child: Column(
@@ -698,7 +698,9 @@ class _StepLifestyleState extends State<StepLifestyle> {
                       return Center(
                         child: Text(
                           capitalize(options[index]),
-                          style: CupertinoThemeHelpers.getMaterialTheme(context).textTheme.textStyle,
+                          style: CupertinoThemeHelpers.getMaterialTheme(context).textTheme.textStyle.copyWith(
+                            color: AppColors.text,
+                          ),
                         ),
                       );
                     }),
@@ -726,7 +728,7 @@ class _StepLifestyleState extends State<StepLifestyle> {
           margin: EdgeInsets.only(
             bottom: MediaQuery.of(context).viewInsets.bottom,
           ),
-          color: CupertinoColors.systemBackground.resolveFrom(context),
+          color: AppColors.background,
           child: SafeArea(
             top: false,
             child: Column(
@@ -769,7 +771,9 @@ class _StepLifestyleState extends State<StepLifestyle> {
                       return Center(
                         child: Text(
                           capitalize(options[index]),
-                          style: CupertinoThemeHelpers.getMaterialTheme(context).textTheme.textStyle,
+                          style: CupertinoThemeHelpers.getMaterialTheme(context).textTheme.textStyle.copyWith(
+                            color: AppColors.text,
+                          ),
                         ),
                       );
                     }),
@@ -796,7 +800,7 @@ class _StepLifestyleState extends State<StepLifestyle> {
           margin: EdgeInsets.only(
             bottom: MediaQuery.of(context).viewInsets.bottom,
           ),
-          color: CupertinoColors.systemBackground.resolveFrom(context),
+          color: AppColors.background,
           child: SafeArea(
             top: false,
             child: Column(
@@ -839,7 +843,9 @@ class _StepLifestyleState extends State<StepLifestyle> {
                       return Center(
                         child: Text(
                           capitalize(options[index]),
-                          style: CupertinoThemeHelpers.getMaterialTheme(context).textTheme.textStyle,
+                          style: CupertinoThemeHelpers.getMaterialTheme(context).textTheme.textStyle.copyWith(
+                            color: AppColors.text,
+                          ),
                         ),
                       );
                     }),
@@ -866,7 +872,7 @@ class _StepLifestyleState extends State<StepLifestyle> {
           margin: EdgeInsets.only(
             bottom: MediaQuery.of(context).viewInsets.bottom,
           ),
-          color: CupertinoColors.systemBackground.resolveFrom(context),
+          color: AppColors.background,
           child: SafeArea(
             top: false,
             child: Column(
@@ -909,7 +915,9 @@ class _StepLifestyleState extends State<StepLifestyle> {
                       return Center(
                         child: Text(
                           capitalize(options[index]),
-                          style: CupertinoThemeHelpers.getMaterialTheme(context).textTheme.textStyle,
+                          style: CupertinoThemeHelpers.getMaterialTheme(context).textTheme.textStyle.copyWith(
+                            color: AppColors.text,
+                          ),
                         ),
                       );
                     }),

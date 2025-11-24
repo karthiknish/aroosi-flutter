@@ -8,6 +8,9 @@ import 'package:aroosi_flutter/features/profiles/models.dart';
 import 'package:aroosi_flutter/features/auth/auth_controller.dart';
 import 'package:aroosi_flutter/core/safety_service.dart';
 import 'package:aroosi_flutter/theme/theme_helpers.dart';
+import 'package:aroosi_flutter/widgets/app_scaffold.dart';
+import 'package:aroosi_flutter/theme/motion.dart';
+import 'package:aroosi_flutter/widgets/animations/motion.dart';
 
 class MatchDetailScreen extends ConsumerStatefulWidget {
   final String matchID;
@@ -63,8 +66,9 @@ class _MatchDetailScreenState extends ConsumerState<MatchDetailScreen> {
     final user = ref.watch(authControllerProvider);
 
     if (user.profile == null) {
-      return const Scaffold(
-        body: Center(child: CircularProgressIndicator()),
+      return const AppScaffold(
+        title: 'Match Details',
+        child: Center(child: CircularProgressIndicator()),
       );
     }
 
@@ -81,70 +85,68 @@ class _MatchDetailScreenState extends ConsumerState<MatchDetailScreen> {
       ),
     );
 
-    return Scaffold(
-      body: CustomScrollView(
-        slivers: [
-          SliverAppBar.large(
-            title: Text(matchItem.counterpartProfile?.displayName ?? 'Match'),
-            actions: [
-              IconButton(
-                icon: const Icon(Icons.chat),
-                onPressed: () {
+    return AppScaffold(
+      title: matchItem.counterpartProfile?.displayName ?? 'Match',
+      usePadding: false,
+      actions: [
+        IconButton(
+          icon: const Icon(Icons.chat),
+          onPressed: () {
+            context.push('/matches/${widget.matchID}/chat');
+          },
+        ),
+        PopupMenuButton<String>(
+          onSelected: (value) {
+            switch (value) {
+              case 'report':
+                _showReportDialog(matchItem);
+                break;
+              case 'block':
+                _showBlockDialog(matchItem);
+                break;
+            }
+          },
+          itemBuilder: (context) => [
+            PopupMenuItem(
+              value: 'report',
+              child: Row(
+                children: [
+                  const Icon(Icons.flag),
+                  const SizedBox(width: 8),
+                  Text('Report User'),
+                ],
+              ),
+            ),
+            PopupMenuItem(
+              value: 'block',
+              child: Row(
+                children: [
+                  const Icon(Icons.block),
+                  const SizedBox(width: 8),
+                  Text('Block User'),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ],
+      child: FadeThrough(
+        delay: AppMotionDurations.fast,
+        child: SingleChildScrollView(
+          child: Column(
+            children: [
+              if (matchItem.counterpartProfile != null)
+                _ProfileSection(profile: matchItem.counterpartProfile!),
+              _MatchInfoSection(matchItem: matchItem),
+              _ActionButtons(
+                matchItem: matchItem,
+                onChatPressed: () {
                   context.push('/matches/${widget.matchID}/chat');
                 },
               ),
-              PopupMenuButton<String>(
-                onSelected: (value) {
-                  switch (value) {
-                    case 'report':
-                      _showReportDialog(matchItem);
-                      break;
-                    case 'block':
-                      _showBlockDialog(matchItem);
-                      break;
-                  }
-                },
-                itemBuilder: (context) => [
-                  PopupMenuItem(
-                    value: 'report',
-                    child: Row(
-                      children: [
-                        const Icon(Icons.flag),
-                        const SizedBox(width: 8),
-                        Text('Report User'),
-                      ],
-                    ),
-                  ),
-                  PopupMenuItem(
-                    value: 'block',
-                    child: Row(
-                      children: [
-                        const Icon(Icons.block),
-                        const SizedBox(width: 8),
-                        Text('Block User'),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
             ],
           ),
-          if (matchItem.counterpartProfile != null)
-            SliverToBoxAdapter(
-              child: _ProfileSection(profile: matchItem.counterpartProfile!),
-            ),
-          SliverToBoxAdapter(
-            child: _MatchInfoSection(matchItem: matchItem),
-          ),
-          SliverToBoxAdapter(
-            child: _ActionButtons(
-              matchItem: matchItem,
-              onChatPressed: () {
-                context.push('/matches/${widget.matchID}/chat');
-              },
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:aroosi_flutter/theme/colors.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:aroosi_flutter/core/responsive.dart';
@@ -8,7 +9,8 @@ import 'package:aroosi_flutter/features/chat/unread_counts_controller.dart';
 import 'package:aroosi_flutter/features/engagement/quick_picks_repository.dart';
 import 'package:aroosi_flutter/features/icebreakers/icebreaker_controller.dart';
 import 'package:aroosi_flutter/features/profiles/models.dart';
-import 'package:aroosi_flutter/theme/colors.dart';
+import 'package:aroosi_flutter/widgets/error_states.dart';
+import 'package:aroosi_flutter/widgets/app_scaffold.dart';
 import 'widgets/actions_row.dart';
 import 'widgets/explore_grid.dart';
 import 'widgets/header_row.dart';
@@ -57,8 +59,9 @@ class DashboardScreen extends ConsumerWidget {
 
     // Show loading state while initializing
     if (auth.loading) {
-      return const Scaffold(
-        body: Center(
+      return const AppScaffold(
+        title: 'Dashboard',
+        child: Center(
           child: CircularProgressIndicator(),
         ),
       );
@@ -66,22 +69,12 @@ class DashboardScreen extends ConsumerWidget {
 
     // Show error state if auth failed
     if (auth.error != null && !auth.isAuthenticated) {
-      return Scaffold(
-        body: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(Icons.error_outline, size: 64, color: AppColors.error),
-              const SizedBox(height: 16),
-              Text('Authentication Error', style: TextStyle(fontSize: 18)),
-              const SizedBox(height: 8),
-              Text(auth.error!, textAlign: TextAlign.center),
-              const SizedBox(height: 16),
-              ElevatedButton(
-                onPressed: () => ref.read(authControllerProvider.notifier).refresh(),
-                child: const Text('Retry'),
-              ),
-            ],
+      return AppScaffold(
+        title: 'Dashboard',
+        child: Center(
+          child: AuthErrorState(
+            errorMessage: auth.error,
+            onRetry: () => ref.read(authControllerProvider.notifier).refresh(),
           ),
         ),
       );
@@ -92,54 +85,47 @@ class DashboardScreen extends ConsumerWidget {
         quickPicksAsync.asData?.value ?? const <ProfileSummary>[];
     final quickPicksLoading = auth.loading || quickPicksAsync.isLoading;
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Dashboard'),
-        centerTitle: true,
-        elevation: 0,
-        backgroundColor: AppColors.background,
-        foregroundColor: AppColors.text,
-        surfaceTintColor: Colors.transparent,
-        actions: [
-          if (unreadTotal > 0)
-            Stack(
-              children: [
-                IconButton(
-                  icon: const Icon(Icons.notifications_outlined),
-                  onPressed: () {
-                    // Navigate to notifications
-                  },
-                ),
-                Positioned(
-                  right: 8,
-                  top: 8,
-                  child: Container(
-                    padding: const EdgeInsets.all(2),
-                    decoration: BoxDecoration(
-                      color: AppColors.error,
-                      borderRadius: BorderRadius.circular(10),
+    return AppScaffold(
+      title: 'Dashboard',
+      usePadding: false,
+      actions: [
+        if (unreadTotal > 0)
+          Stack(
+            children: [
+              IconButton(
+                icon: const Icon(Icons.notifications_outlined),
+                onPressed: () {
+                  // Navigate to notifications
+                },
+              ),
+              Positioned(
+                right: 8,
+                top: 8,
+                child: Container(
+                  padding: const EdgeInsets.all(2),
+                  decoration: BoxDecoration(
+                    color: AppColors.error,
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  constraints: const BoxConstraints(
+                    minWidth: 16,
+                    minHeight: 16,
+                  ),
+                  child: Text(
+                    unreadTotal > 99 ? '99+' : unreadTotal.toString(),
+                    style: TextStyle(
+                      color: AppColors.onPrimary,
+                      fontSize: 10,
+                      fontWeight: FontWeight.bold,
                     ),
-                    constraints: const BoxConstraints(
-                      minWidth: 16,
-                      minHeight: 16,
-                    ),
-                    child: Text(
-                      unreadTotal > 99 ? '99+' : unreadTotal.toString(),
-                      style: TextStyle(
-                        color: AppColors.onPrimary,
-                        fontSize: 10,
-                        fontWeight: FontWeight.bold,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
+                    textAlign: TextAlign.center,
                   ),
                 ),
-              ],
-            ),
-        ],
-      ),
-      backgroundColor: AppColors.surfaceSecondary,
-      body: RefreshIndicator(
+              ),
+            ],
+          ),
+      ],
+      child: RefreshIndicator(
         onRefresh: () async {
           // Refresh data
         },

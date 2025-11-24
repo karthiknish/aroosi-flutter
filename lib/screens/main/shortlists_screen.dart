@@ -225,16 +225,6 @@ class _ShortlistsScreenState extends ConsumerState<ShortlistsScreen> {
       );
     }
 
-    final listChild = ListView.separated(
-      controller: _scrollController,
-      padding: const EdgeInsets.symmetric(vertical: 8),
-      itemCount: (state.items.isEmpty && state.loading)
-          ? 6
-          : state.items.length + (state.hasMore ? 1 : 0),
-      separatorBuilder: (_, __) => const SizedBox(height: 12),
-      itemBuilder: buildItem,
-    );
-
     final slivers = [
       SliverList(
         delegate: SliverChildBuilderDelegate(
@@ -254,11 +244,11 @@ class _ShortlistsScreenState extends ConsumerState<ShortlistsScreen> {
       },
       controller: _scrollController,
       slivers: slivers,
-      child: listChild,
     );
 
     return AppScaffold(
       title: 'Shortlists',
+      usePadding: false,
       actions: [
         // Bulk clear can be added later when backend supports it
       ],

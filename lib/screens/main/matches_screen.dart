@@ -123,50 +123,67 @@ class _MatchesScreenState extends ConsumerState<MatchesScreen> {
       return Builder(
         builder: (context) {
           final columns = Responsive.gridColumns(context);
-          return SliverGrid(
-            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: columns,
-              mainAxisSpacing: 16,
-              crossAxisSpacing: 16,
-              childAspectRatio: Responsive.isTablet(context) ? 3.2 / 4 : 3 / 4,
-            ),
-            delegate: SliverChildBuilderDelegate(
-              (context, index) {
-                if (state.items.isEmpty && state.loading) {
-                  return _MatchSkeleton(
-                    showMessagePreview: index.isEven,
+          return SliverPadding(
+            padding: const EdgeInsets.symmetric(horizontal: 24),
+            sliver: SliverGrid(
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: columns,
+                mainAxisSpacing: 16,
+                crossAxisSpacing: 16,
+                childAspectRatio: Responsive.isTablet(context) ? 3.2 / 4 : 3 / 4,
+              ),
+              delegate: SliverChildBuilderDelegate(
+                (context, index) {
+                  if (state.items.isEmpty && state.loading) {
+                    return _MatchSkeleton(
+                      showMessagePreview: index.isEven,
+                    );
+                  }
+                  if (index >= state.items.length) {
+                    return PagedListFooter(
+                      hasMore: state.hasMore,
+                      isLoading: state.loading,
+                    );
+                  }
+                  final match = state.items[index];
+                  final itemDelay = Duration(
+                    milliseconds:
+                        (AppMotionDurations.fast.inMilliseconds ~/ 2) *
+                        (index % 6),
                   );
-                }
-                if (index >= state.items.length) {
-                  return PagedListFooter(
-                    hasMore: state.hasMore,
-                    isLoading: state.loading,
-                  );
-                }
-                final match = state.items[index];
-                final itemDelay = Duration(
-                  milliseconds:
-                      (AppMotionDurations.fast.inMilliseconds ~/ 2) *
-                      (index % 6),
-                );
-                return FadeSlideIn(
-                  duration: AppMotionDurations.short,
-                  delay: itemDelay,
-                  beginOffset: const Offset(0, 0.08),
-                  child: MotionPressable(
-                    onPressed: () {
-                      if (!_canViewProfile()) return;
-                      // All features are now free - no usage tracking needed
+                  return FadeSlideIn(
+                    duration: AppMotionDurations.short,
+                    delay: itemDelay,
+                    beginOffset: const Offset(0, 0.08),
+                    child: MotionPressable(
+                      onPressed: () {
+                        if (!_canViewProfile()) return;
+                        // All features are now free - no usage tracking needed
 
-                      // For mutual matches, navigate to conversation
-                      if (match.isMutual && match.conversationId.isNotEmpty) {
-                        // Mark conversation as read when opening
-                        ref
-                            .read(matchesControllerProvider.notifier)
-                            .markConversationAsRead(match.conversationId);
-                        context.push('/chat/${match.conversationId}');
-                      } else {
-                        // For non-mutual matches, navigate to profile
+                        // For mutual matches, navigate to conversation
+                        if (match.isMutual && match.conversationId.isNotEmpty) {
+                          // Mark conversation as read when opening
+                          ref
+                              .read(matchesControllerProvider.notifier)
+                              .markConversationAsRead(match.conversationId);
+                          context.push('/chat/${match.conversationId}');
+                        } else {
+                          // For non-mutual matches, navigate to profile
+                          final targetUserId =
+                              match.otherUserId ??
+                              (match.user1Id == match.user2Id
+                                  ? match.user1Id
+                                  : (match.user1Id.isNotEmpty
+                                        ? match.user1Id
+                                        : match.user2Id));
+                          ref
+                              .read(lastSelectedProfileIdProvider.notifier)
+                              .set(targetUserId);
+                          context.push('/details/$targetUserId');
+                        }
+                      },
+                      onLongPress: () async {
+                        final ctx = context;
                         final targetUserId =
                             match.otherUserId ??
                             (match.user1Id == match.user2Id
@@ -174,77 +191,63 @@ class _MatchesScreenState extends ConsumerState<MatchesScreen> {
                                 : (match.user1Id.isNotEmpty
                                       ? match.user1Id
                                       : match.user2Id));
-                        ref
-                            .read(lastSelectedProfileIdProvider.notifier)
-                            .set(targetUserId);
-                        context.push('/details/$targetUserId');
-                      }
-                    },
-                    onLongPress: () async {
-                      final ctx = context;
-                      final targetUserId =
-                          match.otherUserId ??
-                          (match.user1Id == match.user2Id
-                              ? match.user1Id
-                              : (match.user1Id.isNotEmpty
-                                    ? match.user1Id
-                                    : match.user2Id));
 
-                      final action = await showAdaptiveActionSheet(
-                        ctx,
-                        title: match.otherUserName ?? 'Match',
-                        actions: [
-                          if (!match.isMutual) 'Send Interest',
-                          'View Profile',
-                          if (match.isMutual && match.conversationId.isNotEmpty)
-                            'Open Chat',
-                        ],
-                      );
+                        final action = await showAdaptiveActionSheet(
+                          ctx,
+                          title: match.otherUserName ?? 'Match',
+                          actions: [
+                            if (!match.isMutual) 'Send Interest',
+                            'View Profile',
+                            if (match.isMutual && match.conversationId.isNotEmpty)
+                              'Open Chat',
+                          ],
+                        );
 
-                      if (!ctx.mounted) return;
+                        if (!ctx.mounted) return;
 
-                      if (action == null) return;
+                        if (action == null) return;
 
-                      if (action == 0 && !match.isMutual) {
-                        // Send interest
-                        final result = await ref
-                            .read(matchesControllerProvider.notifier)
-                            .sendInterest(targetUserId);
-                        if (result['success'] == true) {
-                          ToastService.instance.success(
-                            'Interest sent to ${match.otherUserName ?? 'match'}',
-                          );
-                        } else {
-                          final error =
-                              result['error'] as String? ??
-                              'Failed to send interest';
-                          ToastService.instance.error(error);
-                        }
-                      } else if ((action == 0 && match.isMutual) ||
-                          (action == 1 && !match.isMutual)) {
-                        // View profile
-                        ref
-                            .read(lastSelectedProfileIdProvider.notifier)
-                            .set(targetUserId);
-                        ctx.push('/details/$targetUserId');
-                      } else if ((action == 1 && match.isMutual) ||
-                          (action == 2)) {
-                        // Open chat
-                        if (match.conversationId.isNotEmpty) {
-                          ref
+                        if (action == 0 && !match.isMutual) {
+                          // Send interest
+                          final result = await ref
                               .read(matchesControllerProvider.notifier)
-                              .markConversationAsRead(match.conversationId);
-                          ctx.push('/chat/${match.conversationId}');
+                              .sendInterest(targetUserId);
+                          if (result['success'] == true) {
+                            ToastService.instance.success(
+                              'Interest sent to ${match.otherUserName ?? 'match'}',
+                            );
+                          } else {
+                            final error =
+                                result['error'] as String? ??
+                                'Failed to send interest';
+                            ToastService.instance.error(error);
+                          }
+                        } else if ((action == 0 && match.isMutual) ||
+                            (action == 1 && !match.isMutual)) {
+                          // View profile
+                          ref
+                              .read(lastSelectedProfileIdProvider.notifier)
+                              .set(targetUserId);
+                          ctx.push('/details/$targetUserId');
+                        } else if ((action == 1 && match.isMutual) ||
+                            (action == 2)) {
+                          // Open chat
+                          if (match.conversationId.isNotEmpty) {
+                            ref
+                                .read(matchesControllerProvider.notifier)
+                                .markConversationAsRead(match.conversationId);
+                            ctx.push('/chat/${match.conversationId}');
+                          }
                         }
-                      }
-                    },
-                    child: _MatchCard(match: match),
-                  ),
-                );
-              },
-              childCount: state.items.isEmpty && state.loading
-                  ? 6
-                  : state.items.length + (state.hasMore ? 1 : 0),
+                      },
+                      child: _MatchCard(match: match),
+                    ),
+                  );
+                },
+                childCount: state.items.isEmpty && state.loading
+                    ? 6
+                    : state.items.length + (state.hasMore ? 1 : 0),
+              ),
             ),
           );
         },
@@ -261,7 +264,7 @@ class _MatchesScreenState extends ConsumerState<MatchesScreen> {
         const SliverToBoxAdapter(child: SizedBox(height: 8)),
         SliverToBoxAdapter(
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
             child: _buildMatchesHero(context, state),
           ),
         ),
@@ -277,7 +280,7 @@ class _MatchesScreenState extends ConsumerState<MatchesScreen> {
       ],
     );
 
-    return AppScaffold(title: 'Matches', child: content);
+    return AppScaffold(title: 'Matches', usePadding: false, child: content);
   }
 
   Widget _buildMatchesHero(BuildContext context, MatchesState state) {

@@ -1,3 +1,4 @@
+import 'package:aroosi_flutter/utils/debug_logger.dart';
 import 'package:aroosi_flutter/core/api_client.dart';
 
 enum DeliveryStatus { delivered, read, failed }
@@ -73,7 +74,7 @@ class DeliveryReceiptService {
       }
       return [];
     } catch (e) {
-      // Error handling
+      logDebug('Error getting delivery receipts', error: e);
       return [];
     }
   }
@@ -93,7 +94,7 @@ class DeliveryReceiptService {
 
       return response.statusCode == 200;
     } catch (e) {
-      // Error handling
+      logDebug('Error recording delivery receipt', error: e);
       return false;
     }
   }
@@ -109,7 +110,7 @@ class DeliveryReceiptService {
 
       return response.statusCode == 200;
     } catch (e) {
-      // Error handling
+      logDebug('Error marking conversation read', error: e);
       return false;
     }
   }

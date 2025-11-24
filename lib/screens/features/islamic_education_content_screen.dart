@@ -3,10 +3,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../theme/colors.dart';
+import '../../core/toast_service.dart';
 import '../../features/islamic_education/models.dart';
 import '../../features/islamic_education/services.dart';
 import '../../features/auth/auth_controller.dart';
 import 'islamic_education_quiz_screen.dart';
+import '../../widgets/app_scaffold.dart';
 
 class IslamicEducationContentScreen extends ConsumerStatefulWidget {
   final IslamicEducationalContent content;
@@ -45,33 +47,24 @@ class _IslamicEducationContentScreenState extends ConsumerState<IslamicEducation
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          widget.content.title,
-          style: GoogleFonts.nunitoSans(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
+    return AppScaffold(
+      title: widget.content.title,
+      usePadding: false,
+      actions: [
+        IconButton(
+          icon: Icon(
+            _isBookmarked ? Icons.bookmark : Icons.bookmark_border,
           ),
+          onPressed: _toggleBookmark,
         ),
-        backgroundColor: AppColors.surfaceSecondary,
-        elevation: 0,
-        actions: [
-          IconButton(
-            icon: Icon(
-              _isBookmarked ? Icons.bookmark : Icons.bookmark_border,
-            ),
-            onPressed: _toggleBookmark,
+        IconButton(
+          icon: Icon(
+            _isLiked ? Icons.favorite : Icons.favorite_border,
           ),
-          IconButton(
-            icon: Icon(
-              _isLiked ? Icons.favorite : Icons.favorite_border,
-            ),
-            onPressed: _toggleLike,
-          ),
-        ],
-      ),
-      body: Column(
+          onPressed: _toggleLike,
+        ),
+      ],
+      child: Column(
         children: [
           // Progress indicator
           _buildProgressBar(),
@@ -307,7 +300,7 @@ class _IslamicEducationContentScreenState extends ConsumerState<IslamicEducation
             children: [
               Icon(
                 Icons.mosque,
-                color: Colors.blue,
+                color: AppColors.info,
                 size: 24,
               ),
               const SizedBox(width: 8),
@@ -316,7 +309,7 @@ class _IslamicEducationContentScreenState extends ConsumerState<IslamicEducation
                 style: GoogleFonts.nunitoSans(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
-                  color: Colors.blue,
+                  color: AppColors.info,
                 ),
               ),
             ],
@@ -334,10 +327,10 @@ class _IslamicEducationContentScreenState extends ConsumerState<IslamicEducation
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.orange.withValues(alpha: 0.05),
+        color: AppColors.warning.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: Colors.orange.withValues(alpha: 0.2),
+          color: AppColors.warning.withValues(alpha: 0.2),
           width: 1,
         ),
       ),
@@ -348,7 +341,7 @@ class _IslamicEducationContentScreenState extends ConsumerState<IslamicEducation
             children: [
               Icon(
                 Icons.lightbulb_outline,
-                color: Colors.orange,
+                color: AppColors.warning,
                 size: 24,
               ),
               const SizedBox(width: 8),
@@ -357,7 +350,7 @@ class _IslamicEducationContentScreenState extends ConsumerState<IslamicEducation
                 style: GoogleFonts.nunitoSans(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
-                  color: Colors.orange,
+                  color: AppColors.warning,
                 ),
               ),
             ],
@@ -371,7 +364,7 @@ class _IslamicEducationContentScreenState extends ConsumerState<IslamicEducation
                 children: [
                   Icon(
                     Icons.check_circle_outline,
-                    color: Colors.orange,
+                    color: AppColors.warning,
                     size: 16,
                   ),
                   const SizedBox(width: 8),
@@ -409,7 +402,7 @@ class _IslamicEducationContentScreenState extends ConsumerState<IslamicEducation
                 ),
               ),
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.green,
+                backgroundColor: AppColors.success,
                 padding: const EdgeInsets.symmetric(vertical: 16),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
@@ -442,9 +435,7 @@ class _IslamicEducationContentScreenState extends ConsumerState<IslamicEducation
     } catch (e) {
       setState(() => _isBookmarked = !shouldBookmark);
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Unable to update bookmark: $e')),
-        );
+        ToastService.instance.error('Unable to update bookmark: $e');
       }
     }
   }
@@ -468,9 +459,7 @@ class _IslamicEducationContentScreenState extends ConsumerState<IslamicEducation
     } catch (e) {
       setState(() => _isLiked = !shouldLike);
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Unable to update like: $e')),
-        );
+        ToastService.instance.error('Unable to update like: $e');
       }
     }
   }
@@ -499,9 +488,7 @@ class _IslamicEducationContentScreenState extends ConsumerState<IslamicEducation
 
   void _showAuthRequiredMessage() {
     if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Please sign in to use this feature.')),
-    );
+    ToastService.instance.warning('Please sign in to use this feature.');
   }
 
 
@@ -553,7 +540,7 @@ class _QuranicVerseCard extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(8),
         border: Border.all(
           color: AppColors.success.withValues(alpha: 0.2),
@@ -568,7 +555,7 @@ class _QuranicVerseCard extends StatelessWidget {
             style: GoogleFonts.nunitoSans(
               fontSize: 12,
               fontWeight: FontWeight.bold,
-              color: Colors.green,
+              color: AppColors.success,
             ),
           ),
           const SizedBox(height: 8),
@@ -632,7 +619,7 @@ class _HadithCard extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(8),
         border: Border.all(
           color: AppColors.info.withValues(alpha: 0.2),
@@ -649,7 +636,7 @@ class _HadithCard extends StatelessWidget {
                 style: GoogleFonts.nunitoSans(
                   fontSize: 12,
                   fontWeight: FontWeight.bold,
-                  color: Colors.blue,
+                  color: AppColors.info,
                 ),
               ),
               const SizedBox(width: 8),
@@ -773,13 +760,13 @@ class _HadithCard extends StatelessWidget {
   Color _getAuthenticityColor(AuthenticityGrade grade) {
     switch (grade) {
       case AuthenticityGrade.sahih:
-        return Colors.green;
+        return AppColors.success;
       case AuthenticityGrade.hasan:
-        return Colors.blue;
+        return AppColors.info;
       case AuthenticityGrade.daif:
-        return Colors.orange;
+        return AppColors.warning;
       case AuthenticityGrade.mawdu:
-        return Colors.red;
+        return AppColors.error;
     }
   }
 }

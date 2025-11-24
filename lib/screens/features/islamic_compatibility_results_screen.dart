@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../theme/colors.dart';
+import '../../theme/theme.dart';
+import '../../theme/theme_helpers.dart';
 import '../../features/compatibility/models.dart';
 import '../../features/compatibility/compatibility_service.dart';
+import '../../widgets/app_scaffold.dart';
 
 class IslamicCompatibilityResultsScreen extends ConsumerWidget {
   final CompatibilityScore score;
@@ -20,20 +24,14 @@ class IslamicCompatibilityResultsScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          'Compatibility Results',
-          style: GoogleFonts.nunitoSans(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        backgroundColor: AppColors.surfaceSecondary,
-        elevation: 0,
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
+    final theme = ThemeHelpers.getMaterialTheme(context);
+    final textTheme = theme.textTheme;
+
+    return AppScaffold(
+      title: 'Compatibility Results',
+      usePadding: false,
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.all(Spacing.lg),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [

@@ -143,15 +143,6 @@ class _FavoritesScreenState extends ConsumerState<FavoritesScreen> {
       );
     }
 
-    final listChild = ListView.builder(
-      controller: _scrollController,
-      padding: const EdgeInsets.symmetric(vertical: 8),
-      itemCount: (state.items.isEmpty && state.loading)
-          ? 6
-          : state.items.length + (state.hasMore ? 1 : 0),
-      itemBuilder: buildListItem,
-    );
-
     final slivers = [
       SliverList(
         delegate: SliverChildBuilderDelegate(
@@ -165,6 +156,7 @@ class _FavoritesScreenState extends ConsumerState<FavoritesScreen> {
 
     return AppScaffold(
       title: 'Favorites',
+      usePadding: false,
       actions: [
         // Bulk actions can be wired later (requires backend endpoint)
       ],
@@ -172,7 +164,6 @@ class _FavoritesScreenState extends ConsumerState<FavoritesScreen> {
         onRefresh: _refresh,
         controller: _scrollController,
         slivers: slivers,
-        child: listChild,
       ),
     );
   }

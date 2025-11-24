@@ -8,6 +8,7 @@ import 'package:aroosi_flutter/theme/motion.dart';
 import 'package:aroosi_flutter/theme/theme_helpers.dart';
 import 'package:aroosi_flutter/widgets/animations/motion.dart';
 import 'package:aroosi_flutter/l10n/app_localizations.dart';
+import 'package:aroosi_flutter/widgets/app_scaffold.dart';
 
 import 'steps/welcome_step.dart';
 import 'steps/marriage_intentions_step.dart';
@@ -80,20 +81,26 @@ class _MatrimonyOnboardingScreenState extends ConsumerState<MatrimonyOnboardingS
     });
 
     if (onboardingState.isLoading && onboardingState.data == null) {
-      return const Scaffold(
-        body: Center(child: CircularProgressIndicator()),
+      return const AppScaffold(
+        title: 'Onboarding',
+        usePadding: false,
+        child: Center(child: CircularProgressIndicator()),
       );
     }
 
     final currentStep = onboardingState.currentStep;
     if (currentStep == null) {
-      return const Scaffold(
-        body: Center(child: CircularProgressIndicator()),
+      return const AppScaffold(
+        title: 'Onboarding',
+        usePadding: false,
+        child: Center(child: CircularProgressIndicator()),
       );
     }
 
-    return Scaffold(
-      body: SafeArea(
+    return AppScaffold(
+      title: 'Onboarding',
+      usePadding: false,
+      child: SafeArea(
         child: Column(
           children: [
             _buildHeader(context, onboardingState, l10n),
